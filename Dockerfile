@@ -19,8 +19,9 @@ ENV RELATIVE_URL_ROOT=${RELATIVE_URL_ROOT:-lti}
 
 ENV APP_HOME /usr/src/app
 RUN mkdir -p $APP_HOME
-COPY . $APP_HOME
 WORKDIR $APP_HOME
+
+COPY Gemfile* $APP_HOME/
 
 ENV BUNDLER_VERSION='2.1.4'
 RUN gem install bundler --no-document -v '2.1.4'
@@ -33,7 +34,11 @@ RUN bundle install
 RUN bundle update --bundler 2.1.4
 RUN gem update --system
 
-RUN SECRET_KEY_BASE=`bin/rake secret` bundle exec rake assets:precompile --trace
+COPY . $APP_HOME
+
+RUN if [ "$RAILS_ENV" == "production" ]; \
+  then SECRET_KEY_BASE=`bin/rake secret` bundle exec rake assets:precompile --trace; \
+  fi
 
 EXPOSE 3000
 
