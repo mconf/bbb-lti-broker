@@ -17,5 +17,7 @@ module BbbLtiBroker
     config.url_host = ENV['URL_HOST']
 
     config.build_number = ENV['BUILD_NUMBER'] || 'v1'
+
+    config.log_level = ENV['LOG_LEVEL'] || :debug
   end
 end
