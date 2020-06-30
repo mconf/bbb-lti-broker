@@ -16,7 +16,11 @@ Rails.application.configure do
       end
     end
 
-    hash = { time: event.time }
+    hash = {
+      time: event.time,
+      exception: event.payload[:exception], # ["ExceptionClass", "the message"]
+      exception_object: event.payload[:exception_object] # the exception instance
+    }
     hash.merge!({"params" => params}) unless params.blank?
     hash
   end
