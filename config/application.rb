@@ -2,6 +2,7 @@
 
 require_relative 'boot'
 require 'rails/all'
+require_relative '../lib/simple_json_formatter'
 
 # Load the app's custom environment variables here, so that they are loaded before environments/*.rb
 
@@ -19,5 +20,10 @@ module BbbLtiBroker
     config.build_number = ENV['BUILD_NUMBER'] || 'v1'
 
     config.log_level = ENV['LOG_LEVEL'] || :debug
+
+    # use a json formatter to match lograge's logs
+    if ENV['LOGRAGE_ENABLED'] == '1'
+      config.log_formatter = SimpleJsonFormatter.new
+    end
   end
 end
