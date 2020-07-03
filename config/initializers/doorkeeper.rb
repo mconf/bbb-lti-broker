@@ -10,7 +10,21 @@ Doorkeeper.configure do
     # Put your resource owner authentication logic here.
     # Example implementation:
     #   User.find_by_id(session[:user_id]) || redirect_to(new_user_session_url)
-    User.find_by_id(session[:user_id]) || redirect_to(params['redirect_uri'])
+
+    # get the user from the launch token
+    # will only accept the user if the token has not expired yet
+    begin
+      launch = AppLaunch.find_by(nonce: params['launch_nonce'])
+      return nil if launch.expired?
+
+      uid = JSON.parse(launch.message)['user_id']
+      context = JSON.parse(launch.message)['tool_consumer_instance_guid']
+      user = User.find_by(uid: uid, context: context)
+    rescue
+      user = nil
+    end
+
+    user || redirect_to(params['redirect_uri'])
   end
 
   # If you want to restrict access to the web interface for adding oauth authorized applications, you need to declare the block below.

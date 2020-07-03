@@ -36,3 +36,6 @@ CONSUMER_SECRET=secret
 ## DOCKER_REPO=my-repo
 ## Change DOCKER_TAG when using a tag other than latest
 ## DOCKER_TAG=my-tag
+
+# How long before a launch nonce expires in seconds
+# LAUNCH_NONCE_DURATION=300

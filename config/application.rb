@@ -21,6 +21,8 @@ module BbbLtiBroker
 
     config.log_level = ENV['LOG_LEVEL'] || :debug
 
+    config.launch_nonce_duration = (ENV['LAUNCH_NONCE_DURATION'] || 300).to_i.seconds
+
     # use a json formatter to match lograge's logs
     if ENV['LOGRAGE_ENABLED'] == '1'
       config.log_formatter = SimpleJsonFormatter.new

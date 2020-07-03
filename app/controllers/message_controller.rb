@@ -53,7 +53,6 @@ class MessageController < ApplicationController
     nonce = @jwt_body['nonce']
     # Redirect to external application if configured
     Rails.cache.write(nonce, message: @message, oauth: { timestamp: @jwt_body['exp'] }, lti_launch_nonce: @lti_launch.nonce)
-    session[:user_id] = @current_user.id
     redirect_to(app_launch_path(params.to_unsafe_h))
   end
 
@@ -64,7 +63,6 @@ class MessageController < ApplicationController
 
     # Redirect to external application if configured
     Rails.cache.write(params[:oauth_nonce], message: @message, oauth: { consumer_key: params[:oauth_consumer_key], timestamp: params[:oauth_timestamp] })
-    session[:user_id] = @current_user.id
     redirector = app_launch_path(params.to_unsafe_h)
     redirect_to(redirector)
   end
