@@ -15,6 +15,9 @@ class AppsController < ApplicationController
     tool = RailsLti2Provider::Tool.where(uuid: params[:oauth_consumer_key]).last
     lti_launch = RailsLti2Provider::LtiLaunch.find_by(nonce: params[:oauth_nonce])
 
+    Rails.logger.info "Creating a launch for tool=#{tool.uuid} and " \
+                      "oauth_nonce=#{params[:oauth_nonce]}"
+
     # add the oauth key to the data of this launch
     message = lti_launch.message
     message.custom_params['oauth_consumer_key'] = params[:oauth_consumer_key]

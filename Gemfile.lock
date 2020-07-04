@@ -1,7 +1,7 @@
 GIT
-  remote: https://github.com/blindsidenetworks/rails_lti2_provider.git
-  revision: e293172144b46b38207495a14d5dbb0c29918921
-  tag: 0.0.4
+  remote: https://github.com/mconf/rails_lti2_provider.git
+  revision: 6eef9926740ab081b1484d6df01b2dfeddad6ab4
+  branch: elos
   specs:
     rails_lti2_provider (0.0.4)
       ims-lti (~> 2.3.0)
