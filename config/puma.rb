@@ -6,10 +6,11 @@
 # the maximum value specified for Puma. Default is set to 5 threads for minimum
 # and maximum, this matches the default thread size of Active Record.
 #
-threads_count = ENV.fetch('RAILS_MAX_THREADS') { 5 }.to_i
-threads(threads_count, threads_count)
+threads_count = ENV.fetch('PUMA_MAX_THREADS') { 5 }
+threads_min_count = ENV.fetch('PUMA_MIN_THREADS') { 5 }
+threads(threads_min_count, threads_count)
 
-# Specifies the `port` that Puma will listen on to receive requests, default is 3000.
+# Specifies the `port` that Puma will listen on to receive requests; default is 3000.
 #
 port(ENV.fetch('PORT') { 3000 })
 
@@ -23,7 +24,7 @@ environment(ENV.fetch('RAILS_ENV') { 'development' })
 # Workers do not work on JRuby or Windows (both of which do not support
 # processes).
 #
-# workers ENV.fetch("WEB_CONCURRENCY") { 2 }
+workers ENV.fetch("PUMA_WORKERS") { 1 }
 
 # Use the `preload_app!` method when specifying a `workers` number.
 # This directive tells Puma to first boot the application and load code
@@ -41,9 +42,14 @@ preload_app!
 # or connections that may have been created at application boot, Ruby
 # cannot share connections between processes.
 #
-# on_worker_boot do
-#   ActiveRecord::Base.establish_connection if defined?(ActiveRecord)
-# end
+on_worker_boot do
+  ActiveRecord::Base.establish_connection if defined?(ActiveRecord)
+end
 
 # Allow puma to be restarted by `rails restart` command.
 plugin(:tmp_restart)
+
+activate_control_app(
+  'tcp://127.0.0.1:9090',
+  auth_token: ENV.fetch('PUMA_TOKEN') { SecureRandom.hex(6) }
+)
