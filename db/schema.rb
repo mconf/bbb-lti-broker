@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_07_03_010522) do
+ActiveRecord::Schema.define(version: 2020_07_16_163338) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -22,6 +22,7 @@ ActiveRecord::Schema.define(version: 2020_07_03_010522) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.datetime "expiration_time"
+    t.index ["nonce"], name: "index_app_launches_on_nonce"
   end
 
   create_table "oauth_access_grants", force: :cascade do |t|
@@ -51,6 +52,7 @@ ActiveRecord::Schema.define(version: 2020_07_03_010522) do
     t.index ["application_id"], name: "index_oauth_access_tokens_on_application_id"
     t.index ["refresh_token"], name: "index_oauth_access_tokens_on_refresh_token", unique: true
     t.index ["resource_owner_id"], name: "index_oauth_access_tokens_on_resource_owner_id"
+    t.index ["revoked_at"], name: "index_oauth_access_tokens_on_revoked_at"
     t.index ["token"], name: "index_oauth_access_tokens_on_token", unique: true
   end
 
@@ -72,6 +74,8 @@ ActiveRecord::Schema.define(version: 2020_07_03_010522) do
     t.text "message"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.index ["nonce"], name: "index_rails_lti2_provider_lti_launches_on_nonce"
+    t.index ["tool_id"], name: "index_rails_lti2_provider_lti_launches_on_tool_id"
   end
 
   create_table "rails_lti2_provider_registrations", id: :serial, force: :cascade do |t|
