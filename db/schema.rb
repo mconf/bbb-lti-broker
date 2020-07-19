@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_07_16_163338) do
+ActiveRecord::Schema.define(version: 2020_07_19_012138) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -74,6 +74,7 @@ ActiveRecord::Schema.define(version: 2020_07_16_163338) do
     t.text "message"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.index ["created_at"], name: "index_rails_lti2_provider_lti_launches_on_created_at"
     t.index ["nonce"], name: "index_rails_lti2_provider_lti_launches_on_nonce"
     t.index ["tool_id"], name: "index_rails_lti2_provider_lti_launches_on_tool_id"
   end
