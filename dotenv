@@ -39,3 +39,6 @@ CONSUMER_SECRET=secret
 
 # How long before a launch nonce expires in seconds
 # LAUNCH_NONCE_DURATION=300
+
+# Don't set cookie attributes to allow the app to run in an iframe
+# DISABLE_COOKIE_FOR_IFRAME=1
