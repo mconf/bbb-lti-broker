@@ -4,13 +4,7 @@
 
 attrs = {
   key: '_bbb_lti_broker_session'
+  secure: ENV['COOKIES_SECURE_OFF'].blank?,
+  same_site: ENV['COOKIES_SAME_SITE'].blank? ? 'None' : ENV['COOKIES_SAME_SITE']
 }
-if ENV['DISABLE_COOKIE_FOR_IFRAME'].blank?
-  attrs = attrs.merge(
-    {
-      same_site: :none,
-      secure: true
-    }
-  )
-end
 Rails.application.config.session_store(:cookie_store, **attrs)
