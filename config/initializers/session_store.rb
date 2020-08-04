@@ -3,7 +3,7 @@
 # Be sure to restart your server when you modify this file.
 
 attrs = {
-  key: '_bbb_lti_broker_session'
+  key: '_bbb_lti_broker_session',
   secure: ENV['COOKIES_SECURE_OFF'].blank?,
   same_site: ENV['COOKIES_SAME_SITE'].blank? ? 'None' : ENV['COOKIES_SAME_SITE']
 }
