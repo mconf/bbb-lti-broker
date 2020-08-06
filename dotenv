@@ -12,6 +12,9 @@ RELATIVE_URL_ROOT=lti
 
 # LTI tools configuration
 DEFAULT_LTI_TOOL=tool
+# To use a different url for icons (useful when using a CDN, for example)
+# TOOL_ROOMS_ICON=https://ks872jadt5c9a8.cloudfront.net/rooms/assets/favicon.ico
+# TOOL_GRADES_ICON=https://ks872jadt5c9a8.cloudfront.net/grades/assets/favicon.ico
 
 # Consumer key
 CONSUMER_KEY=key

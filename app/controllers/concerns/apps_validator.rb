@@ -54,18 +54,23 @@ module AppsValidator
   end
 
   def lti_icon(app_name)
-    return "http://#{request.host_with_port}/assets/icon.svg" if app_name == 'default'
+    return "http://#{request.host_with_port}/rooms/favicon.svg" if app_name == 'default'
 
-    begin
-      app = lti_app(app_name)
-      uri = URI.parse(app['redirect_uri'])
-      site = "#{uri.scheme}://#{uri.host}#{uri.port != 80 ? ':' + uri.port.to_s : ''}/"
-      path = uri.path.split('/')
-      path_base = (path[0].chomp(' ') == '' ? path[1] : path[0]).gsub('/', '') + '/'
-    rescue StandardError
-      # TODO: handle exception
-      return
+    if ENV["TOOL_#{app_name.upcase}_ICON"].blank?
+      begin
+        app = lti_app(app_name)
+        uri = URI.parse(app['redirect_uri'])
+        standard_port = uri.port == 80 || uri.port == 443
+        site = "#{uri.scheme}://#{uri.host}#{standard_port ? '' : ':' + uri.port.to_s}/"
+        path = uri.path.split('/')
+        path_base = (path[0].chomp(' ') == '' ? path[1] : path[0]).gsub('/', '') + '/'
+      rescue StandardError => e
+        # TODO: handle exception
+        return
+      end
+      "#{site}#{path_base + 'favicon.svg'}"
+    else
+      ENV["TOOL_#{app_name.upcase}_ICON"]
     end
-    "#{site}#{path_base + app_name + '/assets/icon.svg'}"
   end
 end
