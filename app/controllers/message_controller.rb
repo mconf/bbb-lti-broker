@@ -36,11 +36,16 @@ class MessageController < ApplicationController
                                               else
                                                 'Unknown Error'
                                               end
+    Rails.logger.error "#{@error} error=#{ex.error} class=#{ex.class.name}"
+
     @message = IMS::LTI::Models::Messages::Message.generate(request.request_parameters)
-    @header = SimpleOAuth::Header.new(:post, request.url, @message.post_params, consumer_key: @message.oauth_consumer_key,
-                                                                                consumer_secret: lti_secret(@message.oauth_consumer_key), callback: 'about:blank')
+    @header = SimpleOAuth::Header.new(
+      :post, request.url, @message.post_params, consumer_key: @message.oauth_consumer_key,
+      consumer_secret: lti_secret(@message.oauth_consumer_key), callback: 'about:blank'
+    )
     if request.request_parameters.key?('launch_presentation_return_url')
-      launch_presentation_return_url = request.request_parameters['launch_presentation_return_url'] + '&lti_errormsg=' + @error
+      launch_presentation_return_url = request.request_parameters['launch_presentation_return_url'] +
+                                       '&lti_errormsg=' + @error
       redirect_to(launch_presentation_return_url)
     else
       render(:basic_lti_launch_request, status: :ok)
@@ -52,7 +57,10 @@ class MessageController < ApplicationController
 
     nonce = @jwt_body['nonce']
     # Redirect to external application if configured
-    Rails.cache.write(nonce, message: @message, oauth: { timestamp: @jwt_body['exp'] }, lti_launch_nonce: @lti_launch.nonce)
+    Rails.cache.write(
+      nonce, message: @message, oauth: { timestamp: @jwt_body['exp'] },
+      lti_launch_nonce: @lti_launch.nonce
+    )
     redirect_to(app_launch_path(params.to_unsafe_h))
   end
 

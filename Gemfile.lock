@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/mconf/rails_lti2_provider.git
-  revision: 98e3ab5bad2d7b4737705d617b81b99e1d8a0615
+  revision: f438f6e5a47fa54955ff86814d2980daae4b1e60
   branch: elos
   specs:
     rails_lti2_provider (0.0.4)
