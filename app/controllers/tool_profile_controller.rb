@@ -106,7 +106,9 @@ class ToolProfileController < ApplicationController
 
     navigation_params[:icon_url] = tc.icon + "?#{placement_key}"
     navigation_params[:canvas_icon_class] = 'icon-lti'
-    navigation_params[:text] = t("apps.#{params[:app]}.title")
+
+    text = request.query_parameters["#{placement_key}_text"] || t("apps.#{params[:app]}.title")
+    navigation_params[:text] = text
 
     tc.set_ext_param(CanvasExtensions::PLATFORM, placement_key, navigation_params)
   end
