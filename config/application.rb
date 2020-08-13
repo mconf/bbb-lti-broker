@@ -23,6 +23,8 @@ module BbbLtiBroker
 
     config.launch_nonce_duration = (ENV['LAUNCH_NONCE_DURATION'] || 300).to_i.seconds
 
+    config.app_name = ENV["APP_NAME"] || 'BbbLtiBroker'
+
     # use a json formatter to match lograge's logs
     if ENV['LOGRAGE_ENABLED'] == '1'
       config.log_formatter = SimpleJsonFormatter.new

@@ -74,3 +74,17 @@ en:
     expired:
       token:   "The token has expired."
       request: "The request has expired."
+    generic:
+      404:
+        code: "NotFound"
+        message: "Not found"
+        suggestion: "The page you tried to access does not exist."
+      406:
+        code:       "NotAcceptable"
+        message:    "Format not acceptable"
+        suggestion: "The URL you entered is probably incorrect."
+        status_code: "406"
+      500:
+        code: "ServerError"
+        message: "Server error"
+        suggestion: "Please try again later or contact an administrator."

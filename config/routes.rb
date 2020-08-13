@@ -59,4 +59,7 @@ Rails.application.routes.draw do
 
     mount RailsLti2Provider::Engine => '/rails_lti2_provider'
   end
+
+  # To treat errors on pages that don't fall on any other controller
+  match '*path' => 'application#on_404', via: :all
 end
