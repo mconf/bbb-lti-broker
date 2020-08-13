@@ -47,3 +47,9 @@ CONSUMER_SECRET=secret
 # Set the flags below to alter this behavior
 # COOKIES_SECURE_OFF=1
 # COOKIES_SAME_SITE=1
+
+# Serve assets through the app
+RAILS_SERVE_STATIC_FILES=true
+
+# To serve assets from a CDN
+# ASSET_HOST=http://ks872jadt5c9a8.cloudfront.net
