@@ -11,3 +11,7 @@ Rails.application.config.assets.version = '1.0'
 # Precompile additional assets.
 # application.js, application.css, and all non-JS/CSS in app/assets folder are already added.
 # Rails.application.config.assets.precompile += %w( search.js )
+
+unless ENV['RELATIVE_URL_ROOT'].blank?
+  Rails.application.config.assets.prefix = "/#{ENV['RELATIVE_URL_ROOT']}"
+end
