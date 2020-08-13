@@ -70,7 +70,7 @@ $block-rem: 0.5rem;
 
 body, body[data-controller='application'] {
   margin: blocks(4);
-  background-color: var(--color-white);
+  background-color: var(--color-white) !important;
   font-family: var(--font-family);
   font-weight: var(--font-weight);
   font-size: var(--font-size);
@@ -86,9 +86,10 @@ body, body[data-controller='application'] {
     font-size: var(--font-size-h2);
   }
 
-}
+  //
+  // for error pages
+  //
 
-body[data-controller='application'] {
   h1 { display: none; }
 
   .alert {
@@ -96,6 +97,10 @@ body[data-controller='application'] {
     border: none;
     padding: blocks(4) 0;
     color: var(--font-color);
+
+    h4 {
+      color: var(--color-main);
+    }
 
     .close { display: none; }
   }

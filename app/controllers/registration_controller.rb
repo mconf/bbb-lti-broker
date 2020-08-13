@@ -10,6 +10,8 @@ class RegistrationController < ApplicationController
   include TemporaryStore
 
   def list
+    return on_404 if ENV['DEVELOPER_MODE_ENABLED'] != 'true'
+
     @registrations = RailsLti2Provider::Tool.where(lti_version: '1.3.0').pluck(:tool_settings)
     @registrations.map! do |reg|
       JSON.parse(reg)
