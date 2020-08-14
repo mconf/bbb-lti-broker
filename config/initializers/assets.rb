@@ -13,5 +13,5 @@ Rails.application.config.assets.version = '1.0'
 # Rails.application.config.assets.precompile += %w( search.js )
 
 unless ENV['RELATIVE_URL_ROOT'].blank?
-  Rails.application.config.assets.prefix = "/#{ENV['RELATIVE_URL_ROOT']}"
+  Rails.application.config.assets.prefix = "/#{ENV['RELATIVE_URL_ROOT']}/assets"
 end
