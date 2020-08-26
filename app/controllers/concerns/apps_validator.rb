@@ -2,6 +2,7 @@
 
 module AppsValidator
   include ActiveSupport::Concern
+  include ExceptionHandler
 
   def user_params(tc_instance_guid, params)
     {
