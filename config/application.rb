@@ -25,6 +25,8 @@ module BbbLtiBroker
 
     config.launch_nonce_duration = (ENV['LAUNCH_NONCE_DURATION'] || 300).to_i.seconds
 
+    config.launch_days_to_delete = ENV['LAUNCH_DAYS_TO_DELETE'].to_i
+
     config.app_name = ENV["APP_NAME"] || 'BbbLtiBroker'
 
     # use a json formatter to match lograge's logs
