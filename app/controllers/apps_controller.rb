@@ -24,9 +24,9 @@ class AppsController < ApplicationController
 
     # FIX ME
     # Move to a worker or cache the result
-    date_limit = Rails.configuration.launch_days_to_delete.days.ago
+    date_limit = Rails.configuration.launch_days_to_delete.days.ago.utc
     Rails.logger.info "Removing the old AppLaunches from before #{date_limit}"
-    deleted_launches = AppLaunch.where('created_at < ?', date_limit).delete_all
+    deleted_launches = AppLaunch.where('expiration_time < ?', date_limit).delete_all
     Rails.logger.info "#{deleted_launches} AppLaunches deleted"
 
     AppLaunch.find_or_create_by(nonce: lti_launch.nonce) do |launch|
