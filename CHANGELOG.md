@@ -1,5 +1,18 @@
 # Change Log
 
+## 0.2.0 Elos - 2021-06-26
+
+* [LTI-51] Update rails to fix missing mimemagic version.
+* [LTI-44] Automatically remove old `AppLaunches`. Removes all launches older than
+  `LAUNCH_DAYS_TO_DELETE` days. Defaults to 15.
+
+Migration notes:
+
+* New environment variable `LAUNCH_DAYS_TO_DELETE` to decide how old launches have to be
+  to be automatically removed. Defaults to 15 (will remove all launches from 15 or more
+  days ago).
+
+
 ## 0.1.0 Elos - 2020-08-16
 
 * Serve assets in production if `RAILS_SERVE_STATIC_FILES` is set and allow the configuration
