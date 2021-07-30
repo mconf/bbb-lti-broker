@@ -1,5 +1,21 @@
 # Change Log
 
+## 0.3.0 Elos - 2021-07-27
+
+* [LTI-29] Added Rails Admin and variables for serve application and/or Rails Admin.
+* [LTI-45] Improved the `AppLaunches` deletion log and added an index in the
+  `expiration_time` field.
+
+Migration notes:
+
+* New environment variables `SERVE_APPLICATION`, `SERVE_RAILS_ADMIN`
+  `AUTHENTICATION_RAILS_ADMIN`, `ADMIN_KEY` and `ADMIN_PASSWORD`, it is necessary to
+  configure as needed for use application and/or rails admin.
+* Created a migration to add index on `expires_at` field for better performance in
+  deleting old `AppLaunches`.
+
+
+
 ## 0.2.0 Elos - 2021-06-26
 
 * [LTI-51] Update rails to fix missing mimemagic version.
