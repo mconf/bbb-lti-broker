@@ -2,14 +2,19 @@
 
 Rails.application.routes.draw do
 
-  if (ENV['SERVE_RAILS_ADMIN'] || false)
+  get '/health_check', to: 'health_check#all'
+  get '/healthz', to: 'health_check#all'
+
+  if Mconf::Env.fetch_boolean("SERVE_RAILS_ADMIN", false)
     mount RailsAdmin::Engine => '/dash', as: 'rails_admin'
+
+    unless Mconf::Env.fetch_boolean("SERVE_APPLICATION", true)
+      root to: redirect('/dash')
+    end
   end
 
-  if (ENV['SERVE_APPLICATION'] || true)
+  if Mconf::Env.fetch_boolean("SERVE_APPLICATION", true)
     scope ENV['RELATIVE_URL_ROOT'] || '/' do
-      get '/health_check', to: 'health_check#all'
-      get '/healthz', to: 'health_check#all'
 
       # rooms calls this api to validate launch from broker
       namespace :api do
@@ -20,7 +25,7 @@ Rails.application.routes.draw do
           get 'sessions/:token/invalidate', to: 'sessions#invalidate_launch', as: :invalidate_session
         end
       end
-    
+
       # grades
       get 'grades/:grades_token/list', to: 'grades#grades_list', as: :grades_list
       post 'grades/:grades_token/change', to: 'grades#send_grades', as: :send_grades
@@ -38,9 +43,9 @@ Rails.application.routes.draw do
         #   [http://example.com/lti/oauth/applications]
         skip_controllers :applications unless ENV['DEVELOPER_MODE_ENABLED'] == 'true'
       end
-    
+
       root to: 'application#index', app: ENV['DEFAULT_LTI_TOOL'] || 'default'
-    
+
       # lti 1.3 authenticate user through login
       post ':app/auth/login', to: 'auth#login', as: 'openid_login'
       post ':app/messages/oblti', to: 'message#openid_launch_request', as: 'openid_launch'
