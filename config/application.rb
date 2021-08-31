@@ -13,7 +13,7 @@ Bundler.require(*Rails.groups)
 
 module BbbLtiBroker
   class Application < Rails::Application
-    VERSION = "0.3.0-elos"
+    VERSION = "0.3.1"
 
     # Settings in config/environments/* take precedence over those specified here.
     # Application configuration should go into files in config/initializers
