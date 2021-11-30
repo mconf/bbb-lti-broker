@@ -1,0 +1,11 @@
+remove_old_app_launch_job:
+   cron: "0 1 * * *"
+   class: RemoveOldAppLaunchJob
+   queue: default
+   description: "Remove old AppLaunches"
+
+remove_old_lti_launch_job:
+   cron: "0 1 * * *"
+   class: RemoveOldLtiLaunchJob
+   queue: default
+   description: "Remove old LtiLaunches"
