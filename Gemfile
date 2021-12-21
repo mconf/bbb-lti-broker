@@ -80,6 +80,6 @@ gem 'lograge'
 gem "logstash-event"
 
 # For queues
-gem 'resque', :require => 'resque/server'
-gem 'resque-scheduler', :require => 'resque/scheduler/server'
+gem 'resque', require: 'resque/server'
+gem 'resque-scheduler', require: 'resque/scheduler/server'
 gem 'active_scheduler'
