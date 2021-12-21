@@ -1,7 +1,7 @@
 require 'resque/server'
 
 Rails.application.routes.draw do
-  mount Resque::Server.new, :at => "/resque"
+  mount Resque::Server.new, at: "/resque"
 
   if (ENV['SERVE_RAILS_ADMIN'] || false)
     mount RailsAdmin::Engine => '/dash', as: 'rails_admin'
