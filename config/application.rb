@@ -32,6 +32,9 @@ module BbbLtiBroker
 
     config.app_name = ENV["APP_NAME"] || 'BbbLtiBroker'
 
+    config.coc_client_id = ENV['COC_CLIENT_ID']
+    config.coc_client_secret = ENV['COC_CLIENT_SECRET']
+
     # use a json formatter to match lograge's logs
     if ENV['LOGRAGE_ENABLED'] == '1'
       config.log_formatter = SimpleJsonFormatter.new
