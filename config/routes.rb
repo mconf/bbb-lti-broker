@@ -68,9 +68,14 @@ Rails.application.routes.draw do
 
     # FIX ME
     # Update these routes later
-    # get '/coc/callback/:app', to: 'coc#callback'
-    get '/coc/callback', to: 'coc#callback'
-    get '/coc/launch', to: 'coc#launch'
+    scope module: :clients do
+      scope module: :coc do
+        scope module: :controllers do
+          # get '/coc/callback/:app', to: 'auth#callback', as
+          get '/coc/callback/', to: 'auth#callback'
+        end
+      end
+    end
 
     # To treat errors on pages that don't fall on any other controller
     match '*path' => 'application#on_404', via: :all

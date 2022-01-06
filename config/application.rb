@@ -14,6 +14,8 @@ module BbbLtiBroker
   class Application < Rails::Application
     VERSION = "0.3.0-elos"
 
+    config.autoload_paths << Rails.root.join('lib')
+
     # Settings in config/environments/* take precedence over those specified here.
     # Application configuration should go into files in config/initializers
     # -- all .rb files in that directory are automatically loaded.
@@ -32,8 +34,12 @@ module BbbLtiBroker
 
     config.app_name = ENV["APP_NAME"] || 'BbbLtiBroker'
 
+    # FIX ME, move this elsewhere
     config.coc_client_id = ENV['COC_CLIENT_ID']
     config.coc_client_secret = ENV['COC_CLIENT_SECRET']
+    config.coc_consumer_key = ENV['COC_CONSUMER_KEY']
+    config.coc_consumer_secret = ENV['COC_CONSUMER_SECRET']
+    config.portal_coc_host = ENV['COC_PASSAPORTE_URI']
 
     # use a json formatter to match lograge's logs
     if ENV['LOGRAGE_ENABLED'] == '1'
