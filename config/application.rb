@@ -39,7 +39,8 @@ module BbbLtiBroker
     config.coc_client_secret = ENV['COC_CLIENT_SECRET']
     config.coc_consumer_key = ENV['COC_CONSUMER_KEY']
     config.coc_consumer_secret = ENV['COC_CONSUMER_SECRET']
-    config.portal_coc_host = ENV['COC_PASSAPORTE_URI']
+    config.coc_portal_host = ENV['COC_PASSAPORTE_URI']
+    config.coc_package_id = ENV['COC_PACKAGE_ID']
 
     # use a json formatter to match lograge's logs
     if ENV['LOGRAGE_ENABLED'] == '1'
