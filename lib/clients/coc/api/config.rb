@@ -10,8 +10,6 @@ module Clients::Coc
         @school_structures_path = lambda do |school_id|
           "/giul/integration/v1/school/#{school_id}/structures"
         end
-        # YEAR = Time.zone.today.year
-        # FIX ME, IT'S HARDCODED
         @year = Time.zone.today.year
       end
 
