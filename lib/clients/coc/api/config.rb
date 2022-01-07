@@ -12,7 +12,7 @@ module Clients::Coc
         end
         # YEAR = Time.zone.today.year
         # FIX ME, IT'S HARDCODED
-        @year = 2021
+        @year = Time.zone.today.year
       end
 
       def fetch_access_token(code)
@@ -58,7 +58,7 @@ module Clients::Coc
 
       def extract_schools_data(school_and_classes_id)
         query = { period: @year,
-                  packageId: 'Portal_COC',
+                  packageId: Rails.application.config.coc_package_id,
                   untilTo: 'TURMA', }
 
         school_and_classes_id.map do |class_data|
@@ -95,7 +95,7 @@ module Clients::Coc
       def build_url(path, query = {})
         url = URI::HTTPS.build(
           scheme: 'https',
-          host: Rails.application.config.portal_coc_host,
+          host: Rails.application.config.coc_portal_host,
           path: path,
           query: URI.encode_www_form(query)
         ).to_s

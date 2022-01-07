@@ -45,9 +45,9 @@ module Clients::Coc
     def adapted_user_params(user_data)
       {
         'user_id' => user_data.id,
-        'custom_lis_person_name_full' => user_data.name,
-        'custom_lis_person_name_given' => '',
-        'custom_lis_person_name_family' => '',
+        'lis_person_name_full' => user_data.name,
+        'lis_person_name_given' => '',
+        'lis_person_name_family' => '',
       }
     end
 
@@ -65,10 +65,9 @@ module Clients::Coc
       end
     end
 
-     # FIX ME Hardcoded values
-     def build_message(user_data)
+    def build_message(user_data)
+      message =
       {
-        'user_id' => user_data.id,
         'context_id' => user_data.economic_group[:id],
         'tool_consumer_instance_guid' => user_data.economic_group[:name],
         'custom_params' => {
@@ -77,7 +76,8 @@ module Clients::Coc
         },
         'roles' => user_data.roles,
       }
+      message.merge!(adapted_user_params(user_data))
     end
   end
-end
+  end
 end
