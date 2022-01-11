@@ -7,9 +7,9 @@ module Clients::Coc
         # FIX ME, mocked params[:app]
         params[:app] = 'rooms'
 
-        @api_config = Api::Config.new
-        @api_config.fetch_access_token(params[:code])
-        user_data = @api_config.fetch_user_data
+        @api_request = Api::Request.new
+        @api_request.fetch_access_token(params[:code])
+        user_data = @api_request.fetch_user_data
 
         @current_user = find_or_create_user(user_data)
 
