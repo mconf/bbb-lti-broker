@@ -1,6 +1,6 @@
 module Clients::Coc
   module Api
-    class Config
+    class Request
       def initialize
         @access_token = ''
 
@@ -91,7 +91,7 @@ module Clients::Coc
       end
 
       def build_url(path, query = {})
-        url = URI::HTTPS.build(
+        URI::HTTPS.build(
           scheme: 'https',
           host: Rails.application.config.coc_portal_host,
           path: path,
@@ -118,7 +118,7 @@ module Clients::Coc
         rescue JSON::ParserError => e
           msg = "Failed to parse passaporte response: #{event}. "\
                 "Message: #{e.message}"
-          puts(msg)
+          Rails.logger.error(msg)
           nil
         end
       end
