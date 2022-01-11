@@ -2,6 +2,8 @@ version: '3'
 
 services:
   app:
+    container_name: broker_app
+    image: broker_app:app
     build:
       context: .
       args:
@@ -16,6 +18,8 @@ services:
       - "3000:3000"
     links:
       - postgres
+    depends_on:
+      - broker_redis
 
   postgres:
     image: postgres:11-alpine
@@ -25,3 +29,42 @@ services:
       - ./data/postgres/:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+
+  broker_redis:
+    container_name: broker_dev_redis
+    image: redis:3.2
+    expose:
+      - "6379"
+    command: redis-server --requirepass "BCsy8zMwZay669ii"
+
+  broker_worker:
+    container_name: broker_dev_resque_worker
+    image: broker_app:app
+    depends_on:
+      - postgres
+      - broker_redis
+    env_file:
+      - ./.env
+    environment:
+      - QUEUE=*
+      - DATABASE_URL=${DATABASE_URL:-postgresql://postgres:password@postgres:5432/lti_broker}
+    volumes:
+      - ./:/usr/src/app
+      - bundle-volume:/usr/src/bundle
+    command: "bin/rake resque:work"
+
+  broker_scheduler:
+    container_name: broker_dev_resque_scheduler
+    image: broker_app:app
+    depends_on:
+      - postgres
+      - broker_redis
+    env_file:
+      - ./.env
+    volumes:
+      - ./:/usr/src/app
+      - bundle-volume:/usr/src/bundle
+    command: "bin/rake resque:scheduler"
+
+volumes:
+  bundle-volume:
