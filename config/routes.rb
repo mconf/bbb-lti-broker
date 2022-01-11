@@ -1,15 +1,21 @@
-# frozen_string_literal: true
+require 'resque/server'
 
 Rails.application.routes.draw do
+  mount Resque::Server.new, at: "/resque"
 
-  if (ENV['SERVE_RAILS_ADMIN'] || false)
+  get '/health_check', to: 'health_check#all'
+  get '/healthz', to: 'health_check#all'
+
+  if Mconf::Env.fetch_boolean("SERVE_RAILS_ADMIN", false)
     mount RailsAdmin::Engine => '/dash', as: 'rails_admin'
+
+    unless Mconf::Env.fetch_boolean("SERVE_APPLICATION", true)
+      root to: redirect('/dash')
+    end
   end
 
-  if (ENV['SERVE_APPLICATION'] || true)
+  if Mconf::Env.fetch_boolean("SERVE_APPLICATION", true)
     scope ENV['RELATIVE_URL_ROOT'] || '/' do
-      get '/health_check', to: 'health_check#all'
-      get '/healthz', to: 'health_check#all'
 
       # rooms calls this api to validate launch from broker
       namespace :api do
