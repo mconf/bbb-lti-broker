@@ -4,9 +4,6 @@ module Clients::Coc
   module Controllers
     class AuthController < ApplicationController
       def callback
-        # FIX ME, mocked params[:app]
-        params[:app] = 'rooms'
-
         @api_request = Api::Request.new
         @api_request.fetch_access_token(params[:code])
         user_data = @api_request.fetch_user_data
@@ -15,7 +12,7 @@ module Clients::Coc
 
         app_launch = find_or_create_app_launch(user_data)
 
-        redirector = "#{coc_app_launch_url(params[:app])}?#{{ launch_nonce: app_launch.nonce }.to_query}"
+        redirector = "#{coc_app_launch_url('coc')}?#{{ launch_nonce: app_launch.nonce }.to_query}"
         redirect_to(redirector)
       end
 
