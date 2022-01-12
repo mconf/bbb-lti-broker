@@ -15,7 +15,7 @@ module BbbLtiBroker
   class Application < Rails::Application
     VERSION = "0.3.1"
 
-    config.autoload_paths << Rails.root.join('lib')
+    config.eager_load_paths << Rails.root.join('lib')
 
     # Settings in config/environments/* take precedence over those specified here.
     # Application configuration should go into files in config/initializers
