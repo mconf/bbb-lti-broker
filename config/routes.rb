@@ -78,6 +78,7 @@ Rails.application.routes.draw do
         scope module: :controllers do
           # get '/coc/callback/:app', to: 'auth#callback', as
           get '/coc/callback/', to: 'auth#callback'
+          get '/coc/callback_launch', to: 'auth#launch'
         end
       end
     end

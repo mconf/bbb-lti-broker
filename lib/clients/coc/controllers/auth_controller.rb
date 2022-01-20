@@ -4,6 +4,11 @@ module Clients::Coc
   module Controllers
     class AuthController < ApplicationController
       def callback
+        @code = params[:code]
+        render 'loader/index'
+      end
+
+      def launch
         @api_request = Api::Request.new
         @api_request.fetch_access_token(params[:code])
         user_data = @api_request.fetch_user_data
