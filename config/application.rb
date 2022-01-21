@@ -13,7 +13,7 @@ Bundler.require(*Rails.groups)
 
 module BbbLtiBroker
   class Application < Rails::Application
-    VERSION = "0.3.1"
+    VERSION = "0.4.0"
 
     config.eager_load_paths << Rails.root.join('lib')
 
