@@ -1,5 +1,15 @@
 # Change Log
 
+## [Unreleased]
+
+
+## 0.4.0 - 2022-01-21
+### Added
+- Added integration with `Portal COC`, using passport `API`.
+### Cards
+* [LTI-101] | Portal COC
+
+
 ## 0.3.1 - 2021-08-31
 
 * [LTI-79] The `/health` routes have been added to application root
@@ -56,3 +66,13 @@ Migration notes:
 * Add several indexes to the database to speed up queries.
 * Configure the session cookie with SameSite=None and Secure to reduce issues when opening
   the application in an iframe.
+
+
+<!-- Cards -->
+[LTI-101]: https://www.notion.so/mconf/Portal-Gerenciamento-bccb3a3fa75c40f38ead425739d13bb7?p=9ac57ab16aa64130a0ac274241c873ce
+
+<!-- Prs -->
+
+<!-- Compares -->
+[Unreleased]: https://github.com/mconf/bbb-lti-broker/compare/feature-coc-on-0.3.1...master-elos
+[0.4.0]: https://github.com/mconf/bbb-lti-broker/compare/v0.3.1...feature-coc-on-0.3.1
