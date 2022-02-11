@@ -30,6 +30,48 @@ services:
     ports:
       - "5432:5432"
 
+  prod:
+    container_name: broker_app_prod
+    image: broker_app_prod:prod
+    build:
+      context: .
+      args:
+        RAILS_ENV: production
+    env_file:
+      - ./.env
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:password@postgres:5432/lti_broker}
+      RAILS_ENV: production
+      MCONF_REDIS_HOST: broker_redis
+      MCONF_REDIS_PASSWORD: BCsy8zMwZay669ii
+      MCONF_REDIS_PORT: 6379
+      MCONF_REDIS_DB: 0
+      PROMETHEUS_EXPORTER_HOST: prod_exporter
+      PROMETHEUS_EXPORTER_PORT: 9394
+      PUMA_WORKERS: 1
+    volumes:
+      - .:/usr/src/app
+    ports:
+      - "3000:3000"
+    links:
+      - postgres
+    depends_on:
+      - broker_redis
+      - prod_exporter
+
+  prod_exporter:
+    container_name: broker_prod_exporter
+    image: broker_app_prod:prod
+    tty: true
+    stdin_open: true
+    ports:
+      - "9394:9394"
+    env_file:
+      - ./.env
+    volumes:
+      - .:/usr/src/app
+    command: bundle exec prometheus_exporter -b 0.0.0.0 -p 9394 --prefix 'broker_app_'
+
   broker_redis:
     container_name: broker_dev_redis
     image: redis:3.2

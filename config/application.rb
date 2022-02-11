@@ -56,5 +56,12 @@ module BbbLtiBroker
     config.redis_port      = ENV['MCONF_REDIS_PORT']
     config.redis_db        = ENV['MCONF_REDIS_DB']
     config.redis_password  = ENV['MCONF_REDIS_PASSWORD']
+
+    # Prevent errors when precompiling assets in local production
+    if ENV['RAILS_ENV'] == 'development'
+      config.assets.configure do |env|
+        env.export_concurrent = false
+      end
+    end
   end
 end
