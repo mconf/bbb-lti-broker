@@ -1,7 +1,6 @@
 require 'resque/server'
 
 Rails.application.routes.draw do
-  mount Resque::Server.new, at: "/resque"
 
   get '/health_check', to: 'health_check#all'
   get '/healthz', to: 'health_check#all'
@@ -70,6 +69,10 @@ Rails.application.routes.draw do
       # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
 
       mount RailsLti2Provider::Engine => '/rails_lti2_provider'
+
+      if Mconf::Env.fetch_boolean("MCONF_SERVE_RESQUE_INTERFACE", false)
+        mount Resque::Server.new, at: "/resque"
+      end
     end
 
     # FIX ME
