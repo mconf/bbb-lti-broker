@@ -18,7 +18,7 @@ class RemoveOldAppLaunchJob < ApplicationJob
                            "in: #{query_duration.round(3)} seconds"
 
         app_launches = get_expired_launches(date_limit).count
-      rescue
+      rescue StandardError => e
         Resque.logger.error "Error removing old LtiLaunch: #{e.message}", \
                             "These #{deleted_launches} has not been deleted."
       end
