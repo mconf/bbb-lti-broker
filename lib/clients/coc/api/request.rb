@@ -93,7 +93,7 @@ module Clients::Coc
       def build_url(path, query = {})
         URI::HTTPS.build(
           scheme: 'https',
-          host: Rails.application.config.coc_portal_host,
+          host: Rails.application.config.coc_passaporte_host,
           path: path,
           query: URI.encode_www_form(query)
         ).to_s
