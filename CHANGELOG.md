@@ -1,14 +1,61 @@
 # Change Log
 
 ## [Unreleased]
+<!-- Compare -->
+[#Unreleased]: https://github.com/mconf/bbb-lti-broker/compare/master-elos...v0.5.0
 
+## 0.5.0 - 2022-06-09
+### Migration notes
+- New `resque`, `resque-scheduler`, `active_scheduler` and `prometheus_exporter` gems. Run `bundle install`.
+- The `PUMA_WORKERS` environment variable needs to be set to 1, otherwise the
+  `prometheus_exporter` won't work.
+- The `MCONF_SERVE_RESQUE_INTERFACE` environment variable needs to be set to `true` to render the 
+  resque interface.
+### Added
+* [LTI-46] | Workers for remove old `app_launches` and `lti_launches` in background.
+  - PRs: [#8]
+* [LTI-84] | `prometheus_exporter` gem to collect information from the Rails application and expose them
+  in a format that Prometheus can read.
+  - PRs: [#10]
+* [LTI-116] | Move `/resque` to `/lti` scope, add `MCONF_SERVE_RESQUE_INTERFACE` environment variable to control the rendering of the resque interface. Add loops on workers to remove more items at a time.
+  - PRs: [#11]
+
+<!-- Cards -->
+[LTI-46]: https://www.notion.so/Mudar-a-l-gica-de-remo-o-de-itens-antigos-para-ser-em-background-workers-5b88b9304c0e4c44b93f283e6fcd292e
+[LTI-84]: https://www.notion.so/Exporter-de-m-tricas-para-o-prometheus-no-LTI-68a2436959804efbb7d14b9705018dbe
+[LTI-116]: https://www.notion.so/mconf/Melhorias-no-workers-da-v0-9-0-e-v0-5-0-do-LTI-9aa0b6f0d8cb4cc283ebe391ef409bb1
+
+<!-- PRs -->
+[#8]: https://github.com/mconf/bbb-lti-broker/pull/8
+[#10]: https://github.com/mconf/bbb-lti-broker/pull/10
+[#11]: https://github.com/mconf/bbb-lti-broker/pull/11
+
+<!-- Compare -->
+[0.5.0]: https://github.com/mconf/bbb-lti-broker/compare/v0.4.1...v0.5.0
+
+## 0.4.1 - 2022-01-28
+### Added
+* Remove translation of user roles from `Portal COC`.
+  - PRs: [#9]
+
+<!-- PRs -->
+[#9]: https://github.com/mconf/bbb-lti-broker/pull/9
+
+<!-- Compare -->
+[0.4.1]: https://github.com/mconf/bbb-lti-broker/compare/v0.4.0...v0.4.1
 
 ## 0.4.0 - 2022-01-21
 ### Added
 - Added integration with `Portal COC`, using passport `API`.
 ### Cards
 * [LTI-101] | Portal COC
+  - Commits: [#54baf4]
 
+<!-- Cards -->
+[LTI-101]: https://www.notion.so/mconf/Portal-Gerenciamento-bccb3a3fa75c40f38ead425739d13bb7?p=9ac57ab16aa64130a0ac274241c873ce
+
+<!-- Commits -->
+[#54baf4]: https://github.com/mconf/bbb-lti-broker/commit/54baf4d0b7ec0750b7615483d6ec0f69e67651bd
 
 ## 0.3.1 - 2021-08-31
 
@@ -66,13 +113,3 @@ Migration notes:
 * Add several indexes to the database to speed up queries.
 * Configure the session cookie with SameSite=None and Secure to reduce issues when opening
   the application in an iframe.
-
-
-<!-- Cards -->
-[LTI-101]: https://www.notion.so/mconf/Portal-Gerenciamento-bccb3a3fa75c40f38ead425739d13bb7?p=9ac57ab16aa64130a0ac274241c873ce
-
-<!-- Prs -->
-
-<!-- Compares -->
-[Unreleased]: https://github.com/mconf/bbb-lti-broker/compare/feature-coc-on-0.3.1...master-elos
-[0.4.0]: https://github.com/mconf/bbb-lti-broker/compare/v0.3.1...feature-coc-on-0.3.1
