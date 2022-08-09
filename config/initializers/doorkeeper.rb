@@ -18,7 +18,7 @@ Doorkeeper.configure do
       return nil if launch.expired?
 
       uid = JSON.parse(launch.message)['user_id']
-      context = JSON.parse(launch.message)['tool_consumer_instance_guid']
+      context = JSON.parse(launch.message)['tool_consumer_instance_guid'] || URI.parse(request.referer).host
       user = User.find_by(uid: uid, context: context)
     rescue
       user = nil
