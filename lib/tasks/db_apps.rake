@@ -8,7 +8,7 @@ require 'bbb_lti_broker/helpers'
 
 namespace :db do
   namespace :apps do
-    desc 'Add a new blti app'
+    desc 'Add a new blti app - add[name,hostname,uid,secret]'
     task :add, [:name, :hostname, :uid, :secret] => :environment do |_t, args|
       include BbbLtiBroker::Helpers
       Rake::Task['environment'].invoke
@@ -40,7 +40,7 @@ namespace :db do
       exit(1)
     end
 
-    desc 'Update an existent blti app if exists'
+    desc 'Update an existent blti app if exists - update[name,hostname,uid,secret]'
     task :update, [:name, :hostname, :uid, :secret] => :environment do |_t, args|
       include BbbLtiBroker::Helpers
       Rake::Task['environment'].invoke
@@ -67,7 +67,7 @@ namespace :db do
       exit(1)
     end
 
-    desc 'Delete an existent blti app if exists'
+    desc 'Delete an existent blti app if exists - delete[name]'
     task :delete, [:name] => :environment do |_t, args|
       include BbbLtiBroker::Helpers
       Rake::Task['environment'].invoke
@@ -83,14 +83,14 @@ namespace :db do
       end
       blti_apps.each do |app|
         app.delete
-        puts "App '#{args[:name]}' was deleted"
+        puts("App '#{args[:name]}' was deleted")
       end
     rescue StandardError => e
       puts(e.backtrace)
       exit(1)
     end
 
-    desc 'Show an existent blti app if exists'
+    desc 'Show an existent blti app if exists - show[name]'
     task :show, [:name] => :environment do |_t, args|
       include BbbLtiBroker::Helpers
       Rake::Task['environment'].invoke
@@ -106,7 +106,7 @@ namespace :db do
       end
       apps.each do |app|
         app1 = app.attributes.select { |key, _value| %w[name uid secret redirect_uri].include?(key) }
-        puts app1.to_json
+        puts(app1.to_json)
       end
     rescue StandardError => e
       puts(e.backtrace)
@@ -133,7 +133,7 @@ namespace :db do
       apps = Doorkeeper::Application.all
       apps.each do |app|
         app1 = app.attributes.select { |key, _value| %w[name uid secret redirect_uri].include?(key) }
-        puts app1.to_json
+        puts(app1.to_json)
       end
     rescue ApplicationRedisRecord::RecordNotFound
       puts(e.backtrace)

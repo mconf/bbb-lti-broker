@@ -6,7 +6,7 @@ Rails.application.configure do
     # config.lograge.keep_original_rails_log = false
     config.lograge.formatter = Lograge::Formatters::Logstash.new
 
-    config.lograge.ignore_actions = ['HealthCheckController#all']
+    config.lograge.ignore_actions = ['HealthCheckController#show']
 
     config.lograge.custom_options = lambda do |event|
       params = {}

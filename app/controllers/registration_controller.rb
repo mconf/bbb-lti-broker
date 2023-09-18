@@ -1,5 +1,21 @@
 # frozen_string_literal: true
 
+# BigBlueButton open source conferencing system - http://www.bigbluebutton.org/.
+
+# Copyright (c) 2018 BigBlueButton Inc. and by respective authors (see below).
+
+# This program is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License as published by the Free Software
+# Foundation; either version 3.0 of the License, or (at your option) any later
+# version.
+
+# BigBlueButton is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+
+# You should have received a copy of the GNU Lesser General Public License along
+# with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
+
 require 'json'
 require 'pathname'
 
@@ -9,9 +25,13 @@ class RegistrationController < ApplicationController
   include AppsValidator
   include TemporaryStore
 
-  def list
-    return on_404 if ENV['DEVELOPER_MODE_ENABLED'] != 'true'
+  before_action :print_parameters if Rails.configuration.developer_mode_enabled
 
+  def list
+    if ENV['DEVELOPER_MODE_ENABLED'] != 'true'
+      render(file: Rails.root.join('public/404'), layout: false, status: :not_found)
+      return
+    end
     @registrations = RailsLti2Provider::Tool.where(lti_version: '1.3.0').pluck(:tool_settings)
     @registrations.map! do |reg|
       JSON.parse(reg)
@@ -21,7 +41,7 @@ class RegistrationController < ApplicationController
   # only available if developer mode is on
   # production - use rails task
   def new
-    @app = ENV['DEFAULT_LTI_TOOL'] || 'default'
+    @app = Rails.configuration.default_tool
     @apps = lti_apps
     set_temp_keys
     set_starter_info
@@ -50,7 +70,7 @@ class RegistrationController < ApplicationController
     if params.key?('private_key_path') && params.key?('public_key_path')
       key_dir = Digest::MD5.hexdigest(params[:iss] + params[:client_id])
       Dir.mkdir('.ssh/') unless Dir.exist?('.ssh/')
-      Dir.mkdir('.ssh/' + key_dir) unless Dir.exist?('.ssh/' + key_dir)
+      Dir.mkdir(".ssh/#{key_dir}") unless Dir.exist?(".ssh/#{key_dir}")
 
       priv_key = read_temp_file(params[:private_key_path])
       pub_key = read_temp_file(params[:public_key_path])
@@ -70,20 +90,23 @@ class RegistrationController < ApplicationController
     options = {}
     options['client_id'] = params[:client_id]
 
-    if params.key?('reg_id')
-      if lti_registration_exists?(params[:reg_id], options)
-        registration = lti_registration(params[:reg_id], options)
-        reg[:tool_private_key] = lti_registration_params(params[:reg_id], options)['tool_private_key']
-        registration.update(tool_settings: reg.to_json, shared_secret: params[:client_id])
-        registration.save
-      end
-    # elsif ! lti_registration_exists?(params[:iss])
-    else
+    registration = lti_registration(params[:reg_id], options) if params.key?('reg_id')
+    unless registration.nil?
+      reg[:tool_private_key] = lti_registration_params(params[:reg_id], options)['tool_private_key']
+      registration.update(tool_settings: reg.to_json, shared_secret: params[:client_id])
+      registration.save
+      redirect_to(registration_list_path)
+      return
+    end
+
+    tenant = RailsLti2Provider::Tenant.first
+    unless tenant.nil?
       RailsLti2Provider::Tool.create!(
         uuid: params[:iss],
         shared_secret: params[:client_id],
         tool_settings: reg.to_json,
-        lti_version: '1.3.0'
+        lti_version: '1.3.0',
+        tenant: tenant
       )
     end
 
@@ -127,6 +150,6 @@ class RegistrationController < ApplicationController
   def set_starter_info
     basic_launch_url = openid_launch_url(app: @app)
     deep_link_url = deep_link_request_launch_url(app: @app)
-    @redirect_uri = basic_launch_url + "\n" + deep_link_url
+    @redirect_uri = "#{basic_launch_url}\n#{deep_link_url}"
   end
 end

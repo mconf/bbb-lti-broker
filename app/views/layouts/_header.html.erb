@@ -1,3 +1,19 @@
+<%# BigBlueButton open source conferencing system - http://www.bigbluebutton.org/.
+
+Copyright (c) 2018 BigBlueButton Inc. and by respective authors (see below).
+
+This program is free software; you can redistribute it and/or modify it under the
+terms of the GNU Lesser General Public License as published by the Free Software
+Foundation; either version 3.0 of the License, or (at your option) any later
+version.
+
+BigBlueButton is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License along
+with BigBlueButton; if not, see <http://www.gnu.org/licenses/>. %>
+
 <!DOCTYPE html>
 <html lang="en-US">
   <head>
@@ -6,10 +22,6 @@
     <%= stylesheet_link_tag    "application", media: "all", "data-turbolinks-track" => true %>
     <%= javascript_include_tag "application", "data-turbolinks-track" => true %>
     <%= csrf_meta_tags %>
-    <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.7/styles/tomorrow.min.css">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.7/highlight.min.js"></script>
-    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     <script type="text/javascript">
      $(document).ready(function(){
        hljs.initHighlightingOnLoad();
@@ -19,3 +31,19 @@
   <body lang="<%= I18n.locale %>"
         data-controller="<%= params[:controller] %>"
         data-action="<%= params[:action] %>">
+
+    <div class="header">
+        <div class="container">
+            <div class="d-flex bd-highlight mb3">
+                <div class="mr-auto p-2 bd-highlight">
+                    <%= link_to root_path do%>
+                        <%= image_tag("bbb_logo.png", class: "bbb-logo") %>
+                    <% end %>
+                </div>
+                <div class="p-2 bd-highlight">
+                    <%= link_to "Config", root_path, :class => "btn btn-outline-primary mx-2 config-button" %>
+                </div>
+            </div>
+        </div>
+    </div>
+  </body>

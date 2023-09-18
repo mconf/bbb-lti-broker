@@ -22,11 +22,27 @@ services:
       - broker_redis
 
   postgres:
-    image: postgres:11-alpine
-    environment:
-      POSTGRES_PASSWORD: password
+    image: postgres:14.6-alpine3.17
+    restart: unless-stopped
     volumes:
-      - ./data/postgres/:/var/lib/postgresql/data
+      - ./data/postgres/14/database_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=
+  redis:
+    image: redis:6.2-alpine3.17
+    restart: unless-stopped
+    volumes:
+      - ./data/redis/database_data:/data
+# BBB LTI BROKER ↓:
+  broker:
+    image: bigbluebutton/bbb-lti-broker
+    restart: unless-stopped
+    env_file: broker/.env
+    logging:
+      driver: journald
+    depends_on:
+      - postgres
     ports:
       - "5432:5432"
 
@@ -48,7 +64,7 @@ services:
       MCONF_REDIS_DB: 0
       PROMETHEUS_EXPORTER_HOST: prod_exporter
       PROMETHEUS_EXPORTER_PORT: 9394
-      PUMA_WORKERS: 1
+      WEB_CONCURRENCY: 1
     volumes:
       - .:/usr/src/app
     ports:

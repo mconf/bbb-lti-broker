@@ -16,8 +16,18 @@
 #
 # This would use the information in config/locales/es.yml.
 #
+# The following keys must be escaped otherwise they will not be retrieved by
+# the default I18n backend:
+#
+# true, false, on, off, yes, no
+#
+# Instead, surround them with single quotes.
+#
+# en:
+#   'true': 'foo'
+#
 # To learn more, please read the Rails Internationalization guide
-# available at http://guides.rubyonrails.org/i18n.html.
+# available at https://guides.rubyonrails.org/i18n.html.
 
 en:
   ui:
@@ -35,9 +45,6 @@ en:
       description: "General Tool Provider that allows users to test LTI 1.x and 2.x capabilities"
     rooms:
       title:       "Rooms"
-      description: "Rooms allows the creation and use of BigBlueButton Rooms through LTI"
-    greenlight:
-      title:       "Greenlight"
       description: "Rooms allows the creation and use of BigBlueButton Rooms through LTI"
   registration:
     goback:         "Go Back"
@@ -69,21 +76,25 @@ en:
   permission:
     nonrps:         "The tool does not have permission to send grades or access student list."
   error:
+    header:         "Error"
     invalid:
       token:       "The token does not exist."
     expired:
       token:   "The token has expired."
       request: "The request has expired."
     generic:
+      401:
+        code:       "Unauthorized"
+        message:    "Unauthorized access"
+        suggestion: "If you are using this room through LTI try launching the app again by using the link or refreshing the browser."
       404:
         code: "NotFound"
         message: "Not found"
         suggestion: "The page you tried to access does not exist."
       406:
-        code:       "NotAcceptable"
-        message:    "Format not acceptable"
-        suggestion: "The URL you entered is probably incorrect."
-        status_code: "406"
+        code:       "Invalid Authenticity Token"
+        message:    "Can't verify CSRF token authenticity"
+        suggestion: "You may be facing this error because the plugin is not SSL secured, or because third party cookies are not enabled."
       500:
         code: "ServerError"
         message: "Server error"

@@ -1,10 +1,28 @@
 # frozen_string_literal: true
 
+# BigBlueButton open source conferencing system - http://www.bigbluebutton.org/.
+
+# Copyright (c) 2018 BigBlueButton Inc. and by respective authors (see below).
+
+# This program is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License as published by the Free Software
+# Foundation; either version 3.0 of the License, or (at your option) any later
+# version.
+
+# BigBlueButton is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+
+# You should have received a copy of the GNU Lesser General Public License along
+# with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
+
+require 'active_support/core_ext/integer/time'
+
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
   # Code is not reloaded between requests.
-  config.cache_classes = true
+  config.cache_classes = (ENV['DEVELOPER_MODE_ENABLED'] != 'true')
 
   # Eager load code on boot. This eager loads most of Rails and
   # your application in memory, allowing both threaded web servers
@@ -16,8 +34,14 @@ Rails.application.configure do
   config.consider_all_requests_local       = false
   config.action_controller.perform_caching = true
 
+  # Ensures that a master key has been made available in either ENV["RAILS_MASTER_KEY"]
+  # or in config/master.key. This key is used to decrypt credentials (and other encrypted files).
+  # config.require_master_key = true
+
   # Compress JavaScripts and CSS.
-  config.assets.js_compressor = Uglifier.new(harmony: true)
+  Sprockets.register_compressor('application/javascript', :terser, Terser::Compressor)
+  config.assets.js_compressor = :terser
+  # config.assets.js_compressor = Uglifier.new(harmony: true)
   # config.assets.css_compressor = :sass
 
   # Do not fallback to assets pipeline if a precompiled asset is missed.
@@ -35,7 +59,7 @@ Rails.application.configure do
   end
 
   # Enable serving of images, stylesheets, and JavaScripts from an asset server.
-  # config.action_controller.asset_host = 'http://assets.example.com'
+  # config.asset_host = 'http://assets.example.com'
 
   unless ENV['ASSET_HOST'].blank?
     config.action_controller.asset_host = ENV['ASSET_HOST']
@@ -45,13 +69,20 @@ Rails.application.configure do
   # config.action_dispatch.x_sendfile_header = 'X-Sendfile' # for Apache
   # config.action_dispatch.x_sendfile_header = 'X-Accel-Redirect' # for NGINX
 
-  # Mount Action Cable outside main process or domain
+  # Store uploaded files on the local file system (see config/storage.yml for options).
+  config.active_storage.service = :local
+
+  # Mount Action Cable outside main process or domain.
   # config.action_cable.mount_path = nil
   # config.action_cable.url = 'wss://example.com/cable'
   # config.action_cable.allowed_request_origins = [ 'http://example.com', /http:\/\/example.*/ ]
 
   # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
-  # config.force_ssl = true
+  config.force_ssl = (ENV['ENABLE_SSL'] == 'true')
+
+  # Include generic and useful information about system operation, but avoid logging too much
+  # information to avoid inadvertent exposure of personally identifiable information (PII).
+  config.log_level = ENV['LOG_LEVEL'] || 'warn'
 
   # Prepend all log lines with the following tags.
   config.log_tags = [:request_id]
@@ -59,9 +90,10 @@ Rails.application.configure do
   # Use a different cache store in production.
   # config.cache_store = :mem_cache_store
 
-  # Use a real queuing backend for Active Job (and separate queues per environment)
+  # Use a real queuing backend for Active Job (and separate queues per environment).
   # config.active_job.queue_adapter     = :resque
-  # config.active_job.queue_name_prefix = "template_#{Rails.env}"
+  # config.active_job.queue_name_prefix = "bbb_lti_broker_production"
+
   config.action_mailer.perform_caching = false
 
   # Ignore bad email addresses and do not raise email delivery errors.
@@ -80,6 +112,12 @@ Rails.application.configure do
     config.log_formatter = ::Logger::Formatter.new
   end
 
+  # Log disallowed deprecations.
+  config.active_support.disallowed_deprecation = :log
+
+  # Tell Active Support which deprecation messages to disallow.
+  config.active_support.disallowed_deprecation_warnings = []
+
   # Use a different logger for distributed setups.
   # require 'syslog/logger'
   # config.logger = ActiveSupport::TaggedLogging.new(Syslog::Logger.new 'app-name')
@@ -92,6 +130,31 @@ Rails.application.configure do
     logger.formatter = config.log_formatter
     config.logger = logger
   end
+
+  if ENV['RAILS_LOG_REMOTE_NAME'] && ENV['RAILS_LOG_REMOTE_PORT']
+    require 'remote_syslog_logger'
+    logger_program = ENV['RAILS_LOG_REMOTE_TAG'] || "bbb-lti-broker-#{ENV['RAILS_ENV']}"
+    logger = RemoteSyslogLogger.new(ENV['RAILS_LOG_REMOTE_NAME'],
+                                    ENV['RAILS_LOG_REMOTE_PORT'], program: logger_program)
+    logger.formatter = ::Logger::Formatter.new
+    config.logger = ActiveSupport::TaggedLogging.new(logger)
+  end
+
+  config.cache_store = if ENV['REDIS_URL'].present?
+                         # Set up Redis cache store
+                         [:redis_cache_store, { url: ENV['REDIS_URL'],
+
+                                                connect_timeout: 30, # Defaults to 20 seconds
+                                                read_timeout: 0.2, # Defaults to 1 second
+                                                write_timeout: 0.2, # Defaults to 1 second
+                                                reconnect_attempts: 1, # Defaults to 0
+
+                                                error_handler: lambda { |method:, returning:, exception:|
+                                                                 config.logger.warn("Support: Redis cache action #{method} failed and returned '#{returning}': #{exception}")
+                                                               }, },]
+                       else
+                         [:file_store, Rails.root.join('tmp/cache_store')]
+                       end
 
   config.hosts = ENV['WHITELIST_HOST'].presence || nil
 

@@ -1,10 +1,26 @@
 require 'resque/server'
 
+# BigBlueButton open source conferencing system - http://www.bigbluebutton.org/.
+
+# Copyright (c) 2018 BigBlueButton Inc. and by respective authors (see below).
+
+# This program is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License as published by the Free Software
+# Foundation; either version 3.0 of the License, or (at your option) any later
+# version.
+
+# BigBlueButton is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+
+# You should have received a copy of the GNU Lesser General Public License along
+# with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
+
 Rails.application.routes.draw do
   mount Resque::Server.new, at: "/resque"
 
-  get '/health_check', to: 'health_check#all'
-  get '/healthz', to: 'health_check#all'
+  get '/health_check', to: 'health_check#show'
+  get '/healthz', to: 'health_check#show'
 
   if Mconf::Env.fetch_boolean("SERVE_RAILS_ADMIN", false)
     mount RailsAdmin::Engine => '/dash', as: 'rails_admin'
@@ -24,8 +40,13 @@ Rails.application.routes.draw do
           get 'user', to: 'users#show', as: :user
           get 'sessions/:token', to: 'sessions#validate_launch', as: :sessions
           get 'sessions/:token/invalidate', to: 'sessions#invalidate_launch', as: :invalidate_session
+          get 'tenants/(:uid)', to: 'tenants#show', param: :uid
         end
       end
+
+      # A monkey patch for supporting links coming from legacy LTI tools that hardcoded the launch under tool.
+      get '(:tenant)/tool(.xml)', to: 'tool_profile#xml_config_legacy', app: Rails.configuration.default_tool
+      post '(:tenant)/tool', to: 'message#basic_lti_launch_request_legacy', as: 'blti_launch_legacy', app: Rails.configuration.default_tool
 
       # grades
       get 'grades/:grades_token/list', to: 'grades#grades_list', as: :grades_list
@@ -48,9 +69,11 @@ Rails.application.routes.draw do
       root to: 'application#index', app: ENV['DEFAULT_LTI_TOOL'] || 'default'
 
       # lti 1.3 authenticate user through login
+      get ':app/auth/login', to: 'auth#login'
       post ':app/auth/login', to: 'auth#login', as: 'openid_login'
       post ':app/messages/oblti', to: 'message#openid_launch_request', as: 'openid_launch'
       # requests from tool consumer go through this path
+      get ':app/messages/blti', to: 'tool_profile#xml_config', app: Rails.configuration.default_tool
       post ':app/messages/blti', to: 'message#basic_lti_launch_request', as: 'blti_launch'
 
       # requests from xml_config go through these paths
@@ -60,28 +83,18 @@ Rails.application.routes.draw do
       post ':app/messages/signed_content_item_request', to: 'message#signed_content_item_request'
 
       # LTI LAUNCH URL (responds to get and post)
-      get  ':app/launch', to: 'apps#launch', as: :app_launch
+      post ':app/launch', to: 'apps#launch', as: :app_launch
 
       match ':app/json_config/:temp_key_token', to: 'tool_profile#json_config', via: [:get, :post], as: 'json_config' # , :defaults => {:format => 'json'}
 
       # xml config and builder for lti 1.0/1.1
-      get ':app/xml_config', to: 'tool_profile#xml_config', app: ENV['DEFAULT_LTI_TOOL'] || 'default', as: :xml_config
-      get ':app/xml_builder', to: 'tool_profile#xml_builder', app: ENV['DEFAULT_LTI_TOOL'] || 'default', as: :xml_builder # if ENV['DEVELOPER_MODE_ENABLED'] == 'true'
+      get ':app/xml_config', to: 'tool_profile#xml_config', app: Rails.configuration.default_tool, as: :xml_config
+      get ':app/xml_builder', to: 'tool_profile#xml_builder', app: Rails.configuration.default_tool, as: :xml_builder
       # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
 
-      mount RailsLti2Provider::Engine => '/rails_lti2_provider'
-    end
+      get '/errors/:code', to: 'errors#index', as: :errors
 
-    # FIX ME
-    # Update these routes later
-    scope module: :clients do
-      scope module: :coc do
-        scope module: :controllers do
-          # get '/coc/callback/:app', to: 'auth#callback', as
-          get '/coc/callback/', to: 'auth#callback'
-          get '/coc/callback_launch', to: 'auth#launch'
-        end
-      end
+      mount RailsLti2Provider::Engine => '/rails_lti2_provider'
     end
 
     # To treat errors on pages that don't fall on any other controller
