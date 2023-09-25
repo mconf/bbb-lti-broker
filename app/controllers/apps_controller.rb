@@ -33,9 +33,7 @@ class AppsController < ApplicationController
     message = lti_launch.message
     message.custom_params['oauth_consumer_key'] = params[:oauth_consumer_key]
 
-    AppLaunch.find_or_create_by(nonce: lti_launch.nonce) do |launch|
-      launch.update(tool_id: tool.id, message: message.to_json)
-    end
+    lti_launch.update(tool_id: tool.id, message: message.to_json)
 
     redirector = "#{lti_app_url(params[:app])}?#{{ launch_nonce: lti_launch.nonce }.to_query}"
     redirect_post(redirector, options: { authenticity_token: :auto })

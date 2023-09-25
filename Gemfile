@@ -96,13 +96,11 @@ end
 group :production do
   gem 'lograge', '~> 0.13.0'
   gem 'remote_syslog_logger'
+  gem 'logstash-event'
 end
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem 'tzinfo-data'
-
-gem 'lograge'
-gem "logstash-event"
 
 # For queues
 gem 'resque', require: 'resque/server'

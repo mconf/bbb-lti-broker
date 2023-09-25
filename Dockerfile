@@ -1,4 +1,4 @@
-FROM alpine:3.18 AS alpine
+FROM ruby:3.2.2-alpine
 
 ARG RAILS_ROOT=/usr/src/app
 ENV RAILS_ROOT=${RAILS_ROOT}
@@ -6,65 +6,34 @@ ENV RAILS_ROOT=${RAILS_ROOT}
 USER root
 WORKDIR $RAILS_ROOT
 
-FROM alpine AS base
-RUN apk add --no-cache \
-    libpq \
-    libxml2 \
-    libxslt \
-    libstdc++ \
-    ruby \
-    ruby-irb \
-    ruby-bigdecimal \
-    ruby-bundler \
-    ruby-json \
-    ruby-rake \
-    ruby-dev \
-    nodejs npm yarn \
-    tini \
-    tzdata \
-    gettext \
-    imagemagick \
-    shared-mime-info
+RUN apk update \
+  && apk upgrade \
+  && apk add --update --no-cache \
+     build-base curl-dev git postgresql-dev \
+     yaml-dev zlib-dev nodejs yarn dumb-init
 
-FROM base as builder
-RUN apk add --update --no-cache \
-    build-base \
-    libxml2-dev \
-    libxslt-dev \
-    pkgconf \
-    postgresql-dev \
-    yaml-dev \
-    zlib-dev \
-    curl-dev git \
-    dumb-init \
-    && ( echo 'install: --no-document' ; echo 'update: --no-document' ) >>/etc/gemrc
-COPY . ./
-RUN bundle config build.nokogiri --use-system-libraries \
-    && bundle config set --local deployment 'true' \
-    && bundle config set --local without 'development:test' \
-    && bundle config set frozen false
-RUN bundle install -j4 \
-    && rm -rf vendor/bundle/ruby/*/cache \
-    && find vendor/bundle/ruby/*/gems/ \( -name '*.c' -o -name '*.o' \) -delete
-RUN yarn install --check-files
-
-FROM base AS application
-RUN apk add --no-cache \
-    bash \
-    postgresql-client
-ARG RAILS_ENV
-ENV RAILS_ENV=${RAILS_ENV:-production}
 ARG BUILD_NUMBER
 ENV BUILD_NUMBER=${BUILD_NUMBER}
-COPY --from=builder /usr/src/app ./
 
-FROM application
-ARG PORT
-ENV PORT=${PORT:-3000}
-EXPOSE ${PORT}
+ARG RAILS_ENV
+ENV RAILS_ENV=${RAILS_ENV:-production}
 
-# Precompile assets
-RUN SECRET_KEY_BASE=1 RAILS_ENV=${RAILS_ENV:-production} bundle exec rake assets:precompile --trace
+COPY Gemfile* $RAILS_ROOT/
+
+RUN if [ "$RAILS_ENV" == "production" ]; \
+    then bundle config set without 'development test doc'; \
+    else bundle config set without 'test doc'; \
+    fi
+RUN bundle install
+RUN yarn install --check-files
+
+COPY . $RAILS_ROOT
+
+RUN if [ "$RAILS_ENV" == "production" ]; \
+  then SECRET_KEY_BASE=`bin/rake secret` bundle exec rake assets:precompile --trace; \
+  fi
+
+EXPOSE 3000
 
 ENTRYPOINT ["/usr/bin/dumb-init", "--"]
 CMD ["scripts/start.sh"]

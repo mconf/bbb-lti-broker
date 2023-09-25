@@ -14,12 +14,12 @@ services:
       RAILS_ENV: development
     volumes:
       - .:/usr/src/app
+      # - bundle-volume:/usr/src/bundle
     ports:
       - "3000:3000"
-    links:
-      - postgres
     depends_on:
       - broker_redis
+      - postgres
 
   postgres:
     image: postgres:14.6-alpine3.17
@@ -28,23 +28,15 @@ services:
       - ./data/postgres/14/database_data:/var/lib/postgresql/data
     environment:
       - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=
+      - POSTGRES_PASSWORD=password
+    ports:
+      - "5432:5432"
+
   redis:
     image: redis:6.2-alpine3.17
     restart: unless-stopped
     volumes:
       - ./data/redis/database_data:/data
-# BBB LTI BROKER ↓:
-  broker:
-    image: bigbluebutton/bbb-lti-broker
-    restart: unless-stopped
-    env_file: broker/.env
-    logging:
-      driver: journald
-    depends_on:
-      - postgres
-    ports:
-      - "5432:5432"
 
   prod:
     container_name: broker_app_prod

@@ -64,7 +64,7 @@ module AppsValidator
     if ENV["TOOL_#{app_name.upcase}_ICON"].blank?
       begin
         app = lti_app(app_name)
-        uri = URI.parse(app['redirect_uri']).sub('https', 'http'))
+        uri = URI.parse(app['redirect_uri']).sub('https', 'http')
         standard_port = uri.port == 80 || uri.port == 443
         site = "#{uri.scheme}://#{uri.host}#{standard_port ? '' : ":#{uri.port}"}/"
         path = uri.path.split('/')
