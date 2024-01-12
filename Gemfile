@@ -63,7 +63,7 @@ gem 'font-awesome-sass', '~> 6.4.0'
 # Use Capistrano for deployment
 # gem 'capistrano-rails', group: :development
 
-gem 'rails_admin', '~> 2.0'
+gem 'rails_admin', '~> 3.0'
 
 group :production do
   gem 'prometheus_exporter'

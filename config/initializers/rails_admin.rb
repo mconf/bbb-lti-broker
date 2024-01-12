@@ -23,6 +23,8 @@ RailsAdmin.config do |config|
   ## To disable Gravatar integration in Navigation Bar set to false
   # config.show_gravatar = true
 
+  config.asset_source = :sprockets
+
   # If true, you must authenticate to use rails admin
   if ENV['AUTHENTICATION_RAILS_ADMIN'] == true.to_s
     config.authorize_with do
