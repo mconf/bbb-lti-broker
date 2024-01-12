@@ -79,6 +79,7 @@ class MessageController < ApplicationController
 
     # Redirect to external application if configured
     Rails.cache.write(params[:oauth_nonce], message: @message, oauth: { consumer_key: params[:oauth_consumer_key], timestamp: params[:oauth_timestamp] })
+    session[:user_id] = @current_user.id
     redirector = app_launch_path(params.to_unsafe_h)
     redirect_post(redirector, options: { authenticity_token: :auto })
   end
@@ -155,8 +156,11 @@ class MessageController < ApplicationController
 
     tool = lti_registration(@jwt_body['iss'])
     tool.lti_launches.where('created_at < ?', 1.day.ago).delete_all
-    @lti_launch = tool.lti_launches.create(nonce: @jwt_body['nonce'], message: @jwt_body.merge(@jwt_header))
+    @lti_launch = tool.lti_launches.create(nonce: @jwt_body['nonce'], message: @jwt_body.merge(@jwt_header).merge())
 
+
+    puts 'MESSAGE NO PROCESS', @lti_launch.message.inspect
+    puts 'PARAMS NO PROCESS', params.inspect
     @message = IMS::LTI::Models::Messages::Message.generate(params)
     tc_instance_guid = tool_consumer_instance_guid(request.referer, params)
     @header = SimpleOAuth::Header.new(:post, request.url, @message.post_params, callback: 'about:blank')

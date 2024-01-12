@@ -25,14 +25,20 @@ class Api::V1::SessionsController < Api::V1::BaseController
     lti_launch = RailsLti2Provider::LtiLaunch.find_by(nonce: params[:token])
     render(json: { token: params[:token], valid: false }.to_json) unless lti_launch
     tenant = lti_launch.tool.tenant.uid unless lti_launch.tool.tenant_id.nil?
-    message = JSON.parse(standarized_message(lti_launch.message.to_json))
+    puts 'LTI_LAU', lti_launch.inspect
+    puts 'LTI_LAU mess', lti_launch[:message].to_json
+    message = JSON.parse(standarized_message(lti_launch[:message]))
     render(json: { token: params[:token], valid: true, tenant: tenant || '', message: message }.to_json)
   end
 
   def invalidate_launch
     lti_launch = RailsLti2Provider::LtiLaunch.find_by(nonce: params[:token])
     if lti_launch.present?
-      lti_launch.invalidate!
+      session[:some] = 'bla'
+      puts 'SESS ANTES', session.inspect
+      puts 'SESS USER ID INVAL', session[:user_id]
+      # reset_session
+      puts 'SESS DEP', session.inspect
       changed = true
       tenant = lti_launch.tool.tenant.uid unless lti_launch.tool.tenant_id.nil?
     else

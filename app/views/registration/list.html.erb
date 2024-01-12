@@ -16,7 +16,7 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>. %>
 
 <div>
   <h3><%= t('registration.list') %></h3> <%= button_to t('ui.new'), new_registration_path, :method => "get" if defined? new_registration_path %>
-  <table id="bbb-registration-table">
+  <table class= 'table' id="bbb-registration-table">
     <thead>
         <tr>
             <th><%= t('registration.issuer') %></th>
@@ -31,16 +31,16 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>. %>
     <tbody>
         <% @registrations.each do |reg| %>
             <tr style="padding: 2em; border: 1px darkgrey solid;">
-                <th><%= reg['issuer'] %></th>
-                <th><%= reg['client_id'] %></th>
-                <th><%= reg['key_set_url'] %></th>
-                <th><%= reg['auth_token_url'] %></th>
-                <th><%= reg['auth_login_url'] %></th>
-                <th><%= reg['tool_private_key'] %></th>
-                <th>
+                <td><%= reg['issuer'] %></td>
+                <td><%= reg['client_id'] %></td>
+                <td><%= reg['key_set_url'] %></td>
+                <td><%= reg['auth_token_url'] %></td>
+                <td><%= reg['auth_login_url'] %></td>
+                <td><%= reg['tool_private_key'] %></td>
+                <td>
                     <%= link_to '<i class="fa fa-edit"></i>'.html_safe, url_for( edit_registration_path + '?' + { :reg_id => reg['issuer'], :client_id => reg['client_id'] }.to_query )%>
                     <%= link_to '<i class="fa fa-trash"></i>'.html_safe, url_for( delete_registration_path + '?' + { :reg_id => reg['issuer'], :client_id => reg['client_id'] }.to_query ) %>
-                </th>
+                </td>
             </tr>
         <% end %>
     </tbody>

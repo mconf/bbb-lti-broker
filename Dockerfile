@@ -24,7 +24,7 @@ RUN if [ "$RAILS_ENV" == "production" ]; \
     then bundle config set without 'development test doc'; \
     else bundle config set without 'test doc'; \
     fi
-RUN bundle install
+RUN gem install bundler:2.4.10; bundle install
 RUN yarn install --check-files
 
 COPY . $RAILS_ROOT

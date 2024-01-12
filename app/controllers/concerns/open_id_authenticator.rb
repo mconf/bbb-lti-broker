@@ -20,6 +20,7 @@ require 'open-uri'
 
 module OpenIdAuthenticator
   include ActiveSupport::Concern
+  include ExceptionHandler
 
   def verify_openid_launch
     validate_openid_message_state
@@ -74,7 +75,7 @@ module OpenIdAuthenticator
   end
 
   def validate_jwt_signature(reg, jwt_header)
-    public_key_set = JSON.parse(URI.parse(reg['key_set_url']).read).open
+    public_key_set = JSON.parse(URI.open(reg['key_set_url']).read)
     jwk_json = public_key_set['keys'].find do |key|
       key['kid'] == jwt_header['kid']
     end
@@ -151,6 +152,7 @@ module OpenIdAuthenticator
                       'context_label': 'label',
                       'context_title': 'title',
                       'user_id': 'id')
+                      puts 'EXTRAI CONTEXT AQUIIIIIIIIIIII', p.inspect
 
     p = extract_param(p, jwt_body, 'https://purl.imsglobal.org/spec/lti-bos/claim/basicoutcomesservice',
                       'lis_result_sourcedid': 'lis_result_sourcedid',

@@ -14,7 +14,7 @@ services:
       RAILS_ENV: development
     volumes:
       - .:/usr/src/app
-      # - bundle-volume:/usr/src/bundle
+      - bundle-volume:/usr/src/bundle
     ports:
       - "3000:3000"
     depends_on:
