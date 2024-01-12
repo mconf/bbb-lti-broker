@@ -66,6 +66,8 @@ module BbbLtiBroker
         message['resource_link_title'] = message['unknown_params']['https://purl.imsglobal.org/spec/lti/claim/resource_link']['title']
         message['resource_link_description'] = message['unknown_params']['https://purl.imsglobal.org/spec/lti/claim/resource_link']['description']
         message['launch_presentation_locale'] = message['unknown_params']['https://purl.imsglobal.org/spec/lti/claim/launch_presentation']['locale']
+        # We need this id to calculate the `room_handler` on the Rooms application
+        message['context_id'] = message['unknown_params']['https://purl.imsglobal.org/spec/lti/claim/context']['id']
       end
       custom_overrides(message).to_json
     end
