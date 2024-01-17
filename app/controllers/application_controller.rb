@@ -35,6 +35,7 @@ class ApplicationController < ActionController::Base
     rescue_from ActionController::RoutingError, with: :on_404
     rescue_from ActiveRecord::RecordNotFound, with: :on_404
     rescue_from ActionController::UnknownFormat, with: :on_406
+    rescue_from ApplicationController::InvalidAuthenticityToken, with: :on_406
   end
 
   protect_from_forgery with: :exception
@@ -62,23 +63,17 @@ class ApplicationController < ActionController::Base
       message: t("error.generic.#{status}.message"),
       suggestion: t("error.generic.#{status}.suggestion"),
       code: status,
-      status: status
+      status: status,
     }
 
     respond_to do |format|
-      format.html { render 'shared/error', status: status }
-      format.json { render json: { error: @error[:message] }, status: status }
-      format.all  { render 'shared/error', status: status, content_type: 'text/html' }
+      format.html { render('shared/error', status: status) }
+      format.json { render(json: { error: @error[:message] }, status: status) }
+      format.all  { render('shared/error', status: status, content_type: 'text/html') }
     end
   end
 
   def print_parameters
     logger.debug(params.to_unsafe_h.sort.to_h.to_yaml)
-  end
-
-  rescue_from ActionController::InvalidAuthenticityToken do |_exception|
-    flash[:alert] = 'Can\'t verify CSRF token authenticity'
-    @error = 'Third party cookies are disabled'
-    redirect_to(errors_path(406))
   end
 end
