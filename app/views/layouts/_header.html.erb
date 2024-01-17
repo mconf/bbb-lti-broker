@@ -31,19 +31,4 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>. %>
   <body lang="<%= I18n.locale %>"
         data-controller="<%= params[:controller] %>"
         data-action="<%= params[:action] %>">
-
-    <div class="header">
-        <div class="container">
-            <div class="d-flex bd-highlight mb3">
-                <div class="mr-auto p-2 bd-highlight">
-                    <%= link_to root_path do%>
-                        <%= image_tag("bbb_logo.png", class: "bbb-logo") %>
-                    <% end %>
-                </div>
-                <div class="p-2 bd-highlight">
-                    <%= link_to "Config", root_path, :class => "btn btn-outline-primary mx-2 config-button" %>
-                </div>
-            </div>
-        </div>
-    </div>
   </body>
