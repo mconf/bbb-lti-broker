@@ -17,20 +17,18 @@ require 'resque/server'
 # with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
 
 Rails.application.routes.draw do
-  mount Resque::Server.new, at: "/resque"
+  mount Resque::Server.new, at: '/resque'
 
   get '/health_check', to: 'health_check#show'
   get '/healthz', to: 'health_check#show'
 
-  if Mconf::Env.fetch_boolean("SERVE_RAILS_ADMIN", false)
+  if Mconf::Env.fetch_boolean('SERVE_RAILS_ADMIN', false)
     mount RailsAdmin::Engine => '/dash', as: 'rails_admin'
 
-    unless Mconf::Env.fetch_boolean("SERVE_APPLICATION", true)
-      root to: redirect('/dash')
-    end
+    root to: redirect('/dash') unless Mconf::Env.fetch_boolean('SERVE_APPLICATION', true)
   end
 
-  if Mconf::Env.fetch_boolean("SERVE_APPLICATION", true)
+  if Mconf::Env.fetch_boolean('SERVE_APPLICATION', true)
 
     # rooms calls this api to validate launch from broker
     namespace :api do
@@ -82,7 +80,7 @@ Rails.application.routes.draw do
     post ':app/messages/signed_content_item_request', to: 'message#signed_content_item_request'
 
     # LTI LAUNCH URL (responds to get and post)
-    post ':app/launch', to: 'apps#launch', as: :app_launch
+    match ':app/launch', to: 'apps#launch', via: [:get, :post], as: :app_launch
 
     match ':app/json_config/:temp_key_token', to: 'tool_profile#json_config', via: [:get, :post], as: 'json_config' # , :defaults => {:format => 'json'}
 
