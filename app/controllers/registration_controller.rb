@@ -28,10 +28,8 @@ class RegistrationController < ApplicationController
   before_action :print_parameters if Rails.configuration.developer_mode_enabled
 
   def list
-    if ENV['DEVELOPER_MODE_ENABLED'] != 'true'
-      render(file: Rails.root.join('public/404'), layout: false, status: :not_found)
-      return
-    end
+    return on_404 if ENV['DEVELOPER_MODE_ENABLED'] != 'true'
+
     @registrations = RailsLti2Provider::Tool.where(lti_version: '1.3.0').pluck(:tool_settings)
     @registrations.map! do |reg|
       JSON.parse(reg)
