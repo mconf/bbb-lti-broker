@@ -152,7 +152,6 @@ module OpenIdAuthenticator
                       'context_label': 'label',
                       'context_title': 'title',
                       'user_id': 'id')
-                      puts 'EXTRAI CONTEXT AQUIIIIIIIIIIII', p.inspect
 
     p = extract_param(p, jwt_body, 'https://purl.imsglobal.org/spec/lti-bos/claim/basicoutcomesservice',
                       'lis_result_sourcedid': 'lis_result_sourcedid',

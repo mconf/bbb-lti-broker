@@ -25,7 +25,6 @@ Doorkeeper.configure do
     # fail "Please configure doorkeeper resource_owner_authenticator block located in #{__FILE__}"
     # Put your resource owner authentication logic here.
     # Example implementation:
-    puts 'USER ID SESS', session[:user_id]
     User.find_by(id: session[:user_id]) || redirect_to(params['redirect_uri'])
   end
 

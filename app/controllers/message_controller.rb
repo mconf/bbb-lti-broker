@@ -159,8 +159,6 @@ class MessageController < ApplicationController
     @lti_launch = tool.lti_launches.create(nonce: @jwt_body['nonce'], message: @jwt_body.merge(@jwt_header).merge())
 
 
-    puts 'MESSAGE NO PROCESS', @lti_launch.message.inspect
-    puts 'PARAMS NO PROCESS', params.inspect
     @message = IMS::LTI::Models::Messages::Message.generate(params)
     tc_instance_guid = tool_consumer_instance_guid(request.referer, params)
     @header = SimpleOAuth::Header.new(:post, request.url, @message.post_params, callback: 'about:blank')
