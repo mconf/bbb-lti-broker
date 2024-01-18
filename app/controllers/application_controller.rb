@@ -31,27 +31,27 @@ class ApplicationController < ActionController::Base
   include AppsValidator
 
   unless Rails.application.config.consider_all_requests_local
-    rescue_from StandardError, with: :on_500
-    rescue_from ActionController::RoutingError, with: :on_404
-    rescue_from ActiveRecord::RecordNotFound, with: :on_404
-    rescue_from ActionController::UnknownFormat, with: :on_406
-    rescue_from ApplicationController::InvalidAuthenticityToken, with: :on_406
+    rescue_from StandardError, with: :on500
+    rescue_from ActionController::RoutingError, with: :on404
+    rescue_from ActiveRecord::RecordNotFound, with: :on404
+    rescue_from ActionController::UnknownFormat, with: :on406
+    rescue_from ApplicationController::InvalidAuthenticityToken, with: :on406
   end
 
   protect_from_forgery with: :exception
 
   @build_number = Rails.configuration.build_number
 
-  def on_404
+  def on404
     render_error(404)
   end
 
   # 406 Not Acceptable
-  def on_406
+  def on406
     render_error(406)
   end
 
-  def on_500
+  def on500
     render_error(500)
   end
 

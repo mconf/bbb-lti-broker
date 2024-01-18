@@ -97,5 +97,5 @@ Rails.application.routes.draw do
   end
 
   # To treat errors on pages that don't fall on any other controller
-  match '*path' => 'application#on_404', via: :all
+  match '*path' => 'application#on404', via: :all
 end
