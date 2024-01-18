@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class RemoveOldAppLaunchJob < ApplicationJob
   def perform
     Resque.logger.info('Removing old AppLaunches')

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'resque/server'
 
 # BigBlueButton open source conferencing system - http://www.bigbluebutton.org/.

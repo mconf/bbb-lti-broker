@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'simple_json_formatter'
 
 Rails.application.configure do

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Mconf
   module Env
     TRUTHY_VALUES = %w[true yes 1].freeze
