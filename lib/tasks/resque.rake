@@ -8,7 +8,7 @@ require 'logger'
 task 'resque:setup' => :environment
 
 namespace :resque do
-  task :setup do
+  task setup: :environment do
     require 'resque'
     require 'resque-scheduler'
 
