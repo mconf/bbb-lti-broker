@@ -1,5 +1,4 @@
 RailsAdmin.config do |config|
-
   ### Popular gems integration
 
   ## == Devise ==
@@ -29,7 +28,7 @@ RailsAdmin.config do |config|
   if ENV['AUTHENTICATION_RAILS_ADMIN'] == true.to_s
     config.authorize_with do
       authenticate_or_request_with_http_basic('Administration') do |username, password|
-        username == ENV["ADMIN_KEY"] && password == ENV["ADMIN_PASSWORD"]
+        username == ENV['ADMIN_KEY'] && password == ENV['ADMIN_PASSWORD']
       end
     end
   end
@@ -50,7 +49,5 @@ RailsAdmin.config do |config|
     # history_show
   end
 
-  if Rails.env.production?
-    config.included_models = [ "RailsLti2Provider::Tool" ]
-  end
+  config.included_models = ['RailsLti2Provider::Tool'] if Rails.env.production?
 end

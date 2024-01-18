@@ -57,12 +57,12 @@ class MessageController < ApplicationController
                'Unknown Error'
              end
     @error = "Authentication failed with: #{output}"
-    Rails.logger.error "#{@error} error=#{ex.error} class=#{ex.class.name}"
+    Rails.logger.error("#{@error} error=#{ex.error} class=#{ex.class.name}")
 
     @message = IMS::LTI::Models::Messages::Message.generate(request.request_parameters)
     @header = SimpleOAuth::Header.new(
       :post, request.url, @message.post_params, consumer_key: @message.oauth_consumer_key,
-      consumer_secret: lti_secret(@message.oauth_consumer_key), callback: 'about:blank'
+                                                consumer_secret: lti_secret(@message.oauth_consumer_key), callback: 'about:blank'
     )
     if request.request_parameters.key?('launch_presentation_return_url')
       launch_presentation_return_url = "#{request.request_parameters['launch_presentation_return_url']}&lti_errormsg=#{@error}"
@@ -156,8 +156,7 @@ class MessageController < ApplicationController
 
     tool = lti_registration(@jwt_body['iss'])
     tool.lti_launches.where('created_at < ?', 1.day.ago).delete_all
-    @lti_launch = tool.lti_launches.create(nonce: @jwt_body['nonce'], message: @jwt_body.merge(@jwt_header).merge())
-
+    @lti_launch = tool.lti_launches.create(nonce: @jwt_body['nonce'], message: @jwt_body.merge(@jwt_header).merge)
 
     @message = IMS::LTI::Models::Messages::Message.generate(params)
     tc_instance_guid = tool_consumer_instance_guid(request.referer, params)

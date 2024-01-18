@@ -12,11 +12,11 @@ Rails.application.configure do
       params = {}
       unless event.payload[:params].nil?
         params = event.payload[:params].reject do |k|
-          ['controller', 'action', 'commit', 'utf8'].include? k
+          %w[controller action commit utf8].include?(k)
         end
-        unless params["user"].nil?
-          params["user"] = params["user"].reject do |k|
-            ['password'].include? k
+        unless params['user'].nil?
+          params['user'] = params['user'].reject do |k|
+            ['password'].include?(k)
           end
         end
       end
@@ -24,12 +24,12 @@ Rails.application.configure do
       hash = {
         time: event.time,
         exception: event.payload[:exception], # ["ExceptionClass", "the message"]
-        exception_object: event.payload[:exception_object] # the exception instance
+        exception_object: event.payload[:exception_object], # the exception instance
       }
-      hash.merge!({"params" => params}) unless params.blank?
-      hash.merge!({"session" => event.payload[:session]}) unless event.payload[:session].nil?
-      hash.merge!({"user" => event.payload[:user]}) unless event.payload[:user].nil?
-      hash.merge!({"room" => event.payload[:room]}) unless event.payload[:room].nil?
+      hash.merge!({ 'params' => params }) if params.present?
+      hash.merge!({ 'session' => event.payload[:session] }) unless event.payload[:session].nil?
+      hash.merge!({ 'user' => event.payload[:user] }) unless event.payload[:user].nil?
+      hash.merge!({ 'room' => event.payload[:room] }) unless event.payload[:room].nil?
       hash
     end
   end

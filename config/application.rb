@@ -29,7 +29,7 @@ Bundler.require(*Rails.groups)
 
 module BbbLtiBroker
   class Application < Rails::Application
-    VERSION = "0.4.0"
+    VERSION = '0.4.0'
 
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults(5.0)
@@ -61,7 +61,7 @@ module BbbLtiBroker
     config.app_launch_days_to_delete = (ENV['APP_LAUNCH_DAYS_TO_DELETE'] || 15).to_i
     config.lti_launch_days_to_delete = (ENV['LTI_LAUNCH_DAYS_TO_DELETE'] || 1).to_i
 
-    config.app_name = ENV["APP_NAME"] || 'BbbLtiBroker'
+    config.app_name = ENV['APP_NAME'] || 'BbbLtiBroker'
 
     # FIX ME, move this elsewhere
     config.coc_client_id = ENV['COC_CLIENT_ID']
@@ -73,9 +73,7 @@ module BbbLtiBroker
     config.coc_passaporte_host = ENV['COC_PASSAPORTE_URI']
 
     # use a json formatter to match lograge's logs
-    if ENV['LOGRAGE_ENABLED'] == '1'
-      config.log_formatter = SimpleJsonFormatter.new
-    end
+    config.log_formatter = SimpleJsonFormatter.new if ENV['LOGRAGE_ENABLED'] == '1'
 
     config.active_job.queue_adapter = :resque
 

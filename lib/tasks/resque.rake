@@ -3,7 +3,7 @@ require 'resque/tasks'
 require 'resque/scheduler/tasks'
 require 'logger'
 
-task "resque:setup" => :environment
+task 'resque:setup' => :environment
 
 namespace :resque do
   task :setup do
@@ -19,8 +19,8 @@ namespace :resque do
     # Resque::Scheduler.dynamic = true
 
     # Scheduler configuration
-    yml_schedule     = YAML.load_file("config/jobs_schedule.yml")
-    wrapped_schedule = ActiveScheduler::ResqueWrapper.wrap yml_schedule
+    yml_schedule     = YAML.load_file('config/jobs_schedule.yml')
+    wrapped_schedule = ActiveScheduler::ResqueWrapper.wrap(yml_schedule)
     Resque.schedule  = wrapped_schedule
   end
 end
