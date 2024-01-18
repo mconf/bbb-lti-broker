@@ -65,10 +65,6 @@ gem 'font-awesome-sass', '~> 6.4.0'
 
 gem 'rails_admin', '~> 3.0'
 
-group :production do
-  gem 'prometheus_exporter'
-end
-
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug', platform: :mri
@@ -96,6 +92,7 @@ end
 group :production do
   gem 'lograge', '~> 0.14.0'
   gem 'logstash-event'
+  gem 'prometheus_exporter'
   gem 'remote_syslog_logger'
 end
 
