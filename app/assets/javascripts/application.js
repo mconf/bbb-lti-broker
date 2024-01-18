@@ -28,6 +28,7 @@
 //
 //= require jquery
 //= require jquery_ujs
+//= require bootstrap
 //= require lodash
 //= require turbolinks
 //= require react
