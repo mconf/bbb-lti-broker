@@ -71,7 +71,7 @@ class AuthController < ApplicationController
 
     unless lti_registration_exists?(params[:iss], options)
       logger.error('ERROR: The app is not currently registered within the lti broker.')
-      return on_404
+      return on404
     end
 
     @registration = lti_registration_params(params[:iss], options)

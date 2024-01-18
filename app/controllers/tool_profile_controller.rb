@@ -142,6 +142,6 @@ class ToolProfileController < ApplicationController
 
   def lti_authorized_default_application
     return unless params[:app] == 'default' && ENV['DEVELOPER_MODE_ENABLED'] != 'true'
-    return on_404
+    return on404
   end
 end

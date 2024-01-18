@@ -28,7 +28,7 @@ class RegistrationController < ApplicationController
   before_action :print_parameters if Rails.configuration.developer_mode_enabled
 
   def list
-    return on_404 if ENV['DEVELOPER_MODE_ENABLED'] != 'true'
+    return on404 if ENV['DEVELOPER_MODE_ENABLED'] != 'true'
 
     @registrations = RailsLti2Provider::Tool.where(lti_version: '1.3.0').pluck(:tool_settings)
     @registrations.map! do |reg|
