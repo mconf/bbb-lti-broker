@@ -67,9 +67,9 @@ class ApplicationController < ActionController::Base
     }
 
     respond_to do |format|
-      format.html { render('shared/error', status: status) }
+      format.html { render('errors/index', status: status) }
       format.json { render(json: { error: @error[:message] }, status: status) }
-      format.all  { render('shared/error', status: status, content_type: 'text/html') }
+      format.all  { render('errors/index', status: status, content_type: 'text/html') }
     end
   end
 
