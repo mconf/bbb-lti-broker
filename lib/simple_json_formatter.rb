@@ -19,6 +19,6 @@ class SimpleJsonFormatter < ActiveSupport::Logger::SimpleFormatter
     end
 
     log[:message] = msg
-    log.to_json + "\n"
+    "#{log.to_json}\n"
   end
 end
