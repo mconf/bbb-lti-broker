@@ -51,21 +51,78 @@ namespace :db do
         key_set_url: key_set_url,
         auth_token_url: auth_token_url,
         auth_login_url: auth_login_url,
-        # tool_private_key: "#{Rails.root}/.ssh/#{key_dir}/priv_key",
-        tool_private_key: Rails.root.join(".ssh/#{key_dir}/priv_key"), # #{Rails.root}/.ssh/#{key_dir}/priv_key",
+        tool_private_key: Rails.root.join(".ssh/#{key_dir}/priv_key")
       }
 
-      RailsLti2Provider::Tool.create(
+      RailsLti2Provider::Tool.create!(
         uuid: issuer,
         shared_secret: client_id,
         tool_settings: reg.to_json,
-        lti_version: '1.3.0'
+        lti_version: '1.3.0',
+        tenant: RailsLti2Provider::Tenant.first
       )
 
       puts(jwk) if args[:type] == 'jwk'
       puts(public_key) if args[:type] == 'key'
     rescue StandardError => e
-      puts(e.backtrace)
+      puts(e.inspect)
+      exit(1)
+    end
+
+    # rake db:registration:create["saltire","saltire-app","https://keyset.com","https://authtoken.com","https://authlogin.com"]
+    # rake db:registration:create["moodle-mconf","moodle-mconf-123","https://keyset.com","https://authtoken.com","https://authlogin.com"]
+    desc 'Add new Tool configuration [issuer,client_id,key_set_url,auth_token_url,auth_login_url]'
+    task :create, [:issuer,:client_id,:key_set_url,:auth_token_url,:auth_login_url] => :environment do |_t, args|
+      Rake::Task['environment'].invoke
+      ActiveRecord::Base.connection
+
+      issuer = args[:issuer]
+      abort('The issuer must be valid.') if issuer.blank?
+
+      client_id = args[:client_id]
+      key_set_url = args[:key_set_url]
+      auth_token_url = args[:auth_token_url]
+      auth_login_url = args[:auth_login_url]
+
+      private_key = OpenSSL::PKey::RSA.generate(4096)
+      public_key = private_key.public_key
+      jwk = JWT::JWK.new(private_key).export
+      jwk['alg'] = 'RS256' unless jwk.key?('alg')
+      jwk['use'] = 'sig' unless jwk.key?('use')
+      jwk = jwk.to_json
+
+      key_dir = Digest::MD5.hexdigest(issuer + client_id)
+      Dir.mkdir('.ssh/') unless Dir.exist?('.ssh/')
+      Dir.mkdir(".ssh/#{key_dir}") unless Dir.exist?(".ssh/#{key_dir}")
+
+      File.open(Rails.root.join(".ssh/#{key_dir}/priv_key"), 'w') do |f|
+        f.puts(private_key.to_s)
+      end
+
+      File.open(Rails.root.join(".ssh/#{key_dir}/pub_key"), 'w') do |f|
+        f.puts(public_key.to_s)
+      end
+
+      reg = {
+        issuer: issuer,
+        client_id: client_id,
+        key_set_url: key_set_url,
+        auth_token_url: auth_token_url,
+        auth_login_url: auth_login_url,
+        tool_private_key: Rails.root.join(".ssh/#{key_dir}/priv_key")
+      }
+
+      RailsLti2Provider::Tool.create!(
+        uuid: issuer,
+        shared_secret: client_id,
+        tool_settings: reg.to_json,
+        lti_version: '1.3.0',
+        tenant: RailsLti2Provider::Tenant.first
+      )
+
+      puts(public_key)
+    rescue StandardError => e
+      puts(e.inspect)
       exit(1)
     end
 
