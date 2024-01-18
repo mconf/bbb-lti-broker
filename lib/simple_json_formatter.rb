@@ -16,10 +16,11 @@ class SimpleJsonFormatter < ActiveSupport::Logger::SimpleFormatter
       level: severity,
     }
 
-    begin
-      # so that lograge's logs aren't double quoted
-      msg = JSON.parse(msg)
+    # so that lograge's logs aren't double quoted
+    msg = begin
+      JSON.parse(msg)
     rescue StandardError
+      msg
     end
 
     log[:message] = msg
