@@ -69,7 +69,7 @@ module AppsValidator
         site = "#{uri.scheme}://#{uri.host}#{standard_port ? '' : ":#{uri.port}"}/"
         path = uri.path.split('/')
         path_base = "#{(path[0].chomp(' ') == '' ? path[1] : path[0]).gsub('/', '')}/"
-      rescue StandardError => e
+      rescue StandardError
         # TODO: handle exception
         logger.error("App #{app_name} is not registered.")
         return
