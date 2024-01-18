@@ -5,7 +5,7 @@ require 'resque/server'
 require 'resque/scheduler/server'
 require 'active_scheduler'
 
-logger = Logger.new(STDOUT)
+logger = Logger.new($stdout)
 logger.formatter = Rails.application.config.log_formatter
 logger.level = Rails.application.config.log_level
 Resque.logger = logger

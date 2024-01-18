@@ -123,8 +123,8 @@ Rails.application.configure do
 
   if ENV['RAILS_LOG_TO_STDOUT'].present?
     # Disable output buffering when STDOUT isn't a tty (e.g. Docker images, systemd services)
-    STDOUT.sync = true
-    logger = ActiveSupport::Logger.new(STDOUT)
+    $stdout.sync = true
+    logger = ActiveSupport::Logger.new($stdout)
     logger.formatter = config.log_formatter
     config.logger = logger
   end
