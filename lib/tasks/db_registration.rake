@@ -69,8 +69,6 @@ namespace :db do
       exit(1)
     end
 
-    # rake db:registration:create["saltire","saltire-app","https://keyset.com","https://authtoken.com","https://authlogin.com"]
-    # rake db:registration:create["moodle-mconf","moodle-mconf-123","https://keyset.com","https://authtoken.com","https://authlogin.com"]
     desc 'Add new Tool configuration [issuer,client_id,key_set_url,auth_token_url,auth_login_url]'
     task :create, [:issuer,:client_id,:key_set_url,:auth_token_url,:auth_login_url] => :environment do |_t, args|
       Rake::Task['environment'].invoke
@@ -199,19 +197,19 @@ namespace :db do
       puts(public_key) if args[:type] == 'key'
     end
 
-    desc 'Lists the Registration Configuration URLs need to register an app'
-    task :url, [] => :environment do |_t|
+    desc 'Lists the Registration Configuration URLs needed to register an app'
+    task :url, [:app_name] => :environment do |_t, args|
+      abort('An app name must be informed.') if args[:app_name].blank?
+
       include Rails.application.routes.url_helpers
       default_url_options[:host] = ENV['URL_HOST']
 
       Rake::Task['environment'].invoke
       ActiveRecord::Base.connection
 
-      $stdout.puts('What is the app you want to register with?')
-      requested_app = $stdin.gets.strip
-      app = Doorkeeper::Application.find_by(name: requested_app)
+      app = Doorkeeper::Application.find_by(name: args[:app_name])
       if app.nil?
-        puts("App '#{requested_app}' does not exist, no urls can be given.")
+        puts("App '#{args[:app_name]}' does not exist, no urls can be given.")
         exit(1)
       end
 
@@ -241,13 +239,13 @@ namespace :db do
       $stdout.puts("\n")
       $stdout.puts("Initiate login URL URL: \n#{openid_login_url(app: app.name)}")
       $stdout.puts("\n")
-      $stdout.puts(format("Redirection URL(s):, \n#{openid_launch_url(app: app.name)}", "\n", deep_link_request_launch_url(app: app.name).to_s))
+      $stdout.puts("Redirection URL(s):\n#{openid_launch_url(app: app.name)}\n#{deep_link_request_launch_url(app: app.name)}")
       $stdout.puts("\n")
-      $stdout.puts("Public Key: \n #{public_key}")
+      $stdout.puts("Public Key: \n#{public_key}")
       $stdout.puts("\n")
-      $stdout.puts("JWK: \n #{jwk}")
+      $stdout.puts("JWK: \n#{jwk}")
       $stdout.puts("\n")
-      $stdout.puts("JSON Configuration URL: \n #{json_config_url(app: app.name, temp_key_token: temp_key_token)}")
+      $stdout.puts("JSON Configuration URL: \n#{json_config_url(app: app.name, temp_key_token: temp_key_token)}")
     end
 
     desc 'Deletes the registration keys inside the temporary bbb-lti folder'
