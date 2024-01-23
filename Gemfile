@@ -10,7 +10,7 @@ gem 'rails', '~> 6.1', '>= 6.1.7.5'
 # Use postgres as the database for Active Record
 gem 'pg', '>= 0.4.4'
 # Use Puma as the app server
-gem 'puma', '>= 6.3.1'
+gem 'puma', '>= 6.4.2'
 # Use SCSS for stylesheets
 gem 'sass-rails', '>= 6.0.0'
 # Use Uglifier as compressor for JavaScript assets
@@ -54,7 +54,7 @@ gem 'ims-lti', git: 'https://github.com/blindsidenetworks/ims-lti.git', tag: 'v2
 
 gem 'simple_oauth', git: 'https://github.com/blindsidenetworks/simple_oauth.git', tag: 'v0.3.1.1'
 
-gem 'activerecord-session_store', '>=2.1.0'
+gem 'activerecord-session_store', '>= 2.1.0'
 
 # frontend
 gem 'bootstrap', '~> 4.5.0'

@@ -43,6 +43,9 @@ CONSUMER_SECRET=secret
 ## Database name for production can be omitted from DATABASE_URL
 ## DB_NAME=database_production
 
+## Enable redis for actioncable
+# REDIS_URL=redis://myuser:mypass@localhost
+REDIS_PREFIX=bbb-lti-broker
 
 # Only needed for Docker Compose.
 ## Change DOCKER_REPO when using a repo other than bigbluebutton
