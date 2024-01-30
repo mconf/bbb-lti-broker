@@ -66,6 +66,7 @@ class MessageController < ApplicationController
     )
     if request.request_parameters.key?('launch_presentation_return_url')
       launch_presentation_return_url = "#{request.request_parameters['launch_presentation_return_url']}&lti_errormsg=#{@error}"
+      logger.info("redirect_post to launch_presentation_return_url=#{launch_presentation_return_url}")
       redirect_post(launch_presentation_return_url, options: { authenticity_token: :auto })
     else
       render(:basic_lti_launch_request, status: :ok)
@@ -81,6 +82,7 @@ class MessageController < ApplicationController
     Rails.cache.write(params[:oauth_nonce], message: @message, oauth: { consumer_key: params[:oauth_consumer_key], timestamp: params[:oauth_timestamp] })
     session[:user_id] = @current_user.id
     redirector = app_launch_path(params.to_unsafe_h)
+    logger.info("redirect_post to app_launch_path=#{redirector}")
     redirect_post(redirector, options: { authenticity_token: :auto })
   end
 
@@ -116,6 +118,7 @@ class MessageController < ApplicationController
     Rails.cache.write(params[:oauth_nonce], message: @message, oauth: { consumer_key: params[:oauth_consumer_key], timestamp: @jwt_body['exp'] })
     session[:user_id] = @current_user.id
     redirector = app_launch_path(params.to_unsafe_h)
+    logger.info("redirect_post to app_launch_path=#{redirector}")
     redirect_post(redirector, options: { authenticity_token: :auto })
   end
 
@@ -156,6 +159,7 @@ class MessageController < ApplicationController
 
     tool = lti_registration(@jwt_body['iss'])
     tool.lti_launches.where('created_at < ?', 1.day.ago).delete_all
+    logger.info("Creating a launch for tool=#{tool.uuid} with nonce=#{@jwt_body['nonce']}")
     @lti_launch = tool.lti_launches.create(nonce: @jwt_body['nonce'], message: @jwt_body.merge(@jwt_header).merge)
 
     @message = IMS::LTI::Models::Messages::Message.generate(params)
