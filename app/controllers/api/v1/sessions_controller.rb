@@ -32,12 +32,11 @@ class Api::V1::SessionsController < Api::V1::BaseController
   def invalidate_launch
     lti_launch = RailsLti2Provider::LtiLaunch.find_by(nonce: params[:token])
     if lti_launch.present?
-      # reset_session
+      lti_launch.update(expired: true)
       changed = true
-      tenant = lti_launch.tool.tenant.uid unless lti_launch.tool.tenant_id.nil?
     else
       changed = false
     end
-    render(json: { token: params[:token], changed: changed, tenant: tenant || '' }.to_json)
+    render(json: { token: params[:token], changed: changed }.to_json)
   end
 end

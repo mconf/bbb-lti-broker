@@ -78,9 +78,9 @@ class MessageController < ApplicationController
     process_blti_message
     return if params[:app] == 'default'
 
-    # Redirect to external application if configured
     Rails.cache.write(params[:oauth_nonce], message: @message, oauth: { consumer_key: params[:oauth_consumer_key], timestamp: params[:oauth_timestamp] })
-    session[:user_id] = @current_user.id
+    @lti_launch.update(user_id: @current_user.id)
+
     redirector = app_launch_path(params.to_unsafe_h)
     logger.info("redirect_post to app_launch_path=#{redirector}")
     redirect_post(redirector, options: { authenticity_token: :auto })
@@ -114,9 +114,9 @@ class MessageController < ApplicationController
 
     params[:oauth_nonce] = @jwt_body['nonce']
     params[:oauth_consumer_key] = @jwt_body['iss']
-    # Redirect to external application if configured
     Rails.cache.write(params[:oauth_nonce], message: @message, oauth: { consumer_key: params[:oauth_consumer_key], timestamp: @jwt_body['exp'] })
-    session[:user_id] = @current_user.id
+    @lti_launch.update(user_id: @current_user.id)
+
     redirector = app_launch_path(params.to_unsafe_h)
     logger.info("redirect_post to app_launch_path=#{redirector}")
     redirect_post(redirector, options: { authenticity_token: :auto })
@@ -160,7 +160,7 @@ class MessageController < ApplicationController
     tool = lti_registration(@jwt_body['iss'])
     tool.lti_launches.where('created_at < ?', 1.day.ago).delete_all
     logger.info("Creating a launch for tool=#{tool.uuid} with nonce=#{@jwt_body['nonce']}")
-    @lti_launch = tool.lti_launches.create(nonce: @jwt_body['nonce'], message: @jwt_body.merge(@jwt_header).merge)
+    @lti_launch = tool.lti_launches.create(nonce: @jwt_body['nonce'], message: @jwt_body.merge(@jwt_header))
 
     @message = IMS::LTI::Models::Messages::Message.generate(params)
     tc_instance_guid = tool_consumer_instance_guid(request.referer, params)

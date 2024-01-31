@@ -22,10 +22,12 @@ Doorkeeper.configure do
 
   # This block will be called to check whether the resource owner is authenticated or not.
   resource_owner_authenticator do
-    # fail "Please configure doorkeeper resource_owner_authenticator block located in #{__FILE__}"
-    # Put your resource owner authentication logic here.
-    # Example implementation:
-    User.find_by(id: session[:user_id]) || redirect_to(params['redirect_uri'])
+    # get the user from the lti_launch
+    # will only accept the user if the launch has not expired yet
+    launch = RailsLti2Provider::LtiLaunch.find_by(nonce: params['launch_nonce'])
+    user = (launch&.expired? || launch.nil?) ? nil : User.find(launch.user_id)
+
+    user || redirect_to(params['redirect_uri'])
   end
 
   # If you want to restrict access to the web interface for adding oauth authorized applications, you need to declare the block below.
