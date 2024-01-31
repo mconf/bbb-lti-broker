@@ -18,19 +18,20 @@
 
 class AppsController < ApplicationController
   before_action :print_parameters if Rails.configuration.developer_mode_enabled
+  # skip Rails default verify auth token - we use our own strategies
+  skip_before_action :verify_authenticity_token
 
   # verified oauth, etc
   # launch into lti application
   def launch
     # Make launch request to LTI-APP
-    tool = RailsLti2Provider::Tool.where(uuid: params[:oauth_consumer_key]).last
     lti_launch = RailsLti2Provider::LtiLaunch.find_by(nonce: params[:oauth_nonce])
 
     # add the oauth key to the data of this launch
     message = lti_launch.message
     message.custom_params['oauth_consumer_key'] = params[:oauth_consumer_key]
 
-    lti_launch.update(tool_id: tool.id, message: message.to_json)
+    lti_launch.update(message: message.to_json)
 
     redirector = "#{lti_app_url(params[:app])}?#{{ launch_nonce: lti_launch.nonce }.to_query}"
     logger.info("redirect_post to LTI app url=#{redirector}")

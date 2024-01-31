@@ -35,7 +35,7 @@ class ApplicationController < ActionController::Base
     rescue_from ActionController::RoutingError, with: :on404
     rescue_from ActiveRecord::RecordNotFound, with: :on404
     rescue_from ActionController::UnknownFormat, with: :on406
-    rescue_from ApplicationController::InvalidAuthenticityToken, with: :on406
+    rescue_from ActionController::InvalidAuthenticityToken, with: :on406
   end
 
   protect_from_forgery with: :exception

@@ -48,22 +48,24 @@ services:
     env_file:
       - ./.env
     environment:
+      DISABLE_DATABASE_ENVIRONMENT_CHECK: 1
       DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:password@postgres:5432/lti_broker}
       RAILS_ENV: production
+      REDIS_URL: redis://:BCsy8zMwZay669ii@broker_redis:6379/0
       MCONF_REDIS_HOST: broker_redis
       MCONF_REDIS_PASSWORD: BCsy8zMwZay669ii
       MCONF_REDIS_PORT: 6379
       MCONF_REDIS_DB: 0
       PROMETHEUS_EXPORTER_HOST: prod_exporter
       PROMETHEUS_EXPORTER_PORT: 9394
-      WEB_CONCURRENCY: 1
+      PUMA_WORKERS: 1
+      LOGRAGE_ENABLED: 1
     volumes:
       - .:/usr/src/app
     ports:
       - "3000:3000"
-    links:
-      - postgres
     depends_on:
+      - postgres
       - broker_redis
       - prod_exporter
 

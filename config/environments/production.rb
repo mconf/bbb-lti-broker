@@ -148,7 +148,7 @@ Rails.application.configure do
                                                 reconnect_attempts: 1, # Defaults to 0
 
                                                 error_handler: lambda { |method:, returning:, exception:|
-                                                                 config.logger.warn("Support: Redis cache action #{method} failed and returned '#{returning}': #{exception}")
+                                                                 Rails.logger.warn("Support: Redis cache action #{method} failed and returned '#{returning}': #{exception}")
                                                                }, },]
                        else
                          [:file_store, Rails.root.join('tmp/cache_store')]
