@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_03_09_132533) do
+ActiveRecord::Schema.define(version: 2024_01_30_121022) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -62,11 +62,15 @@ ActiveRecord::Schema.define(version: 2023_03_09_132533) do
     t.bigint "tool_id"
     t.string "nonce"
     t.text "message"
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.bigint "user_id"
+    t.boolean "expired"
     t.index ["created_at"], name: "index_rails_lti2_provider_lti_launches_on_created_at"
+    t.index ["nonce"], name: "index_launch_nonce", unique: true
     t.index ["nonce"], name: "index_rails_lti2_provider_lti_launches_on_nonce"
     t.index ["tool_id"], name: "index_rails_lti2_provider_lti_launches_on_tool_id"
+    t.index ["user_id"], name: "index_rails_lti2_provider_lti_launches_on_user_id"
   end
 
   create_table "rails_lti2_provider_registrations", force: :cascade do |t|
