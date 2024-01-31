@@ -55,10 +55,9 @@ module BbbLtiBroker
 
     config.launch_nonce_duration = (ENV['LAUNCH_NONCE_DURATION'] || 300).to_i.seconds
 
-    # Configures how many days AppLaunches will be kept on the db.
-    # AppLaunches that are more than {app_launch_days_to_delete} days old will be deleted
-    # every time app_launch is called.
-    config.app_launch_days_to_delete = (ENV['APP_LAUNCH_DAYS_TO_DELETE'] || 15).to_i
+    # Configures how many days LtiLaunches will be kept on the db.
+    # LtiLaunches that are more than {lti_launch_days_to_delete} days old will be deleted
+    # every time the RemoveOldLtiLaunchJob runs.
     config.lti_launch_days_to_delete = (ENV['LTI_LAUNCH_DAYS_TO_DELETE'] || 1).to_i
 
     config.app_name = ENV['APP_NAME'] || 'BbbLtiBroker'
