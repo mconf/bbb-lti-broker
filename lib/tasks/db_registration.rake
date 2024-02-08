@@ -20,10 +20,10 @@ namespace :db do
       $stdout.puts('What is the key set url?')
       key_set_url = $stdin.gets.strip
 
-      $stdout.puts('What is the auth token url?')
+      $stdout.puts('What is the access token url?')
       auth_token_url = $stdin.gets.strip
 
-      $stdout.puts('What is the auth login url?')
+      $stdout.puts('What is the auth request url?')
       auth_login_url = $stdin.gets.strip
 
       private_key = OpenSSL::PKey::RSA.generate(4096)
@@ -69,8 +69,8 @@ namespace :db do
       exit(1)
     end
 
-    desc 'Add new Tool configuration [issuer,client_id,key_set_url,auth_token_url,auth_login_url]'
-    task :create, [:issuer,:client_id,:key_set_url,:auth_token_url,:auth_login_url] => :environment do |_t, args|
+    desc 'Add new Tool configuration (with all credentials passed as arguments)'
+    task :create, [:issuer, :client_id, :key_set_url, :access_token_url, :auth_request_url] => :environment do |_t, args|
       Rake::Task['environment'].invoke
       ActiveRecord::Base.connection
 
@@ -79,8 +79,8 @@ namespace :db do
 
       client_id = args[:client_id]
       key_set_url = args[:key_set_url]
-      auth_token_url = args[:auth_token_url]
-      auth_login_url = args[:auth_login_url]
+      auth_token_url = args[:access_token_url]
+      auth_login_url = args[:auth_request_url]
 
       private_key = OpenSSL::PKey::RSA.generate(4096)
       public_key = private_key.public_key
