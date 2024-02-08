@@ -67,7 +67,7 @@ class ApplicationController < ActionController::Base
     }
 
     respond_to do |format|
-      format.html { render('errors/index', status: status) }
+      format.html { render('errors/index', status: status, layout: false) }
       format.json { render(json: { error: @error[:message] }, status: status) }
       format.all  { render('errors/index', status: status, content_type: 'text/html') }
     end

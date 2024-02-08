@@ -16,7 +16,7 @@
 <!DOCTYPE html>
 <html lang="en-US">
 <head>
-    <title>BbbLtiBroker</title>
+    <title><%= Rails.application.config.app_name %></title>
     <%= stylesheet_link_tag    "application", media: "all", "data-turbolinks-track" => true %>
     <%= javascript_include_tag "application", "data-turbolinks-track" => true %>
     <%= csrf_meta_tags %>
@@ -25,11 +25,9 @@
             hljs.initHighlightingOnLoad();
         });
     </script>
-
-   
 </head>
 <body>
-    <div class="container border border-danger " style="margin-top: 10%">
+    <div class="container" style="margin-top: 10%">
         <h1><%= t('error.header') %></h1>
 
         <%= render 'errors/error', key: @error[:key], message: @error[:message], suggestion: @error[:suggestion] %>
