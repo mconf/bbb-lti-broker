@@ -18,7 +18,7 @@ namespace :db do
 
       key = args[:key] || SecureRandom.alphanumeric(12)
       secret = args[:secret] || SecureRandom.alphanumeric(16)
-      tenant = RailsLti2Provider::Tenant.find_by(uid: args[:tenant] || '')
+      tenant = RailsLti2Provider::Tenant.find_by(uid: args[:tenant]) || RailsLti2Provider::Tenant.first
       tool = RailsLti2Provider::Tool.find_by(uuid: key)
       unless tool.nil?
         puts("Key '#{key}' already exists, it can not be added")

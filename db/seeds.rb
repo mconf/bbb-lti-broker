@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU Lesser General Public License along
 # with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
 
-tenant = RailsLti2Provider::Tenant.find_or_create_by!(uid: '')
+tenant = RailsLti2Provider::Tenant.find_or_create_by!(uid: 'default')
 
 case Rails.env
 when 'development'

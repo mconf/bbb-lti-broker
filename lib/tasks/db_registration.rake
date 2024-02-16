@@ -70,7 +70,7 @@ namespace :db do
     end
 
     desc 'Add new Tool configuration (with all credentials passed as arguments)'
-    task :create, [:issuer, :client_id, :key_set_url, :access_token_url, :auth_request_url] => :environment do |_t, args|
+    task :create, [:issuer, :client_id, :key_set_url, :access_token_url, :auth_request_url, :tenant] => :environment do |_t, args|
       Rake::Task['environment'].invoke
       ActiveRecord::Base.connection
 
@@ -81,6 +81,7 @@ namespace :db do
       key_set_url = args[:key_set_url]
       auth_token_url = args[:access_token_url]
       auth_login_url = args[:auth_request_url]
+      tenant = RailsLti2Provider::Tenant.find_by(uid: args[:tenant]) || RailsLti2Provider::Tenant.first
 
       private_key = OpenSSL::PKey::RSA.generate(4096)
       public_key = private_key.public_key
@@ -115,7 +116,7 @@ namespace :db do
         shared_secret: client_id,
         tool_settings: reg.to_json,
         lti_version: '1.3.0',
-        tenant: RailsLti2Provider::Tenant.first
+        tenant: tenant
       )
 
       puts(public_key)
@@ -237,7 +238,7 @@ namespace :db do
       $stdout.puts("\n")
       $stdout.puts("Deep Link URL: \n#{deep_link_request_launch_url(app: app.name)}")
       $stdout.puts("\n")
-      $stdout.puts("Initiate login URL URL: \n#{openid_login_url(app: app.name)}")
+      $stdout.puts("Initiate login URL: \n#{openid_login_url(app: app.name)}")
       $stdout.puts("\n")
       $stdout.puts("Redirection URL(s):\n#{openid_launch_url(app: app.name)}\n#{deep_link_request_launch_url(app: app.name)}")
       $stdout.puts("\n")
