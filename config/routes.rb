@@ -51,12 +51,18 @@ Rails.application.routes.draw do
     get 'grades/:grades_token/list', to: 'grades#grades_list', as: :grades_list
     post 'grades/:grades_token/change', to: 'grades#send_grades', as: :send_grades
 
-    # registration (LMS -> broker)
+    # tool (LTI 1.3.0)
     get 'registration/list', to: 'registration#list', as: :registration_list
-    get 'registration/new', to: 'registration#new', as: :new_registration # if ENV['DEVELOPER_MODE_ENABLED'] == 'true'
+    get 'registration/show', to: 'registration#show', as: :show_registration
+    get 'registration/new', to: 'registration#new', as: :new_registration
     get 'registration/edit', to: 'registration#edit', as: :edit_registration
     post 'registration/submit', to: 'registration#submit', as: :submit_registration
     get 'registration/delete', to: 'registration#delete', as: :delete_registration
+
+    # tool (LTI-1p0)
+    resources :tools, except: [:index]
+    # tenants
+    resources :tenants, except: [:index, :show]
 
     # registration (broker -> rooms)
     use_doorkeeper do

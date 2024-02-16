@@ -51,5 +51,5 @@ RailsAdmin.config do |config|
     # history_show
   end
 
-  config.included_models = ['RailsLti2Provider::Tool'] if Rails.env.production?
+  config.included_models = ['RailsLti2Provider::Tool', 'RailsLti2Provider::Tenant'] if Rails.env.production?
 end

@@ -31,6 +31,7 @@
 
 en:
   ui:
+    cancel:        "Cancel"
     goback:        "Go Back"
     submit:        "Submit"
     new:           "New"
@@ -54,9 +55,12 @@ en:
     auth_token_url:   "Access Token URL"
     auth_login_url:   "Auth request URL"
     toolprivkey:    "Tool private key"
-    editreg:        "Edit Registration"
-    newreg:         "New Registration"
-    list:           "Registrations"
+    edit:           "Edit Tool - LTI 1.3"
+    new:            "New Tool - LTI 1.3"
+    show:           "Tool - LTI 1.3"
+    list:
+      tools_1p3:    "Tools - LTI 1.3"
+      tools_1p0:    "Tools - LTI 1.0"
     startmeoff:     "Start me off"
     toolurl:        "Tool URL"
     deeplinkurl:    "Deep Link URL"
@@ -99,3 +103,18 @@ en:
         code: "ServerError"
         message: "Server error"
         suggestion: "Please try again later or contact an administrator."
+  tool:
+    created_at: "Created at"
+    edit: "Edit Tool - LTI 1.0"
+    lti_version: "LTI Version"
+    new: "New tool - LTI 1.0"
+    shared_secret: "Shared Secret"
+    show: "Tool - LTI 1.0"
+    tenant: "Tenant"
+    updated_at: "Updated at"
+    uuid: "UUID"
+  tenant:
+    edit: "Edit Tenant"
+    new: "New Tenant"
+    settings: "Settings"
+    uid: "UID"

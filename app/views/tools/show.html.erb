@@ -1,0 +1,63 @@
+<%# BigBlueButton open source conferencing system - http://www.bigbluebutton.org/.
+
+Copyright (c) 2018 BigBlueButton Inc. and by respective authors (see below).
+
+This program is free software; you can redistribute it and/or modify it under the
+terms of the GNU Lesser General Public License as published by the Free Software
+Foundation; either version 3.0 of the License, or (at your option) any later
+version.
+
+BigBlueButton is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License along
+with BigBlueButton; if not, see <http://www.gnu.org/licenses/>. %>
+
+<div class="registration-show container">
+    <h3><%= t('tool.show') %></h3>
+    <div class='form-group row'>
+        <%= label_tag(:uuid, t('tool.uuid') + ':', class: "col-sm-2 col-form-label") %>
+        <div class='col-sm-10 col'>
+            <%= text_field_tag(:uuid, @tool.uuid, size: 90, class: 'form-control', readonly: true) %>
+        </div>
+    </div>
+    <div class='form-group row'>
+        <%= label_tag(:shared_secret, t('tool.shared_secret') + ':', class: "col-sm-2 col-form-label") %>
+        <div class='col-sm-10 col'>
+            <%= text_field_tag(:shared_secret, @tool.shared_secret, size: 90, class: 'form-control', readonly: true) %>
+        </div>
+    </div>
+    <div class='form-group row'>
+        <%= label_tag(:tool_settings, t('tool.tool_settings') + ':', class: "col-sm-2 col-form-label") %>
+        <div class='col-sm-10 col'>
+            <%= text_field_tag(:tool_settings, @tool.tool_settings, size: 90, class: 'form-control', readonly: true) %>
+        </div>
+    </div>
+    <div class='form-group row'>
+        <%= label_tag(:lti_version, t('tool.lti_version') + ':', class: "col-sm-2 col-form-label") %>
+        <div class='col-sm-10 col'>
+            <%= text_field_tag(:lti_version, @tool.lti_version, size: 90, class: 'form-control', readonly: true) %>
+        </div>
+    </div>
+    <div class='form-group row'>
+        <%= label_tag(:tenant, t('tool.tenant') + ':', class: "col-sm-2 col-form-label") %>
+        <div class='col-sm-10 col'>
+            <%= text_field_tag(:tenant, @tool.tenant.uid, size: 90, class: 'form-control', readonly: true) %>
+        </div>
+    </div>
+    <div class='form-group row'>
+        <%= label_tag(:created_at, t('tool.created_at') + ':', class: "col-sm-2 col-form-label") %>
+        <div class='col-sm-10 col'>
+            <%= text_field_tag(:created_at, @tool.created_at, class: 'form-control', readonly: true) %>
+        </div>
+    </div>
+    <div class='form-group row'>
+        <%= label_tag(:updated_at, t('tool.updated_at') + ':', class: "col-sm-2 col-form-label") %>
+        <div class='col-sm-10 col'>
+            <%= text_field_tag(:updated_at, @tool.updated_at, class: 'form-control', readonly: true) %>
+        </div>
+    </div>
+
+    <%= link_to t('ui.goback'), registration_list_url, class: 'btn btn-secondary' %>
+</div>

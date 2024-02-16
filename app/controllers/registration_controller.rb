@@ -25,22 +25,30 @@ class RegistrationController < ApplicationController
   include AppsValidator
   include TemporaryStore
 
+  http_basic_authenticate_with name: ENV['ADMIN_KEY'], password: ENV['ADMIN_PASSWORD']
+
   before_action :print_parameters if Rails.configuration.developer_mode_enabled
 
   def list
-    return on404 if ENV['DEVELOPER_MODE_ENABLED'] != 'true'
-
-    @registrations = RailsLti2Provider::Tool.where(lti_version: '1.3.0').pluck(:tool_settings)
-    @registrations.map! do |reg|
-      JSON.parse(reg)
-    end
+    @tools_1p3 = RailsLti2Provider::Tool.where(lti_version: '1.3.0').sort
+    @tools_1p0 = RailsLti2Provider::Tool.where(lti_version: 'LTI-1p0').sort
+    @tenants = RailsLti2Provider::Tenant.all.sort
   end
 
-  # only available if developer mode is on
-  # production - use rails task
+  def show
+    redirect_to(registration_list_path) unless params.key?('reg_id') && params.key?('client_id')
+    options = {}
+    options['client_id'] = params[:client_id] if params.key?('client_id')
+    redirect_to(registration_list_path) unless lti_registration_exists?(params[:reg_id], options)
+
+    @registration = lti_registration_params(params[:reg_id], options)
+    @tool = lti_registration(params[:reg_id], options)
+  end
+
   def new
     @app = Rails.configuration.default_tool
     @apps = lti_apps
+    @tenants = RailsLti2Provider::Tenant.all.sort.pluck(:uid, :id)
     set_temp_keys
     set_starter_info
   end
@@ -52,6 +60,8 @@ class RegistrationController < ApplicationController
     redirect_to(registration_list_path) unless lti_registration_exists?(params[:reg_id], options)
 
     @registration = lti_registration_params(params[:reg_id], options)
+    @tool = lti_registration(params[:reg_id], options)
+    @tenants = RailsLti2Provider::Tenant.all.sort.pluck(:uid, :id)
   end
 
   def submit
@@ -77,7 +87,6 @@ class RegistrationController < ApplicationController
         f.puts(priv_key)
       end
 
-      Rails.root.join('path/to')
       File.open(Rails.root.join(".ssh/#{key_dir}/pub_key"), 'w') do |f|
         f.puts(pub_key)
       end
@@ -85,26 +94,25 @@ class RegistrationController < ApplicationController
       reg[:tool_private_key] = Rails.root.join(".ssh/#{key_dir}/priv_key") # "#{Rails.root}/.ssh/#{key_dir}/priv_key"
     end
 
-    options = {}
-    options['client_id'] = params[:client_id]
-
-    registration = lti_registration(params[:reg_id], options) if params.key?('reg_id')
+    registration = lti_registration(params[:reg_id]) if params.key?('reg_id')
     unless registration.nil?
-      reg[:tool_private_key] = lti_registration_params(params[:reg_id], options)['tool_private_key']
-      registration.update(tool_settings: reg.to_json, shared_secret: params[:client_id])
+      reg[:tool_private_key] = lti_registration_params(params[:reg_id])['tool_private_key']
+      registration.update(
+        tool_settings: reg.to_json,
+        shared_secret: params[:client_id],
+        tenant: RailsLti2Provider::Tenant.find_by(id: params[:tenant_id])
+      )
       registration.save
-      redirect_to(registration_list_path)
-      return
+      redirect_to(registration_list_path) and return
     end
 
-    tenant = RailsLti2Provider::Tenant.first
     unless tenant.nil?
       RailsLti2Provider::Tool.create!(
         uuid: params[:iss],
         shared_secret: params[:client_id],
         tool_settings: reg.to_json,
         lti_version: '1.3.0',
-        tenant: tenant
+        tenant: RailsLti2Provider::Tenant.find_by(id: params[:tenant_id])
       )
     end
 
