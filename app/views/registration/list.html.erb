@@ -22,9 +22,9 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>. %>
     <table class='table bbb-registration-table' id="bbb-registration-table-1p3">
         <thead>
             <tr>
-                <th><%= t('registration.issuer') %></th>
+                <th class='w-25'><%= t('registration.issuer') %></th>
                 <th><%= t('registration.clientid') %></th>
-                <th><%= t('tool.tenant') %></th>
+                <th class='w-25'><%= t('tool.tenant') %></th>
                 <th class='options-col'><%= t('ui.options') %></th>
             </tr>
         </thead>
@@ -34,11 +34,11 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>. %>
                 <tr>
                     <td><%= reg['issuer'] %></td>
                     <td><%= reg['client_id'] %></td>
-                    <td><%= tool.tenant.uid %></td>
+                    <td><%= tool.tenant&.uid %></td>
                     <td class='options-col'>
                         <%= link_to '<i class="fa fa-info-circle"></i>'.html_safe, show_registration_path(reg_id: reg['issuer'], client_id: reg['client_id']), class: 'mx-1' %>
                         <%= link_to '<i class="fa fa-edit"></i>'.html_safe, edit_registration_path(reg_id: reg['issuer'], client_id: reg['client_id']), class: 'mx-1' %>
-                        <%= link_to '<i class="fa fa-trash"></i>'.html_safe, delete_registration_path(reg_id: reg['issuer'], client_id: reg['client_id']), class: 'mx-1', 'data-confirm': 'Are you sure?' %>
+                        <%= link_to '<i class="fa fa-trash"></i>'.html_safe, delete_registration_path(reg_id: reg['issuer'], client_id: reg['client_id']), class: 'mx-1 text-danger', 'data-confirm': 'Are you sure?' %>
                     </td>
                 </tr>
             <% end %>
@@ -53,9 +53,9 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>. %>
     <table class='table bbb-registration-table' id="bbb-registration-table-1p0">
         <thead>
             <tr>
-                <th><%= t('tool.uuid') %></th>
+                <th class='w-25'><%= t('tool.uuid') %></th>
                 <th><%= t('tool.shared_secret') %></th>
-                <th><%= t('tool.tenant') %></th>
+                <th class='w-25'><%= t('tool.tenant') %></th>
                 <th class='options-col'><%= t('ui.options') %></th>
             </tr>
         </thead>
@@ -68,7 +68,7 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>. %>
                     <td class='options-col'>
                         <%= link_to '<i class="fa fa-info-circle"></i>'.html_safe, tool_path(tool.uuid), class: 'mx-1' %>
                         <%= link_to '<i class="fa fa-edit"></i>'.html_safe, edit_tool_path(tool.uuid), class: 'mx-1' %>
-                        <%= link_to '<i class="fa fa-trash"></i>'.html_safe, tool_path(tool.uuid), class: 'mx-1', method: :delete, 'data-confirm': 'Are you sure?' %>
+                        <%= link_to '<i class="fa fa-trash"></i>'.html_safe, tool_path(tool.uuid), class: 'mx-1 text-danger', method: :delete, 'data-confirm': 'Are you sure?' %>
                     </td>
                 </tr>
             <% end %>
@@ -94,7 +94,7 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>. %>
                     <td><%= ten['settings'] %></td>
                     <td class='options-col'>
                         <%= link_to '<i class="fa fa-edit"></i>'.html_safe, edit_tenant_path(ten.uid), class: 'mx-1' %>
-                        <%= link_to '<i class="fa fa-trash"></i>'.html_safe, tenant_path(ten.uid), class: 'mx-1', method: :delete, 'data-confirm': 'Are you sure?' %>
+                        <%= link_to '<i class="fa fa-trash"></i>'.html_safe, tenant_path(ten.uid), class: 'mx-1 text-danger', method: :delete, 'data-confirm': 'Are you sure?' %>
                     </td>
                 </tr>
             <% end %>
