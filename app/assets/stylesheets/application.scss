@@ -31,7 +31,7 @@
 */
 
 @import "bootstrap";
-@import "font-awesome";
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+3');
 
 @import "utilities/variables";
 @import "utilities/fonts";
@@ -45,7 +45,7 @@
 }
 
 html, body {
-  font-family: "Source Sans Pro" !important;
+  font-family: "Source Sans 3" !important;
   font-size: 15px;
   font-weight: normal;
   position: relative;

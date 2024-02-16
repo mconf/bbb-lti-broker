@@ -20,12 +20,8 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>. %>
     <title><%= Rails.application.config.app_name %></title>
     <%= stylesheet_link_tag    "application", media: "all", "data-turbolinks-track" => true %>
     <%= javascript_include_tag "application", "data-turbolinks-track" => true %>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
     <%= csrf_meta_tags %>
-    <script type="text/javascript">
-     $(document).ready(function(){
-       hljs.initHighlightingOnLoad();
-     });
-    </script>
   </head>
   <body lang="<%= I18n.locale %>"
         data-controller="<%= params[:controller] %>"
