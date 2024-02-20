@@ -55,8 +55,7 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>. %>
                 <%= select_tag :tenant_id, options_for_select(@tenants, @tenants[0][1]), class: 'form-control' %>
             <% end %>
         <% end %>
-        <%= hidden_field_tag 'public_key_path', @public_key_file.path %>
-        <%= hidden_field_tag 'private_key_path', @private_key_file.path %>
+        <%= hidden_field_tag 'key_pair_id', @rsa_key_pair.id %>
         <%= submit_tag(t('ui.submit'), class: 'btn btn-success') %>
         <%= link_to t('ui.cancel'), registration_list_url, class: 'btn btn-secondary' %>
     <% end %>

@@ -86,9 +86,9 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>. %>
         <% end %>
     <% end %>
     <%= content_tag :div, class: "form-group row" do %>
-        <%= label_tag(:tenant_id, t('registration.toolprivkey') + ':', class: "col-sm-2 col-form-label") %>
+        <%= label_tag(:tenant_id, t('registration.rsa_key_pair_id') + ':', class: "col-sm-2 col-form-label") %>
         <%= content_tag :div, class: "col-sm-10 col" do %>
-            <%= text_field_tag(:auth_login_url, @registration['tool_private_key'], size: 90, class: 'form-control', readonly: true) %>
+            <%= text_field_tag(:auth_login_url, @registration['rsa_key_pair_id'], size: 90, class: 'form-control', readonly: true) %>
         <% end %>
     <% end %>
     <%= link_to t('ui.goback'), registration_list_url, class: 'btn btn-secondary' %>

@@ -33,17 +33,11 @@ namespace :db do
       jwk['use'] = 'sig' unless jwk.key?('use')
       jwk = jwk.to_json
 
-      key_dir = Digest::MD5.hexdigest(issuer + client_id)
-      Dir.mkdir('.ssh/') unless Dir.exist?('.ssh/')
-      Dir.mkdir(".ssh/#{key_dir}") unless Dir.exist?(".ssh/#{key_dir}")
-
-      File.open(Rails.root.join(".ssh/#{key_dir}/priv_key"), 'w') do |f|
-        f.puts(private_key.to_s)
-      end
-
-      File.open(Rails.root.join(".ssh/#{key_dir}/pub_key"), 'w') do |f|
-        f.puts(public_key.to_s)
-      end
+      rsa_key_pair = RsaKeyPair.create(
+        private_key: private_key.to_s,
+        public_key: public_key.to_s,
+        tool_id: issuer
+      )
 
       reg = {
         issuer: issuer,
@@ -51,7 +45,7 @@ namespace :db do
         key_set_url: key_set_url,
         auth_token_url: auth_token_url,
         auth_login_url: auth_login_url,
-        tool_private_key: Rails.root.join(".ssh/#{key_dir}/priv_key")
+        rsa_key_pair_id: rsa_key_pair.id
       }
 
       RailsLti2Provider::Tool.create!(
@@ -90,17 +84,11 @@ namespace :db do
       jwk['use'] = 'sig' unless jwk.key?('use')
       jwk = jwk.to_json
 
-      key_dir = Digest::MD5.hexdigest(issuer + client_id)
-      Dir.mkdir('.ssh/') unless Dir.exist?('.ssh/')
-      Dir.mkdir(".ssh/#{key_dir}") unless Dir.exist?(".ssh/#{key_dir}")
-
-      File.open(Rails.root.join(".ssh/#{key_dir}/priv_key"), 'w') do |f|
-        f.puts(private_key.to_s)
-      end
-
-      File.open(Rails.root.join(".ssh/#{key_dir}/pub_key"), 'w') do |f|
-        f.puts(public_key.to_s)
-      end
+      rsa_key_pair = RsaKeyPair.create(
+        private_key: private_key.to_s,
+        public_key: public_key.to_s,
+        tool_id: issuer
+      )
 
       reg = {
         issuer: issuer,
@@ -108,7 +96,7 @@ namespace :db do
         key_set_url: key_set_url,
         auth_token_url: auth_token_url,
         auth_login_url: auth_login_url,
-        tool_private_key: Rails.root.join(".ssh/#{key_dir}/priv_key")
+        rsa_key_pair_id: rsa_key_pair.id
       }
 
       RailsLti2Provider::Tool.create!(
@@ -139,12 +127,11 @@ namespace :db do
 
       reg = RailsLti2Provider::Tool.find_by_issuer(issuer, options)
 
-      if JSON.parse(reg.tool_settings)['tool_private_key'].present?
-        key_dir = Pathname.new(JSON.parse(reg.tool_settings)['tool_private_key']).parent.to_s
-        FileUtils.remove_dir(key_dir, true) if Dir.exist?(key_dir)
+      if key_pair_id = JSON.parse(reg.tool_settings)['rsa_key_pair_id']
+        RsaKeyPair.find(key_pair_id).destroy!
       end
 
-      reg.destroy
+      reg.destroy!
     end
 
     desc 'Generate new key pair for existing Tool configuration [key, jwk]'
@@ -172,27 +159,23 @@ namespace :db do
       jwk['use'] = 'sig' unless jwk.key?('use')
       jwk = jwk.to_json
 
-      key_dir = Digest::MD5.hexdigest(issuer + client_id)
-      Dir.mkdir('.ssh/') unless Dir.exist?('.ssh/')
-      Dir.mkdir(".ssh/#{key_dir}") unless Dir.exist?(".ssh/#{key_dir}")
-
-      # File.open(File.join(Rails.root, '.ssh', key_dir, 'priv_key'), 'w') do |f|
-      #   f.puts(private_key.to_s)
-      # end
-      File.open(Rails.root.join(".ssh/#{key_dir}/priv_key"), 'w') do |f|
-        f.puts(private_key.to_s)
-      end
-
-      # File.open(File.join(Rails.root, '.ssh', key_dir, 'pub_key'), 'w') do |f|
-      #   f.puts(public_key.to_s)
-      # end
-      File.open(Rails.root.join(".ssh/#{key_dir}/pub_key"), 'w') do |f|
-        f.puts(public_key.to_s)
-      end
-
       tool_settings = JSON.parse(registration.tool_settings)
-      tool_settings['tool_private_key'] = Rails.root.join(".ssh/#{key_dir}/priv_key") # "#{Rails.root}/.ssh/#{key_dir}/priv_key"
-      registration.update(tool_settings: tool_settings.to_json, shared_secret: client_id)
+      key_pair = RsaKeyPair.find_by(id: tool_settings['rsa_key_pair_id'])
+      if tool_settings['rsa_key_pair_id'].blank? || key_pair.nil?
+        key_pair = RsaKeyPair.create(
+          private_key: private_key.to_s,
+          public_key: public_key.to_s,
+          tool_id: issuer
+        )
+        tool_settings['rsa_key_pair_id'] = key_pair.id
+        registration.update(tool_settings: tool_settings.to_json)
+      else
+        key_pair.update(
+          private_key: private_key,
+          public_key: public_key,
+          tool_id: issuer
+        )
+      end
 
       puts(jwk) if args[:type] == 'jwk'
       puts(public_key) if args[:type] == 'key'
@@ -223,15 +206,11 @@ namespace :db do
       jwk['use'] = 'sig' unless jwk.key?('use')
       jwk = jwk.to_json
 
-      # keep temp files in scope so they are not deleted
-      storage = TemporaryStorage.new
-      public_key_file = storage.store('bbb-lti-rsa-pub-', public_key.to_s)
-      private_key_file = storage.store('bbb-lti-rsa-pri-', private_key.to_s)
-
+      key_pair = RsaKeyPair.create(private_key: private_key.to_s, public_key: public_key.to_s)
       temp_key_token = SecureRandom.hex
 
       ActiveRecord::Base.connection.cache do
-        Rails.cache.write(temp_key_token, public_key_path: public_key_file.path, private_key_path: private_key_file.path, timestamp: Time.now.to_i)
+        Rails.cache.write(temp_key_token, rsa_key_pair_id: key_pair.id, timestamp: Time.now.to_i)
       end
 
       $stdout.puts("Tool URL: \n#{openid_launch_url(app: app.name)}")
@@ -249,12 +228,9 @@ namespace :db do
       $stdout.puts("JSON Configuration URL: \n#{json_config_url(app: app.name, temp_key_token: temp_key_token)}")
     end
 
-    desc 'Deletes the registration keys inside the temporary bbb-lti folder'
-    task :clear_tmp, [] => :environment do |_t|
-      storage = TemporaryStorage.new
-
-      # Removes everything inside the bbb-lti folder
-      FileUtils.rm_rf(Dir["#{storage.temp_folder}/*"])
+    desc 'Deletes the RsaKeyPairs not associated with any tool'
+    task :clear_rsa_keys, [] => :environment do |_t|
+      RsaKeyPair.where(tool_id: nil).delete_all
     end
   end
 end

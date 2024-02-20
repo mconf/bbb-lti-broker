@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_01_30_121022) do
+ActiveRecord::Schema.define(version: 2024_02_19_190044) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -105,6 +105,14 @@ ActiveRecord::Schema.define(version: 2024_01_30_121022) do
     t.index ["id", "tenant_id"], name: "index_tool_id_tenant_id", unique: true
     t.index ["tenant_id"], name: "index_tenant_id"
     t.index ["uuid"], name: "index_uuid", unique: true
+  end
+
+  create_table "rsa_key_pairs", force: :cascade do |t|
+    t.text "private_key"
+    t.text "public_key"
+    t.string "tool_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
   end
 
   create_table "sessions", force: :cascade do |t|

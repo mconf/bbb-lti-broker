@@ -32,7 +32,7 @@ module PlatformServiceConnector
       jti: "lti-service-token#{SecureRandom.hex}",
     }
 
-    priv = File.read(registration['tool_private_key'])
+    priv = RsaKeyPair.find(registration['rsa_key_pair_id']).private_key
     priv_key = OpenSSL::PKey::RSA.new(priv)
 
     jwt = JWT.encode(jwt_claim, priv_key, 'RS256')

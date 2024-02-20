@@ -54,7 +54,7 @@ en:
     keyseturl:      "Key set URL"
     auth_token_url:   "Access Token URL"
     auth_login_url:   "Auth request URL"
-    toolprivkey:    "Tool private key"
+    rsa_key_pair_id:  "RSA key pair ID"
     edit:           "Edit Tool - LTI 1.3"
     new:            "New Tool - LTI 1.3"
     show:           "Tool - LTI 1.3"
