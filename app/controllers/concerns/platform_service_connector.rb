@@ -1,5 +1,21 @@
 # frozen_string_literal: true
 
+# BigBlueButton open source conferencing system - http://www.bigbluebutton.org/.
+
+# Copyright (c) 2018 BigBlueButton Inc. and by respective authors (see below).
+
+# This program is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License as published by the Free Software
+# Foundation; either version 3.0 of the License, or (at your option) any later
+# version.
+
+# BigBlueButton is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+
+# You should have received a copy of the GNU Lesser General Public License along
+# with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
+
 module PlatformServiceConnector
   include ActiveSupport::Concern
 
@@ -13,10 +29,10 @@ module PlatformServiceConnector
       aud: auth_url,
       iat: Time.new.to_i - 5,
       exp: Time.new.to_i + 60,
-      jti: 'lti-service-token' + SecureRandom.hex,
+      jti: "lti-service-token#{SecureRandom.hex}",
     }
 
-    priv = File.read(registration['tool_private_key'])
+    priv = RsaKeyPair.find(registration['rsa_key_pair_id']).private_key
     priv_key = OpenSSL::PKey::RSA.new(priv)
 
     jwt = JWT.encode(jwt_claim, priv_key, 'RS256')
@@ -53,7 +69,7 @@ module PlatformServiceConnector
       request = Net::HTTP::Get.new(uri.request_uri)
     end
 
-    request.add_field('Authorization', 'Bearer ' + token)
+    request.add_field('Authorization', "Bearer #{token}")
     request['Accept'] = accept
     # request.add_field 'Accept', accept
 

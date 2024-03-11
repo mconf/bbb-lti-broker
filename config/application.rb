@@ -1,5 +1,21 @@
 # frozen_string_literal: true
 
+# BigBlueButton open source conferencing system - http://www.bigbluebutton.org/.
+
+# Copyright (c) 2018 BigBlueButton Inc. and by respective authors (see below).
+
+# This program is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License as published by the Free Software
+# Foundation; either version 3.0 of the License, or (at your option) any later
+# version.
+
+# BigBlueButton is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+
+# You should have received a copy of the GNU Lesser General Public License along
+# with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
+
 require_relative 'boot'
 require 'rails/all'
 require_relative '../lib/simple_json_formatter'
@@ -13,29 +29,39 @@ Bundler.require(*Rails.groups)
 
 module BbbLtiBroker
   class Application < Rails::Application
-    VERSION = "0.4.0"
+    VERSION = '0.4.0'
+
+    # Initialize configuration defaults for originally generated Rails version.
+    config.load_defaults(5.0)
 
     config.eager_load_paths << Rails.root.join('lib')
 
     # Settings in config/environments/* take precedence over those specified here.
     # Application configuration should go into files in config/initializers
     # -- all .rb files in that directory are automatically loaded.
-    config.url_host = ENV['URL_HOST']
+    config.url_host = ENV['URL_HOST'] || 'localhost'
 
     config.build_number = ENV['BUILD_NUMBER'] || VERSION
+
+    config.developer_mode_enabled = (ENV['DEVELOPER_MODE_ENABLED'] == 'true')
+
+    config.relative_url_root = "/#{ENV['RELATIVE_URL_ROOT']}"
+
+    config.handler_legacy_patterns = ENV['HANDLER_LEGACY_PATTERNS'] || 'param-resource_link_id,param-oauth_consumer_key'
+
+    config.default_tool = ENV['DEFAULT_LTI_TOOL'] || 'default'
 
     config.log_level = ENV['LOG_LEVEL'] || :debug
 
     config.launch_nonce_duration = (ENV['LAUNCH_NONCE_DURATION'] || 300).to_i.seconds
 
-    # Configures how many days AppLaunches will be kept on the db.
-    # AppLaunches that are more than {app_launch_days_to_delete} days old will be deleted
-    # every time app_launch is called.
-    config.app_launch_days_to_delete = (ENV['APP_LAUNCH_DAYS_TO_DELETE'] || 15).to_i
+    # Configures how many days LtiLaunches will be kept on the db.
+    # LtiLaunches that are more than {lti_launch_days_to_delete} days old will be deleted
+    # every time the RemoveOldLtiLaunchJob runs.
     config.lti_launch_days_to_delete = (ENV['LTI_LAUNCH_DAYS_TO_DELETE'] || 1).to_i
     config.limit_launch_to_delete = (ENV['LIMIT_LAUNCH_TO_DELETE'] || 1000).to_i
 
-    config.app_name = ENV["APP_NAME"] || 'BbbLtiBroker'
+    config.app_name = ENV['APP_NAME'] || 'BbbLtiBroker'
 
     # FIX ME, move this elsewhere
     config.coc_client_id = ENV['COC_CLIENT_ID']
@@ -47,9 +73,7 @@ module BbbLtiBroker
     config.coc_passaporte_host = ENV['COC_PASSAPORTE_URI']
 
     # use a json formatter to match lograge's logs
-    if ENV['LOGRAGE_ENABLED'] == '1'
-      config.log_formatter = SimpleJsonFormatter.new
-    end
+    config.log_formatter = SimpleJsonFormatter.new if ENV['LOGRAGE_ENABLED'] == '1'
 
     config.active_job.queue_adapter = :resque
 

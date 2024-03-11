@@ -5,7 +5,7 @@ module Clients::Coc
     class AuthController < ApplicationController
       def callback
         @code = params[:code]
-        render 'loader/index'
+        render('loader/index')
       end
 
       def launch
@@ -57,7 +57,7 @@ module Clients::Coc
         tool = RailsLti2Provider::Tool.where(uuid: Rails.application.config.coc_consumer_key).last
 
         # FIX ME MAYBE
-        nonce = 'coc-' + SecureRandom.hex
+        nonce = "coc- + #{SecureRandom.hex}"
 
         # add the oauth key to the data of this launch
 
@@ -77,7 +77,7 @@ module Clients::Coc
               'schools' => user_data.schools,
             },
             'roles' => user_data.roles,
-            'lis_outcome_service_url' => 'https://' + Rails.application.config.coc_portal_host
+            'lis_outcome_service_url' => "https:// + #{Rails.application.config.coc_portal_host}",
           }
         message.merge!(adapted_user_params(user_data))
       end

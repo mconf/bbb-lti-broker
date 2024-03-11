@@ -1,7 +1,26 @@
 # frozen_string_literal: true
 
+# BigBlueButton open source conferencing system - http://www.bigbluebutton.org/.
+
+# Copyright (c) 2018 BigBlueButton Inc. and by respective authors (see below).
+
+# This program is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License as published by the Free Software
+# Foundation; either version 3.0 of the License, or (at your option) any later
+# version.
+
+# BigBlueButton is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+
+# You should have received a copy of the GNU Lesser General Public License along
+# with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
+
+require 'open-uri'
+
 module OpenIdAuthenticator
   include ActiveSupport::Concern
+  include ExceptionHandler
 
   def verify_openid_launch
     validate_openid_message_state
@@ -33,7 +52,7 @@ module OpenIdAuthenticator
   end
 
   def validate_openid_message_state
-    raise CustomError, :state_not_found unless cookies.key?(params[:state])
+    raise CustomError, :state_not_found unless params.key?('state')
     raise CustomError, :missing_id_token unless params.key?('id_token')
   end
 
@@ -45,7 +64,7 @@ module OpenIdAuthenticator
   end
 
   def validate_nonce(jwt_body)
-    raise CustomError, :invalid_nonce unless jwt_body['nonce'] == Rails.cache.read('lti1p3_' + jwt_body['nonce'])[:nonce]
+    raise CustomError, :invalid_nonce unless jwt_body['nonce'] == Rails.cache.read("lti1p3_#{jwt_body['nonce']}")[:nonce]
   end
 
   def validate_registration(jwt_body)
@@ -56,7 +75,7 @@ module OpenIdAuthenticator
   end
 
   def validate_jwt_signature(reg, jwt_header)
-    public_key_set = JSON.parse(File.open(reg['key_set_url']).string)
+    public_key_set = JSON.parse(URI.open(reg['key_set_url']).read)
     jwk_json = public_key_set['keys'].find do |key|
       key['kid'] == jwt_header['kid']
     end
@@ -122,10 +141,11 @@ module OpenIdAuthenticator
 
     p = extract_param(p, jwt_body, 'https://purl.imsglobal.org/spec/lti/claim/tool_platform',
                       'tool_consumer_instance_guid': 'guid',
-                      'tool_consumer_info_product_family_code': 'family_code',
-                      'tool_consumer_info_version': 'version',
+                      'tool_consumer_instance_description': 'description',
                       'tool_consumer_instance_name': 'name',
-                      'tool_consumer_instance_description': 'description')
+                      'tool_consumer_instance_url': 'url',
+                      'tool_consumer_info_version': 'version',
+                      'tool_consumer_info_product_family_code': 'family_code')
 
     p = extract_param(p, jwt_body, 'https://purl.imsglobal.org/spec/lti/claim/context',
                       'context_id': 'id',
@@ -150,9 +170,10 @@ module OpenIdAuthenticator
       end
     end
 
-    if jwt_body['https://purl.imsglobal.org/spec/lti/claim/message_type'] == 'LtiResourceLinkRequest'
+    case jwt_body['https://purl.imsglobal.org/spec/lti/claim/message_type']
+    when 'LtiResourceLinkRequest'
       p[:lti_message_type] = 'basic-lti-launch-request'
-    elsif jwt_body['https://purl.imsglobal.org/spec/lti/claim/message_type'] == 'LtiDeepLinkingRequest'
+    when 'LtiDeepLinkingRequest'
       p[:lti_message_type] = 'ContentItemSelectionRequest'
     end
     p

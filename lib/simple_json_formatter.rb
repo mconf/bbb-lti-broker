@@ -1,22 +1,29 @@
+# frozen_string_literal: true
+
 class SimpleJsonFormatter < ActiveSupport::Logger::SimpleFormatter
-  @@pid = $$
+  @pid = $PID
+
+  class << self
+    attr_accessor :pid
+  end
 
   def call(severity, _time, _progname, msg)
-    @@pid = $$ if @@pid != $$
+    self.class.pid = $PID if self.class.pid != $PID
 
     log = {
       "@timestamp": Time.now.utc,
-      pid: @@pid,
+      pid: self.class.pid,
       level: severity,
     }
 
-    begin
-      # so that lograge's logs aren't double quoted
-      msg = JSON.parse(msg)
-    rescue
+    # so that lograge's logs aren't double quoted
+    msg = begin
+      JSON.parse(msg)
+    rescue StandardError
+      msg
     end
 
     log[:message] = msg
-    log.to_json + "\n"
+    "#{log.to_json}\n"
   end
 end

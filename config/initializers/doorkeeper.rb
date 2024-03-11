@@ -1,28 +1,31 @@
 # frozen_string_literal: true
 
+# BigBlueButton open source conferencing system - http://www.bigbluebutton.org/.
+
+# Copyright (c) 2018 BigBlueButton Inc. and by respective authors (see below).
+
+# This program is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License as published by the Free Software
+# Foundation; either version 3.0 of the License, or (at your option) any later
+# version.
+
+# BigBlueButton is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+
+# You should have received a copy of the GNU Lesser General Public License along
+# with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
+
 Doorkeeper.configure do
   # Change the ORM that doorkeeper will use (needs plugins)
   orm :active_record
 
   # This block will be called to check whether the resource owner is authenticated or not.
   resource_owner_authenticator do
-    # fail "Please configure doorkeeper resource_owner_authenticator block located in #{__FILE__}"
-    # Put your resource owner authentication logic here.
-    # Example implementation:
-    #   User.find_by_id(session[:user_id]) || redirect_to(new_user_session_url)
-
-    # get the user from the launch token
-    # will only accept the user if the token has not expired yet
-    begin
-      launch = AppLaunch.find_by(nonce: params['launch_nonce'])
-      return nil if launch.expired?
-
-      uid = JSON.parse(launch.message)['user_id']
-      context = JSON.parse(launch.message)['tool_consumer_instance_guid'] || URI.parse(request.referer).host
-      user = User.find_by(uid: uid, context: context)
-    rescue
-      user = nil
-    end
+    # get the user from the lti_launch
+    # will only accept the user if the launch has not expired yet
+    launch = RailsLti2Provider::LtiLaunch.find_by(nonce: params['launch_nonce'])
+    user = (launch&.expired? || launch.nil?) ? nil : User.find(launch.user_id)
 
     user || redirect_to(params['redirect_uri'])
   end
@@ -32,7 +35,7 @@ Doorkeeper.configure do
     #   # Put your admin authentication logic here.
     #   # Example implementation:
     #   Admin.find_by_id(session[:admin_id]) || redirect_to(new_admin_session_url)
-    redirect_to(root_url) unless true
+    #   redirect_to(root_url) unless true
   end
 
   # Authorization Code expiration time (default 10 minutes).

@@ -2,29 +2,18 @@
 # of editing this file, please use the migrations feature of Active Record to
 # incrementally modify your database, and then regenerate this schema definition.
 #
-# This file is the source Rails uses to define your schema when running `rails
-# db:schema:load`. When creating a new database, `rails db:schema:load` tends to
+# This file is the source Rails uses to define your schema when running `bin/rails
+# db:schema:load`. When creating a new database, `bin/rails db:schema:load` tends to
 # be faster and is potentially less error prone than running all of your
 # migrations from scratch. Old migrations may fail to apply correctly if those
 # migrations use external dependencies or application code.
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_07_14_202041) do
+ActiveRecord::Schema.define(version: 2024_02_19_190044) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
-
-  create_table "app_launches", force: :cascade do |t|
-    t.string "tool_id"
-    t.string "nonce"
-    t.text "message"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-    t.datetime "expiration_time"
-    t.index ["expiration_time"], name: "index_app_launches_on_expiration_time"
-    t.index ["nonce"], name: "index_app_launches_on_nonce"
-  end
 
   create_table "oauth_access_grants", force: :cascade do |t|
     t.bigint "resource_owner_id", null: false
@@ -69,36 +58,70 @@ ActiveRecord::Schema.define(version: 2021_07_14_202041) do
     t.index ["uid"], name: "index_oauth_applications_on_uid", unique: true
   end
 
-  create_table "rails_lti2_provider_lti_launches", id: :serial, force: :cascade do |t|
+  create_table "rails_lti2_provider_lti_launches", force: :cascade do |t|
     t.bigint "tool_id"
     t.string "nonce"
     t.text "message"
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.bigint "user_id"
+    t.boolean "expired"
     t.index ["created_at"], name: "index_rails_lti2_provider_lti_launches_on_created_at"
+    t.index ["nonce"], name: "index_launch_nonce", unique: true
     t.index ["nonce"], name: "index_rails_lti2_provider_lti_launches_on_nonce"
     t.index ["tool_id"], name: "index_rails_lti2_provider_lti_launches_on_tool_id"
+    t.index ["user_id"], name: "index_rails_lti2_provider_lti_launches_on_user_id"
   end
 
-  create_table "rails_lti2_provider_registrations", id: :serial, force: :cascade do |t|
+  create_table "rails_lti2_provider_registrations", force: :cascade do |t|
     t.string "uuid"
     t.text "registration_request_params"
     t.text "tool_proxy_json"
     t.string "workflow_state"
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
     t.bigint "tool_id"
     t.text "correlation_id"
     t.index ["correlation_id"], name: "index_rails_lti2_provider_registrations_on_correlation_id", unique: true
   end
 
-  create_table "rails_lti2_provider_tools", id: :serial, force: :cascade do |t|
+  create_table "rails_lti2_provider_tenants", force: :cascade do |t|
+    t.string "uid"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.jsonb "settings", default: {}, null: false
+    t.index ["uid"], name: "index_tenant_uid", unique: true
+  end
+
+  create_table "rails_lti2_provider_tools", force: :cascade do |t|
     t.string "uuid"
     t.text "shared_secret"
     t.text "tool_settings"
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
     t.string "lti_version"
+    t.integer "tenant_id"
+    t.datetime "expired_at"
+    t.index ["id", "tenant_id"], name: "index_tool_id_tenant_id", unique: true
+    t.index ["tenant_id"], name: "index_tenant_id"
+    t.index ["uuid"], name: "index_uuid", unique: true
+  end
+
+  create_table "rsa_key_pairs", force: :cascade do |t|
+    t.text "private_key"
+    t.text "public_key"
+    t.string "tool_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
+
+  create_table "sessions", force: :cascade do |t|
+    t.string "session_id", null: false
+    t.text "data"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["session_id"], name: "index_sessions_on_session_id", unique: true
+    t.index ["updated_at"], name: "index_sessions_on_updated_at"
   end
 
   create_table "users", force: :cascade do |t|

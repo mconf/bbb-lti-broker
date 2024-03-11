@@ -1,22 +1,43 @@
-#bbb-registration-table {
+/* BigBlueButton open source conferencing system - http://www.bigbluebutton.org/.
+
+Copyright (c) 2018 BigBlueButton Inc. and by respective authors (see below).
+
+This program is free software; you can redistribute it and/or modify it under the
+terms of the GNU Lesser General Public License as published by the Free Software
+Foundation; either version 3.0 of the License, or (at your option) any later
+version.
+
+BigBlueButton is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License along
+with BigBlueButton; if not, see <http://www.gnu.org/licenses/>. */
+
+.bbb-registration-table {
     border-collapse: collapse;
     width: 100%;
 }
 
-#bbb-registration-table td, #bbb-registration-table th {
+.bbb-registration-table td, .bbb-registration-table th {
     border: 1px solid #ddd;
     padding: 8px;
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    &.options-col { width: 90px; }
 }
 
-#bbb-registration-table tr:nth-child(even){
+.bbb-registration-table tr:nth-child(even){
     background-color: #f2f2f2;
 }
 
-#bbb-registration-table tr:hover {
+.bbb-registration-table tr:hover {
     background-color: #ddd;
 }
 
-#bbb-registration-table thead th {
+.bbb-registration-table thead th {
     padding-top: 0.5em;
     padding-bottom: 0.5em;
     text-align: left;
@@ -24,34 +45,6 @@
     color: white;
 }
 
-#bbb-registration-table .fa {
-    font-size: 1.4em;
-}
-
-#bbb-registration-table .fa-trash {
-    color: red;
-}
-
-input[type="submit"] {
-    background-color: #3eb343;
-    border: none;
-    color: white;
-    padding: 0.5em 1.3em;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    margin: 4px 2px;
-    cursor: pointer;
-}
-
-input[value="Go Back"] {
-    background-color: #575f58;
-}
-input[readonly],
-textarea[readonly] {
-    background-color: #e8e8e8;
-}
-
-.form-required-txt {
-    color: #d21d1d;
+.bbb-registration-table .fa {
+    font-size: 1.2em;
 }

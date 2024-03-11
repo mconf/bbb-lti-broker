@@ -1,6 +1,10 @@
-FROM ruby:2.7.0-alpine
+FROM ruby:3.2.2-alpine
+
+ARG RAILS_ROOT=/usr/src/app
+ENV RAILS_ROOT=${RAILS_ROOT}
 
 USER root
+WORKDIR $RAILS_ROOT
 
 RUN apk update \
   && apk upgrade \
@@ -14,27 +18,16 @@ ENV BUILD_NUMBER=${BUILD_NUMBER}
 ARG RAILS_ENV
 ENV RAILS_ENV=${RAILS_ENV:-production}
 
-ARG RELATIVE_URL_ROOT
-ENV RELATIVE_URL_ROOT=${RELATIVE_URL_ROOT:-lti}
+COPY Gemfile* $RAILS_ROOT/
 
-ENV APP_HOME /usr/src/app
-RUN mkdir -p $APP_HOME
-WORKDIR $APP_HOME
-
-COPY Gemfile* $APP_HOME/
-
-ENV BUNDLER_VERSION='2.1.4'
-RUN gem install bundler --no-document -v '2.1.4'
 RUN if [ "$RAILS_ENV" == "production" ]; \
     then bundle config set without 'development test doc'; \
     else bundle config set without 'test doc'; \
     fi
-RUN bundle install
+RUN gem install bundler:2.4.10; bundle install
+RUN yarn install --check-files
 
-RUN bundle update --bundler 2.1.4
-RUN gem update --system
-
-COPY . $APP_HOME
+COPY . $RAILS_ROOT
 
 RUN if [ "$RAILS_ENV" == "production" ]; \
   then SECRET_KEY_BASE=`bin/rake secret` bundle exec rake assets:precompile --trace; \

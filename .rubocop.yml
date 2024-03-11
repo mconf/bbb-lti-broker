@@ -13,6 +13,7 @@ AllCops:
     - bin/unicorn_rails
     - bin/update
     - bin/yarn
+    - db/migrate/*
     - vendor/bundle/**/*
   TargetRubyVersion: 2.6
 Layout/HashAlignment:
@@ -41,8 +42,6 @@ Style/Documentation:
   Enabled: false
 Style/DoubleNegation:
   Enabled: false
-Style/ClassAndModuleChildren:
-  Enabled: false
 Style/MethodCallWithArgsParentheses:
   Enabled: true
   IgnoredMethods:
@@ -63,6 +62,16 @@ Style/TrailingCommaInArrayLiteral:
   EnforcedStyleForMultiline: consistent_comma
 Style/TrailingCommaInHashLiteral:
   EnforcedStyleForMultiline: consistent_comma
-Lint/LiteralAsCondition:
+Style/ClassAndModuleChildren:
+  Enabled: false
+Rails/Date:
+  Enabled: false
+Rails/HelperInstanceVariable:
+  # this is temporary while I refactor the code from the helper to libs/concerns
+  Enabled: false
+Lint/LiteralInInterpolation:
+  Enabled: false
+Lint/MissingSuper:
   Exclude:
-    - config/initializers/doorkeeper.rb
+    - 'app/controllers/**/*'
+    - 'lib/**/*'

@@ -3,9 +3,9 @@
 # You can generate a secure one through the Greenlight docker image
 # with the command.
 #
-#   docker run --rm bigbluebutton/greenlight:v2 bundle exec rake secret
+#   docker run --rm bigbluebutton/bbb-lti-broker:latest bundle exec rake secret
 #
-SECRET_KEY_BASE=secret
+SECRET_KEY_BASE=
 
 # App configuration
 RELATIVE_URL_ROOT=lti
@@ -24,15 +24,28 @@ CONSUMER_SECRET=secret
 
 # DEVELOPER_MODE_ENABLED=true
 
+# [debug|info|warn|error|fatal]
 # LOG_LEVEL=info
 # LOGRAGE_ENABLED=1
 
 # WHITELIST_HOST=broker.example.com
 
-# HOST_URL=broker.example.com
+## Set the hostname using your own domain (Required)
+# URL_HOST=broker.example.com
+
+## Use to send logs to external repository (Optional)
+# RAILS_LOG_REMOTE_NAME=xxx.papertrailapp.com
+# RAILS_LOG_REMOTE_PORT=99999
+# RAILS_LOG_REMOTE_TAG=bbb-lti-broker
 
 ## Use DATABASE_URL when using a postgres outside the pre-packaged with docker-compose
-## DATABASE_URL=postgres://myuser:mypass@localhost
+## DATABASE_URL=postgres://myuser:mypass@localhost/database_name
+## Database name for production can be omitted from DATABASE_URL
+## DB_NAME=database_production
+
+## Enable redis for actioncable
+# REDIS_URL=redis://myuser:mypass@localhost
+REDIS_PREFIX=bbb-lti-broker
 
 # Only needed for Docker Compose.
 ## Change DOCKER_REPO when using a repo other than bigbluebutton
@@ -53,3 +66,33 @@ RAILS_SERVE_STATIC_FILES=true
 
 # To serve assets from a CDN
 # ASSET_HOST=http://ks872jadt5c9a8.cloudfront.net
+
+## Enable redis as the Action Cable adapter.
+# CABLE_ADAPTER=redis
+# REDIS_URL=redis://myuser:mypass@localhost
+
+## Web server settings
+# The size of the thread pool per worker used by Greenlight's web server.
+# For details, see: https://github.com/puma/puma#thread-pool
+# Default: 5
+# RAILS_MAX_THREADS=5
+
+# The amount of workers (separate processes) used by the web server.
+# For details, see: https://github.com/puma/puma#clustered-mode
+# Default: 1
+# WEB_CONCURRENCY=1
+
+## Define patterns for handler_legacy
+# Different legacy apps used different combinations of params to produce the handler or meetingID. On top of that
+# different consumers may come with differnt parameters or the data may be inconsistent. This is the reason why some
+# rules are needed.
+#   - param-xxx, it is a literal value of parameter xxx.
+#   - fqdn-yyy parses the host obtained from processing the value of parameter yyy as a URL.
+#   - | is a fallback in case the value found from the first pattern is empty.
+#
+#   E.g.
+#     konekti: 'param-tool_consumer_instance_guid|fqdn-ext_tc_profile_url,param-context_id,param-resource_link_id'
+#     bbb-lti 'param-resource_link_id,param-oauth_consumer_key'
+#
+# Default: param-resource_link_id,param-oauth_consumer_key
+# HANDLER_LEGACY_PATTERNS='param-tool_consumer_instance_guid|fqdn-ext_tc_profile_url,param-context_id,param-resource_link_id'

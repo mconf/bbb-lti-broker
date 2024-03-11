@@ -1,15 +1,17 @@
+# frozen_string_literal: true
+
 module Clients::Coc
   module Api
     module Data
-  class SegmentData
-    attr_reader :id, :name, :grades
+      class SegmentData
+        attr_reader :id, :name, :grades
 
-    def initialize(id, name)
-      @id = id
-      @name = name
-      @grades = ContainerData.new
+        def initialize(id, name)
+          @id = id
+          @name = name
+          @grades = ContainerData.new
+        end
+      end
     end
   end
-end
-end
 end
