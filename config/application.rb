@@ -33,6 +33,7 @@ module BbbLtiBroker
     # every time app_launch is called.
     config.app_launch_days_to_delete = (ENV['APP_LAUNCH_DAYS_TO_DELETE'] || 15).to_i
     config.lti_launch_days_to_delete = (ENV['LTI_LAUNCH_DAYS_TO_DELETE'] || 1).to_i
+    config.limit_launch_to_delete = (ENV['LIMIT_LAUNCH_TO_DELETE'] || 1000).to_i
 
     config.app_name = ENV["APP_NAME"] || 'BbbLtiBroker'
 
