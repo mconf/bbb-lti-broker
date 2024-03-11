@@ -29,7 +29,7 @@ Bundler.require(*Rails.groups)
 
 module BbbLtiBroker
   class Application < Rails::Application
-    VERSION = '0.4.0'
+    VERSION = '0.6.0'
 
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults(5.0)
