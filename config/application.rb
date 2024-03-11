@@ -59,6 +59,7 @@ module BbbLtiBroker
     # LtiLaunches that are more than {lti_launch_days_to_delete} days old will be deleted
     # every time the RemoveOldLtiLaunchJob runs.
     config.lti_launch_days_to_delete = (ENV['LTI_LAUNCH_DAYS_TO_DELETE'] || 1).to_i
+    config.limit_launch_to_delete = (ENV['LIMIT_LAUNCH_TO_DELETE'] || 1000).to_i
 
     config.app_name = ENV['APP_NAME'] || 'BbbLtiBroker'
 

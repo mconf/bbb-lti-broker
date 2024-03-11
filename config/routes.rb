@@ -19,10 +19,13 @@ require 'resque/server'
 # with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
 
 Rails.application.routes.draw do
-  mount Resque::Server.new, at: '/resque'
 
   get '/health_check', to: 'health_check#show'
   get '/healthz', to: 'health_check#show'
+
+  if Mconf::Env.fetch_boolean("MCONF_SERVE_RESQUE_INTERFACE", false)
+    mount Resque::Server.new, at: '/resque'
+  end
 
   if Mconf::Env.fetch_boolean('SERVE_RAILS_ADMIN', false)
     mount RailsAdmin::Engine => '/dash', as: 'rails_admin'
