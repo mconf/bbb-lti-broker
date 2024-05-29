@@ -134,7 +134,8 @@ class MessageController < ApplicationController
 
   def deep_link
     resource = deep_link_resource(openid_launch_url, { 'What\'s black and white and red all over?': 'A sunburnt panda' }, 'My room')
-    @deep_link_jwt_message = deep_link_jwt_response(lti_registration_params(@jwt_body['iss']), @jwt_header, @jwt_body, [resource])
+    # @jwt_body['aud'] corresponds to the client_id
+    @deep_link_jwt_message = deep_link_jwt_response(lti_registration_params(@jwt_body['aud']), @jwt_header, @jwt_body, [resource])
     @deep_link_return_url = @jwt_body['https://purl.imsglobal.org/spec/lti-dl/claim/deep_linking_settings']['deep_link_return_url']
   end
 
@@ -157,7 +158,8 @@ class MessageController < ApplicationController
     @jwt_header = jwt[:header]
     @jwt_body = jwt[:body]
 
-    tool = lti_registration(@jwt_body['iss'])
+    # @jwt_body['aud'] corresponds to the client_id
+    tool = lti_registration(@jwt_body['aud'])
     tool.lti_launches.where('created_at < ?', 1.day.ago).delete_all
     logger.info("Creating a launch for tool=#{tool.uuid} with nonce=#{@jwt_body['nonce']}")
     @lti_launch = tool.lti_launches.create(nonce: @jwt_body['nonce'], message: @jwt_body.merge(@jwt_header))

@@ -36,7 +36,7 @@ namespace :db do
       rsa_key_pair = RsaKeyPair.create(
         private_key: private_key.to_s,
         public_key: public_key.to_s,
-        tool_id: issuer
+        tool_id: client_id
       )
 
       reg = {
@@ -49,7 +49,7 @@ namespace :db do
       }
 
       RailsLti2Provider::Tool.create!(
-        uuid: issuer,
+        uuid: client_id,
         shared_secret: client_id,
         tool_settings: reg.to_json,
         lti_version: '1.3.0',
@@ -87,7 +87,7 @@ namespace :db do
       rsa_key_pair = RsaKeyPair.create(
         private_key: private_key.to_s,
         public_key: public_key.to_s,
-        tool_id: issuer
+        tool_id: client_id
       )
 
       reg = {
@@ -100,7 +100,7 @@ namespace :db do
       }
 
       RailsLti2Provider::Tool.create!(
-        uuid: issuer,
+        uuid: client_id,
         shared_secret: client_id,
         tool_settings: reg.to_json,
         lti_version: '1.3.0',
@@ -122,10 +122,8 @@ namespace :db do
       $stdout.puts('What is the client ID for the registration?')
       client_id = $stdin.gets.strip
 
-      options = {}
-      options['client_id'] = client_id if client_id.present?
 
-      reg = RailsLti2Provider::Tool.find_by_issuer(issuer, options)
+      reg = RailsLti2Provider::Tool.find_by_uuid(client_id)
 
       if key_pair_id = JSON.parse(reg.tool_settings)['rsa_key_pair_id']
         RsaKeyPair.find(key_pair_id).destroy!
@@ -146,9 +144,7 @@ namespace :db do
       $stdout.puts('What is the client ID for the registration?')
       client_id = $stdin.gets.strip
 
-      options = {}
-      options['client_id'] = client_id if client_id.present?
-      registration = RailsLti2Provider::Tool.find_by_issuer(issuer, options)
+      registration = RailsLti2Provider::Tool.find_by_issuer(client_id)
 
       abort('The registration must be valid.') if registration.blank?
 
@@ -165,7 +161,7 @@ namespace :db do
         key_pair = RsaKeyPair.create(
           private_key: private_key.to_s,
           public_key: public_key.to_s,
-          tool_id: issuer
+          tool_id: client_id
         )
         tool_settings['rsa_key_pair_id'] = key_pair.id
         registration.update(tool_settings: tool_settings.to_json)
@@ -173,7 +169,7 @@ namespace :db do
         key_pair.update(
           private_key: private_key,
           public_key: public_key,
-          tool_id: issuer
+          tool_id: client_id
         )
       end
 

@@ -36,9 +36,9 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>. %>
                     <td><%= reg['client_id'] %></td>
                     <td><%= tool.tenant&.uid %></td>
                     <td class='options-col'>
-                        <%= link_to '<i class="fa fa-info-circle"></i>'.html_safe, show_registration_path(reg_id: reg['issuer'], client_id: reg['client_id']), class: 'mx-1' %>
-                        <%= link_to '<i class="fa fa-edit"></i>'.html_safe, edit_registration_path(reg_id: reg['issuer'], client_id: reg['client_id']), class: 'mx-1' %>
-                        <%= link_to '<i class="fa fa-trash"></i>'.html_safe, delete_registration_path(reg_id: reg['issuer'], client_id: reg['client_id']), class: 'mx-1 text-danger', 'data-confirm': 'Are you sure?' %>
+                        <%= link_to '<i class="fa fa-info-circle"></i>'.html_safe, show_registration_path(uuid: tool.uuid), class: 'mx-1' %>
+                        <%= link_to '<i class="fa fa-edit"></i>'.html_safe, edit_registration_path(uuid: tool.uuid), class: 'mx-1' %>
+                        <%= link_to '<i class="fa fa-trash"></i>'.html_safe, delete_registration_path(uuid: tool.uuid), class: 'mx-1 text-danger', 'data-confirm': 'Are you sure?' %>
                     </td>
                 </tr>
             <% end %>
