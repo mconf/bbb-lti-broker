@@ -119,6 +119,14 @@ Doorkeeper.configure do
   # for example.
   #
   # forbid_redirect_uri { |uri| uri.scheme.to_s.downcase == 'javascript' }
+  forbid_redirect_uri do |uri|
+    if uri.scheme.to_s.downcase == 'javascript'
+      true
+    else
+      rooms_uri = URI.parse(Rails.application.config.app_rooms_url)
+      !uri.host.eql?(rooms_uri.host)
+    end
+  end
 
   # Specify what grant flows are enabled in array of Strings. The valid
   # strings and the flows they enable are:

@@ -41,6 +41,8 @@ module BbbLtiBroker
     # -- all .rb files in that directory are automatically loaded.
     config.url_host = ENV['URL_HOST'] || 'localhost'
 
+    config.app_rooms_url = ENV['APP_ROOMS_URL'] || 'localhost'
+
     config.build_number = ENV['BUILD_NUMBER'] || VERSION
 
     config.developer_mode_enabled = (ENV['DEVELOPER_MODE_ENABLED'] == 'true')
