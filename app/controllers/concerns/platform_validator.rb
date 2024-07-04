@@ -20,22 +20,22 @@ module PlatformValidator
   include ActiveSupport::Concern
 
   # LTI 1.0/1.1
-  def lti_secret(key, _options = {})
+  def lti_secret(key)
     tool = RailsLti2Provider::Tool.find_by_uuid(key)
     tool&.shared_secret
   end
 
   # LTI 1.3
-  def lti_registration_exists?(iss, options = {})
-    RailsLti2Provider::Tool.find_by_issuer(iss, options).present?
+  def lti_registration_exists?(key)
+    RailsLti2Provider::Tool.find_by_uuid(key).present?
   end
 
-  def lti_registration_params(iss, options = {})
-    reg = lti_registration(iss, options)
+  def lti_registration_params(key)
+    reg = lti_registration(key)
     JSON.parse(reg.tool_settings)
   end
 
-  def lti_registration(iss, options = {})
-    RailsLti2Provider::Tool.find_by_issuer(iss, options)
+  def lti_registration(key)
+    RailsLti2Provider::Tool.find_by_uuid(key)
   end
 end

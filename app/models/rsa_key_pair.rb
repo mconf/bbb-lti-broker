@@ -18,6 +18,6 @@
 
 class RsaKeyPair < ApplicationRecord
   def tool
-    RailsLti2Provider::Tool.find_by_issuer(self.tool_id)
+    RailsLti2Provider::Tool.find_by_uuid(self.tool_id)
   end
 end

@@ -65,16 +65,14 @@ class AuthController < ApplicationController
 
   def validate_oidc_login
     raise CustomError, :could_not_find_issuer unless params.key?('iss')
+    raise CustomError, :could_not_find_client_id unless params.key?('client_id')
     raise CustomError, :could_not_find_login_hint unless params.key?('login_hint')
 
-    options = {}
-    options['client_id'] = params[:client_id] if params.key?('client_id')
-
-    unless lti_registration_exists?(params[:iss], options)
+    unless lti_registration_exists?(params[:client_id])
       logger.error('ERROR: The app is not currently registered within the lti broker.')
       return on404
     end
 
-    @registration = lti_registration_params(params[:iss], options)
+    @registration = lti_registration_params(params[:client_id])
   end
 end

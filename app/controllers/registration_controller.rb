@@ -36,13 +36,11 @@ class RegistrationController < ApplicationController
   end
 
   def show
-    redirect_to(registration_list_path) unless params.key?('reg_id') && params.key?('client_id')
-    options = {}
-    options['client_id'] = params[:client_id] if params.key?('client_id')
-    redirect_to(registration_list_path) unless lti_registration_exists?(params[:reg_id], options)
+    redirect_to(registration_list_path) unless params.key?('uuid')
+    redirect_to(registration_list_path) unless lti_registration_exists?(params[:uuid])
 
-    @registration = lti_registration_params(params[:reg_id], options)
-    @tool = lti_registration(params[:reg_id], options)
+    @registration = lti_registration_params(params[:uuid])
+    @tool = lti_registration(params[:uuid])
   end
 
   def new
@@ -54,18 +52,16 @@ class RegistrationController < ApplicationController
   end
 
   def edit
-    redirect_to(registration_list_path) unless params.key?('reg_id') && params.key?('client_id')
-    options = {}
-    options['client_id'] = params[:client_id] if params.key?('client_id')
-    redirect_to(registration_list_path) unless lti_registration_exists?(params[:reg_id], options)
+    redirect_to(registration_list_path) unless params.key?('uuid')
+    redirect_to(registration_list_path) unless lti_registration_exists?(params[:uuid])
 
-    @registration = lti_registration_params(params[:reg_id], options)
-    @tool = lti_registration(params[:reg_id], options)
+    @registration = lti_registration_params(params[:uuid])
+    @tool = lti_registration(params[:uuid])
     @tenants = RailsLti2Provider::Tenant.all.sort.pluck(:uid, :id)
   end
 
   def submit
-    return if params[:iss] == ''
+    return if params[:client_id] == ''
 
     reg = {
       issuer: params[:iss],
@@ -80,12 +76,12 @@ class RegistrationController < ApplicationController
       redirect_to(new_registration_path) and return if key_pair.nil?
 
       reg[:rsa_key_pair_id] = params[:key_pair_id]
-      key_pair.update(tool_id: params[:iss])
+      key_pair.update(tool_id: params[:client_id])
     end
 
-    registration = lti_registration(params[:reg_id]) if params.key?('reg_id')
+    registration = lti_registration(params[:client_id]) if params.key?('client_id')
     unless registration.nil?
-      reg[:rsa_key_pair_id] = lti_registration_params(params[:reg_id])['rsa_key_pair_id']
+      reg[:rsa_key_pair_id] = lti_registration_params(params[:client_id])['rsa_key_pair_id']
       registration.update(
         tool_settings: reg.to_json,
         shared_secret: params[:client_id],
@@ -96,7 +92,7 @@ class RegistrationController < ApplicationController
     end
 
     RailsLti2Provider::Tool.create!(
-      uuid: params[:iss],
+      uuid: params[:client_id],
       shared_secret: params[:client_id],
       tool_settings: reg.to_json,
       lti_version: '1.3.0',
@@ -107,11 +103,9 @@ class RegistrationController < ApplicationController
   end
 
   def delete
-    options = {}
-    options['client_id'] = params[:client_id] if params.key?('client_id')
-    if lti_registration_exists?(params[:reg_id], options)
-      reg = lti_registration(params[:reg_id], options)
-      if key_pair_id = lti_registration_params(params[:reg_id], options)['rsa_key_pair_id']
+    if lti_registration_exists?(params[:uuid])
+      reg = lti_registration(params[:uuid])
+      if key_pair_id = lti_registration_params(params[:uuid])['rsa_key_pair_id']
         RsaKeyPair.find(key_pair_id).destroy
       end
       reg.delete
