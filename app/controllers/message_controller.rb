@@ -113,7 +113,7 @@ class MessageController < ApplicationController
     return if params[:app] == 'default'
 
     params[:oauth_nonce] = @jwt_body['nonce']
-    params[:oauth_consumer_key] = @jwt_body['iss']
+    params[:oauth_consumer_key] = @jwt_body['aud']
     Rails.cache.write(params[:oauth_nonce], message: @message, oauth: { consumer_key: params[:oauth_consumer_key], timestamp: @jwt_body['exp'] })
     @lti_launch.update(user_id: @current_user.id)
 
