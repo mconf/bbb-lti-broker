@@ -45,6 +45,7 @@ module BbbLtiBroker
     end
 
     def secure_url(url)
+      return nil if url.nil?
       uri = URI.parse(url)
       uri.scheme = 'https'
       uri.to_s
