@@ -95,8 +95,8 @@ Rails.application.routes.draw do
     match ':app/json_config/:temp_key_token', to: 'tool_profile#json_config', via: [:get, :post], as: 'json_config' # , :defaults => {:format => 'json'}
 
     # xml config and builder for lti 1.0/1.1
-    get ':app/xml_config', to: 'tool_profile#xml_config', app: Rails.configuration.default_tool, as: :xml_config
-    get ':app/xml_builder', to: 'tool_profile#xml_builder', app: Rails.configuration.default_tool, as: :xml_builder
+    get ':app/xml_config', to: 'tool_profile#xml_config', as: :xml_config
+    get ':app/xml_builder', to: 'tool_profile#xml_builder', as: :xml_builder
     # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
 
     get '/errors/:code', to: 'errors#index', as: :errors
