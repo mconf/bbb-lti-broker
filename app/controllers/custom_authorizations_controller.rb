@@ -1,5 +1,5 @@
 class CustomAuthorizationsController < Doorkeeper::AuthorizationsController
-  before_action :redirect_uri_validation, only: [:new]
+  prepend_before_action :redirect_uri_validation, only: [:new]
 
   def redirect_uri_validation
     uri = URI.parse(params[:redirect_uri])
