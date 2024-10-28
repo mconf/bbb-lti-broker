@@ -3,10 +3,12 @@ class CustomAuthorizationsController < Doorkeeper::AuthorizationsController
 
   def redirect_uri_validation
     uri = URI.parse(params[:redirect_uri])
+    Rails.logger.info "[Redirect URI validation] redirect_uri=#{uri}"
     if uri.scheme.to_s.downcase == 'javascript'
       render_error
     else
       rooms_uri = URI.parse(Rails.application.config.app_rooms_url)
+      Rails.logger.info "[Redirect URI validation] rooms_uri=#{rooms_uri} uri_host=#{uri.host} rooms_uri_host=#{rooms_uri.host}"
       render_error unless uri.host.eql?(rooms_uri.host)
     end
   end
