@@ -43,6 +43,8 @@ module BbbLtiBroker
 
     config.build_number = ENV['BUILD_NUMBER'] || VERSION
 
+    config.app_rooms_url = ENV['APP_ROOMS_URL'] || 'localhost'
+
     config.developer_mode_enabled = (ENV['DEVELOPER_MODE_ENABLED'] == 'true')
 
     config.relative_url_root = "/#{ENV['RELATIVE_URL_ROOT']}"
