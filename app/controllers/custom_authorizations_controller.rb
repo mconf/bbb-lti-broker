@@ -4,14 +4,22 @@ class CustomAuthorizationsController < Doorkeeper::AuthorizationsController
   def redirect_uri_validation
     uri = URI.parse(params[:redirect_uri])
     Rails.logger.info "[Redirect URI validation] redirect_uri=#{uri}"
+    # scheme validation
     if uri.scheme.to_s.downcase == 'javascript'
       Rails.logger.error "[Redirect URI validation] Invalid 'javascript' redirect_uri scheme"
       render_error
+    # host validation
     else
-      rooms_uri = URI.parse(Rails.application.config.app_rooms_url)
-      unless uri.host.eql?(rooms_uri.host)
-        Rails.logger.error "[Redirect URI validation] Invalid redirect_uri host (is not equal to rooms_uri host), " \
-                          "rooms_uri_host=#{rooms_uri.host} redirect_uri_host=#{uri.host}"
+      app = Doorkeeper::Application.find_by(uid: params[:client_id])
+      if app.nil?
+        Rails.logger.error "[Redirect URI validation] App not found, client_id=#{params[:client_id]}"
+        render_error('app_not_found') and return
+      end
+
+      app_uri = URI.parse(app.redirect_uri)
+      unless uri.host.eql?(app_uri.host)
+        Rails.logger.error "[Redirect URI validation] Invalid redirect_uri host (is not equal to app_uri host), " \
+                          "app_name=#{app.name} app_uri_host=#{app_uri.host} redirect_uri_host=#{uri.host}"
         render_error
       end
     end
@@ -19,12 +27,12 @@ class CustomAuthorizationsController < Doorkeeper::AuthorizationsController
 
   private
 
-  def render_error
+  def render_error(error_type = 'redirect_uri')
     status = 401
     @error = {
-      key: t("error.redirect_uri.code"),
-      message: t("error.redirect_uri.message"),
-      suggestion: t("error.redirect_uri.suggestion"),
+      key: t("error.#{error_type}.code"),
+      message: t("error.#{error_type}.message"),
+      suggestion: t("error.#{error_type}.suggestion"),
       code: status,
       status: status,
     }

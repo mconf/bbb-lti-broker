@@ -90,6 +90,10 @@ en:
       code:         "Unauthorized"
       message:      "Unauthorized redirect_uri"
       suggestion:   "If you are using this room through LTI try launching the app again by using the link or refreshing the browser."
+    app_not_found:
+      code:         "Unauthorized"
+      message:      "Application not registered"
+      suggestion:   "The client_id you informed is not associated with any application."
     generic:
       401:
         code:       "Unauthorized"
