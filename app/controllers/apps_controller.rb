@@ -26,10 +26,19 @@ class AppsController < ApplicationController
   def launch
     # Make launch request to LTI-APP
     lti_launch = RailsLti2Provider::LtiLaunch.find_by(nonce: params[:oauth_nonce])
+    tenant = lti_launch.tool.tenant
 
     # add the oauth key to the data of this launch
     message = lti_launch.message
     message.custom_params['oauth_consumer_key'] = params[:oauth_consumer_key]
+
+    # tenant settings for Workadventure SaaS
+    if tenant && tenant.settings['worka_saas_enabled'].present?
+      # ['worka_saas_enabled', 'worka_saas_world', 'worka_saas_domain']
+      tenant.settings.keys.select{ |k| k.match?('worka_saas') }.each do |key|
+        message.custom_params[key] = tenant.settings[key]
+      end
+    end
 
     lti_launch.update(message: message.to_json)
 
