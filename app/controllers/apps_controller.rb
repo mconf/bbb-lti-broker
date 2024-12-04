@@ -32,10 +32,19 @@ class AppsController < ApplicationController
     message = lti_launch.message
     message.custom_params['oauth_consumer_key'] = params[:oauth_consumer_key]
 
-    # tenant settings for Workadventure SaaS
-    if tenant && tenant.settings['worka_saas_enabled'].present?
-      # ['worka_saas_enabled', 'worka_saas_world', 'worka_saas_domain']
-      tenant.settings.keys.select{ |k| k.match?('worka_saas') }.each do |key|
+    # add tenant settings as custom params
+    unless tenant&.settings.present?
+      settings = tenant.settings
+      # settings for Workadventure SaaS
+      if ['1', 'true', true].include?(settings['worka_saas_enabled'])
+        # ['worka_saas_enabled', 'worka_saas_world', 'worka_saas_domain']
+        tenant.settings.keys.select{ |k| k.match?('worka_saas') }.each do |key|
+          message.custom_params[key] = tenant.settings[key]
+        end
+      end
+      # settings for self-hosted Workadventure
+      # ['worka_selfhosted_url', 'worka_selfhosted_bbb_url']
+      tenant.settings.keys.select{ |k| k.match?('worka_selfhosted') }.each do |key|
         message.custom_params[key] = tenant.settings[key]
       end
     end
