@@ -33,7 +33,7 @@ class AppsController < ApplicationController
     message.custom_params['oauth_consumer_key'] = params[:oauth_consumer_key]
 
     # add tenant settings as custom params
-    unless tenant&.settings.present?
+    if tenant&.settings.present?
       settings = tenant.settings
       # settings for Workadventure SaaS
       if ['1', 'true', true].include?(settings['worka_saas_enabled'])
