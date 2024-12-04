@@ -91,7 +91,13 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>. %>
             <% @tenants.each do |ten| %>
                 <tr>
                     <td><%= ten['uid'] %></td>
-                    <td><%= ten['settings'] %></td>
+                    <td>
+                        <ul>
+                            <% ten['settings'].each do |key, value| %>
+                                <li><%= "#{key} => #{value}" %> </li>
+                            <% end %>
+                        </ul>
+                    </td>
                     <td class='options-col'>
                         <%= link_to '<i class="fa fa-edit"></i>'.html_safe, edit_tenant_path(ten.uid), class: 'mx-1' %>
                         <%= link_to '<i class="fa fa-trash"></i>'.html_safe, tenant_path(ten.uid), class: 'mx-1 text-danger', method: :delete, 'data-confirm': 'Are you sure?' %>

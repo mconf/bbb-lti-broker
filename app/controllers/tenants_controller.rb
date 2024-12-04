@@ -31,7 +31,7 @@ class TenantsController < ApplicationController
   end
 
   def create
-    tenant = RailsLti2Provider::Tenant.new(uid: params[:uid], settings: {})
+    tenant = RailsLti2Provider::Tenant.new(tenant_params)
     if tenant.save
       redirect_to(registration_list_path)
     else
@@ -40,9 +40,11 @@ class TenantsController < ApplicationController
   end
 
   def update
-    @tenant.update!(uid: params[:uid])
-
-    redirect_to(registration_list_path)
+    if @tenant.update(tenant_params)
+      redirect_to(registration_list_path)
+    else
+      redirect_to(edit_tenant_path(@tenant.uid))
+    end
   end
 
   def destroy
@@ -55,5 +57,21 @@ class TenantsController < ApplicationController
 
   def find_tenant
     @tenant = RailsLti2Provider::Tenant.find_by(uid: params['id'])
+  end
+
+  def tenant_params
+    params.require(:tenant).permit(:uid).tap do |whitelisted|
+      settings_params = {}
+      unless params[:tenant][:settings].blank?
+        # combine the fields back into the `settings` JSON field
+        # rejects blank or '0' values
+        params[:tenant][:settings].each do |key, value|
+          next if (value.blank? || value == '0')
+          settings_params[key] = value
+        end
+      end
+
+      whitelisted[:settings] = settings_params
+    end
   end
 end

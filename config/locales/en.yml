@@ -125,4 +125,12 @@ en:
     edit: "Edit Tenant"
     new: "New Tenant"
     settings: "Settings"
+    settings_fields:
+      worka_saas_toggle: "Toggle Workadventure SaaS settings"
+      worka_saas_enabled: "Worka SaaS enabled"
+      worka_saas_domain: "World domain"
+      worka_saas_world: "World name"
+      worka_selfhosted_toggle: "Toggle self-hosted Workadventure settings"
+      worka_selfhosted_url: "Workadventure URL"
+      worka_selfhosted_bbb_url: "BBB server URL"
     uid: "UID"
