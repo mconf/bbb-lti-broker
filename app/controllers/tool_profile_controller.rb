@@ -80,9 +80,7 @@ class ToolProfileController < ApplicationController
   end
 
   def xml_config
-    render(xml: xml_config_tc(
-      blti_launch_url(app: params[:app]).sub('https', 'http')
-    ))
+    render(xml: xml_config_tc(blti_launch_url(app: params[:app])))
   end
 
   # This action is used only to support the old bbb application for backward compatibility
@@ -117,8 +115,8 @@ class ToolProfileController < ApplicationController
   end
 
   def xml_config_tc(launch_url)
-    title = t("apps.#{params[:app]}.title", default: "#{params[:app].capitalize} #{t('apps.default.title')}")
-    description = t("apps.#{params[:app]}.description", default: "#{t('apps.default.title')} provider powered by BBB LTI Broker.")
+    title = ENV["TOOL_#{params[:app].upcase}_TITLE"] || t("apps.#{params[:app]}.title", default: "#{params[:app].capitalize} #{t('apps.default.title')}")
+    description = ENV["TOOL_#{params[:app].upcase}_DESCRIPTION"] || t("apps.#{params[:app]}.description", default: "#{t('apps.default.title')} provider powered by BBB LTI Broker.")
     tc = IMS::LTI::Services::ToolConfig.new(title: title, launch_url: launch_url) # "#{location}/#{year}/#{id}"
     tc.secure_launch_url = secure_url(tc.launch_url)
     tc.icon = lti_icon(params[:app])

@@ -34,6 +34,8 @@ Rails.application.configure do
 
   # Show full error reports.
   config.consider_all_requests_local = true
+  
+  config.action_dispatch.default_headers['X-Frame-Options'] = 'ALLOW-FROM http://localhost'
 
   # Enable/disable caching. By default caching is disabled.
   config.action_controller.perform_caching = true

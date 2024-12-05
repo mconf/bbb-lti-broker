@@ -10,3 +10,6 @@ en:
     tool:
       title:       "Elos"
       description: "Elos LTI"
+    worka:
+      title:       "Workadventure"
+      description: "Workadventure LTI"
