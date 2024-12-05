@@ -72,6 +72,7 @@ Rails.application.routes.draw do
       # Including 'skip_controllers :application' disables the controller for managing external applications
       #   [http://example.com/lti/oauth/applications]
       skip_controllers :applications unless ENV['DEVELOPER_MODE_ENABLED'] == 'true'
+      controllers :authorizations => 'custom_authorizations'
     end
 
     root to: 'application#index', app: ENV['DEFAULT_LTI_TOOL'] || 'default'

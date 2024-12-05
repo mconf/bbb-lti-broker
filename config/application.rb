@@ -29,7 +29,7 @@ Bundler.require(*Rails.groups)
 
 module BbbLtiBroker
   class Application < Rails::Application
-    VERSION = '1.0.0'
+    VERSION = '1.0.1'
 
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults(5.0)
@@ -42,6 +42,8 @@ module BbbLtiBroker
     config.url_host = ENV['URL_HOST'] || 'localhost'
 
     config.build_number = ENV['BUILD_NUMBER'] || VERSION
+
+    config.app_rooms_url = ENV['APP_ROOMS_URL'] || 'localhost'
 
     config.developer_mode_enabled = (ENV['DEVELOPER_MODE_ENABLED'] == 'true')
 
