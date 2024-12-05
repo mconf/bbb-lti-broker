@@ -34,16 +34,22 @@ class AppsController < ApplicationController
 
     # add tenant settings as custom params
     if tenant&.settings.present?
-      settings = tenant.settings
-      # settings for Workadventure SaaS
-      if ['1', 'true', true].include?(settings['worka_saas_enabled'])
-        tenant.settings.keys.select{ |k| k.match?('worka_saas') }.each do |key|
+      # settings for worka app
+      if params[:app] == 'worka'
+        logger.info "Adding tenant settings as custom params for '#{params[:app]}' app"
+        # settings for Workadventure SaaS
+        if ['1', 'true', true].include?(tenant.settings['worka_saas_enabled'])
+          tenant.settings.keys.select{ |k| k.match?('worka_saas') }.each do |key|
+            message.custom_params[key] = tenant.settings[key]
+          end
+        end
+        # settings for self-hosted Workadventure
+        tenant.settings.keys.select{ |k| k.match?('worka_self_hosted') }.each do |key|
           message.custom_params[key] = tenant.settings[key]
         end
-      end
-      # settings for self-hosted Workadventure
-      tenant.settings.keys.select{ |k| k.match?('worka_self_hosted') }.each do |key|
-        message.custom_params[key] = tenant.settings[key]
+      # settings for rooms app
+      elsif params[:app] == 'rooms'
+        logger.info "Adding tenant settings as custom params for '#{params[:app]}' app"
       end
     end
 
