@@ -37,14 +37,12 @@ class AppsController < ApplicationController
       settings = tenant.settings
       # settings for Workadventure SaaS
       if ['1', 'true', true].include?(settings['worka_saas_enabled'])
-        # ['worka_saas_enabled', 'worka_saas_world', 'worka_saas_domain']
         tenant.settings.keys.select{ |k| k.match?('worka_saas') }.each do |key|
           message.custom_params[key] = tenant.settings[key]
         end
       end
       # settings for self-hosted Workadventure
-      # ['worka_selfhosted_url', 'worka_selfhosted_bbb_url']
-      tenant.settings.keys.select{ |k| k.match?('worka_selfhosted') }.each do |key|
+      tenant.settings.keys.select{ |k| k.match?('worka_self_hosted') }.each do |key|
         message.custom_params[key] = tenant.settings[key]
       end
     end

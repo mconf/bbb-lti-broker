@@ -48,16 +48,28 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>. %>
         <%# self-hosted Worka settings %>
         <div class='form-group row'>
             <div class='col'>
-                <%= button_tag t('tenant.settings_fields.worka_selfhosted_toggle'), data: {toggle: 'collapse', target: '#worka-selfhosted-settings'}, type: 'button', class: 'btn btn-link' %>
-                <div id='worka-selfhosted-settings' class='collapse'>
+                <%= button_tag t('tenant.settings_fields.worka_self_hosted_toggle'), data: {toggle: 'collapse', target: '#worka-self-hosted-settings'}, type: 'button', class: 'btn btn-link' %>
+                <div id='worka-self-hosted-settings' class='collapse'>
                     <%= form.fields :settings, model: OpenStruct.new(form.object.settings) do |setting_fields| %>
                         <div class='form-group row'>
-                            <%= setting_fields.label :worka_selfhosted_url, t('tenant.settings_fields.worka_selfhosted_url') + ':', class: 'col-sm-2 col-form-label' %>
-                            <%= setting_fields.text_field :worka_selfhosted_url, class: 'form-control col-sm-10 col' %>
+                            <%= setting_fields.label :worka_self_hosted_url, t('tenant.settings_fields.worka_self_hosted_url') + ':', class: 'col-sm-2 col-form-label' %>
+                            <%= setting_fields.text_field :worka_self_hosted_url, class: 'form-control col-sm-10 col' %>
                         </div>
                         <div class='form-group row'>
-                            <%= setting_fields.label :worka_selfhosted_bbb_url, t('tenant.settings_fields.worka_selfhosted_bbb_url') + ':', class: 'col-sm-2 col-form-label' %>
-                            <%= setting_fields.text_field :worka_selfhosted_bbb_url, class: 'form-control col-sm-10 col' %>
+                            <%= setting_fields.label :worka_self_hosted_bbb_url, t('tenant.settings_fields.worka_self_hosted_bbb_url') + ':', class: 'col-sm-2 col-form-label' %>
+                            <%= setting_fields.text_field :worka_self_hosted_bbb_url, class: 'form-control col-sm-10 col' %>
+                        </div>
+                        <div class='form-group row'>
+                            <%= setting_fields.label :worka_self_hosted_map_file_url, t('tenant.settings_fields.worka_self_hosted_map_file_url') + ':', class: 'col-sm-2 col-form-label' %>
+                            <%= setting_fields.text_field :worka_self_hosted_map_file_url, class: 'form-control col-sm-10 col' %>
+                        </div>
+                        <div class='form-group row'>
+                            <%= setting_fields.label :worka_self_hosted_woka_list_json_url, t('tenant.settings_fields.worka_self_hosted_woka_list_json_url') + ':', class: 'col-sm-2 col-form-label' %>
+                            <%= setting_fields.text_field :worka_self_hosted_woka_list_json_url, class: 'form-control col-sm-10 col' %>
+                        </div>
+                        <div class='form-group row'>
+                            <%= setting_fields.label :worka_self_hosted_companion_list_json_url, t('tenant.settings_fields.worka_self_hosted_companion_list_json_url') + ':', class: 'col-sm-2 col-form-label' %>
+                            <%= setting_fields.text_field :worka_self_hosted_companion_list_json_url, class: 'form-control col-sm-10 col' %>
                         </div>
                     <% end %>
                 </div>
