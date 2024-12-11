@@ -94,7 +94,16 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>. %>
                     <td>
                         <ul>
                             <% ten['settings'].each do |key, value| %>
-                                <li><%= "#{key} => #{value}" %> </li>
+                                <% if value.is_a?(Hash) %>
+                                    <span> <%= key %> </span>
+                                    <ul>
+                                        <% value.each do |inner_k, inner_val| %>
+                                            <li><%= "#{inner_k} => #{inner_val}" %></li>
+                                        <% end %>
+                                    </ul>
+                                <% else %>
+                                    <li><%= "#{key} => #{value}" %> </li>
+                                <% end %>
                             <% end %>
                         </ul>
                     </td>

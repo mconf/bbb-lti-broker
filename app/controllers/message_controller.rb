@@ -153,20 +153,10 @@ class MessageController < ApplicationController
 
     # add tenant settings
     tenant_settings = @lti_launch.tool.tenant&.settings
-    if tenant_settings
-      # settings for worka app
-      if params[:app] == 'worka'
-        logger.info "Adding tenant settings as custom params for '#{params[:app]}' app"
-        # Workadventure SaaS
-        if ['1', 'true', true].include?(tenant_settings['worka_saas_enabled'])
-          tenant_settings.keys.select{ |k| k.match?('worka_saas') }.each do |key|
-            new_message['custom_params'][key] = tenant_settings[key]
-          end
-        end
-        # Workadventure self-hosted
-        tenant_settings.keys.select{ |k| k.match?('worka_self_hosted') }.each do |key|
-          new_message['custom_params'][key] = tenant_settings[key]
-        end
+    if tenant_settings && tenant_settings["#{params[:app]}_app_settings"]
+      logger.info "Adding tenant settings for '#{params[:app]}' app as custom params"
+      tenant_settings["#{params[:app]}_app_settings"].each do |key, value|
+        new_message['custom_params'][key] = value
       end
     end
 
