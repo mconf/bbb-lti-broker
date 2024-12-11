@@ -26,37 +26,9 @@ class AppsController < ApplicationController
   def launch
     # Make launch request to LTI-APP
     lti_launch = RailsLti2Provider::LtiLaunch.find_by(nonce: params[:oauth_nonce])
-    tenant = lti_launch.tool.tenant
-
-    # add the oauth key to the data of this launch
-    message = lti_launch.message
-    message.custom_params['oauth_consumer_key'] = params[:oauth_consumer_key]
-
-    # add tenant settings as custom params
-    if tenant&.settings.present?
-      # settings for worka app
-      if params[:app] == 'worka'
-        logger.info "Adding tenant settings as custom params for '#{params[:app]}' app"
-        # settings for Workadventure SaaS
-        if ['1', 'true', true].include?(tenant.settings['worka_saas_enabled'])
-          tenant.settings.keys.select{ |k| k.match?('worka_saas') }.each do |key|
-            message.custom_params[key] = tenant.settings[key]
-          end
-        end
-        # settings for self-hosted Workadventure
-        tenant.settings.keys.select{ |k| k.match?('worka_self_hosted') }.each do |key|
-          message.custom_params[key] = tenant.settings[key]
-        end
-      # settings for rooms app
-      elsif params[:app] == 'rooms'
-        logger.info "Adding tenant settings as custom params for '#{params[:app]}' app"
-      end
-    end
-
-    lti_launch.update(message: message.to_json)
-
     redirector = "#{lti_app_url(params[:app])}?#{{ launch_nonce: lti_launch.nonce }.to_query}"
     logger.info("redirect_post to LTI app url=#{redirector}")
+
     redirect_post(redirector, options: { authenticity_token: :auto })
   end
 end

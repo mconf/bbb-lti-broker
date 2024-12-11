@@ -39,6 +39,8 @@ class MessageController < ApplicationController
   before_action :lti_authentication, only: %i[basic_lti_launch_request basic_lti_launch_request_legacy]
   # validates message corresponds to a LTI launch
   before_action :process_openid_message, only: %i[openid_launch_request deep_link]
+  # add custom params to lti_launch message
+  after_action :add_custom_params_to_launch_message, only: %i[basic_lti_launch_request openid_launch_request]
 
   # fails lti_authentication in rails lti2 provider gem
   rescue_from RailsLti2Provider::LtiLaunch::Unauthorized do |ex|
@@ -140,6 +142,36 @@ class MessageController < ApplicationController
   end
 
   private
+
+  # Add any tenant and tool settings for a specific app as custom params in the lti_launch message
+  def add_custom_params_to_launch_message
+    new_message = @lti_launch.message.post_params
+    new_message['custom_params'] ||= {}
+
+    # add the oauth consumer key
+    new_message['custom_params']['oauth_consumer_key'] = params[:oauth_consumer_key]
+
+    # add tenant settings
+    tenant_settings = @lti_launch.tool.tenant&.settings
+    if tenant_settings
+      # settings for worka app
+      if params[:app] == 'worka'
+        logger.info "Adding tenant settings as custom params for '#{params[:app]}' app"
+        # Workadventure SaaS
+        if ['1', 'true', true].include?(tenant_settings['worka_saas_enabled'])
+          tenant_settings.keys.select{ |k| k.match?('worka_saas') }.each do |key|
+            new_message['custom_params'][key] = tenant_settings[key]
+          end
+        end
+        # Workadventure self-hosted
+        tenant_settings.keys.select{ |k| k.match?('worka_self_hosted') }.each do |key|
+          new_message['custom_params'][key] = tenant_settings[key]
+        end
+      end
+    end
+
+    @lti_launch.update(message: new_message.to_json)
+  end
 
   # called by all requests to process the message first
   def process_blti_message
