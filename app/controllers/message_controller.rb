@@ -160,6 +160,20 @@ class MessageController < ApplicationController
       end
     end
 
+    # add tool settings with priority over tenant settings, i.e.
+    # any setting with the same key will be overwritten
+    tool_settings = begin
+      JSON.parse(@lti_launch.tool.tool_settings)
+    rescue JSON::JSONError
+      nil
+    end
+    if tool_settings && tool_settings["#{params[:app]}_app_settings"]
+      logger.info "Adding tool settings for '#{params[:app]}' app as custom params"
+      tool_settings["#{params[:app]}_app_settings"].each do |key, value|
+        new_message['custom_params'][key] = value
+      end
+    end
+
     @lti_launch.update(message: new_message.to_json)
   end
 
