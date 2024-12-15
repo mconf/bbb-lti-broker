@@ -28,8 +28,8 @@ class ToolsController < ApplicationController
   end
 
   def new
-    @tool = RailsLti2Provider::Tool.new
     @tenants = RailsLti2Provider::Tenant.all.pluck(:uid, :id)
+    @tool = RailsLti2Provider::Tool.new(tenant_id: @tenants[0][1])
   end
 
   def edit
@@ -37,27 +37,19 @@ class ToolsController < ApplicationController
   end
 
   def create
-    tool = RailsLti2Provider::Tool.new(
-      uuid: params[:uuid],
-      shared_secret: params[:shared_secret],
-      lti_version: 'LTI-1p0',
-      tool_settings: 'none',
-      tenant: RailsLti2Provider::Tenant.find_by(id: params[:tool][:tenant_id])
-    )
+    other_params = {lti_version: 'LTI-1p0', tool_settings: '{}'}
+    @tool = RailsLti2Provider::Tool.new(tool_params.merge(other_params))
 
-    if tool.save
+    if @tool.save
       redirect_to(registration_list_path)
     else
+      logger.debug(@tool.errors.inspect)
       redirect_to(new_tool_path)
     end
   end
 
   def update
-    @tool.update!(
-      uuid: params[:uuid],
-      shared_secret: params[:shared_secret],
-      tenant: RailsLti2Provider::Tenant.find_by(id: params[:tool][:tenant_id])
-    )
+    @tool.update(tool_params)
 
     redirect_to(registration_list_path)
   end
@@ -72,5 +64,15 @@ class ToolsController < ApplicationController
 
   def find_tool
     @tool = RailsLti2Provider::Tool.find_by(uuid: params['id'])
+  end
+
+  def tool_params
+    params.require(:tool).permit(:uuid, :shared_secret, :tenant_id,
+    tool_settings: {}, app_settings: {}).tap do |whitelisted|
+      # Reject blank values inside inner hashes
+      whitelisted[:app_settings].each do |key, value|
+        value.compact_blank!
+      end
+    end
   end
 end

@@ -112,6 +112,7 @@ en:
         message: "Server error"
         suggestion: "Please try again later or contact an administrator."
   tool:
+    app_settings: "App settings"
     created_at: "Created at"
     edit: "Edit Tool - LTI 1.0"
     lti_version: "LTI Version"
