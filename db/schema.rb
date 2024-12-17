@@ -90,7 +90,6 @@ ActiveRecord::Schema.define(version: 2024_12_13_090345) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.jsonb "settings", default: {}, null: false
-    t.jsonb "app_settings", default: {}, null: false
     t.index ["uid"], name: "index_tenant_uid", unique: true
   end
 
