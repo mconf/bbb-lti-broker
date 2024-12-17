@@ -152,8 +152,8 @@ class MessageController < ApplicationController
     new_message['custom_params']['oauth_consumer_key'] = params[:oauth_consumer_key]
 
     # add tenant settings
-    tenant_settings = @lti_launch.tool.tenant&.settings
-    if tenant_settings && tenant_settings["#{params[:app]}_app_settings"]
+    tenant_settings = @lti_launch.tool.tenant&.settings || {}
+    if tenant_settings["#{params[:app]}_app_settings"]
       logger.info "Adding tenant settings for '#{params[:app]}' app as custom params"
       tenant_settings["#{params[:app]}_app_settings"].each do |key, value|
         new_message['custom_params'][key] = value
@@ -162,14 +162,10 @@ class MessageController < ApplicationController
 
     # add tool settings with priority over tenant settings, i.e.
     # any setting with the same key will be overwritten
-    tool_settings = begin
-      JSON.parse(@lti_launch.tool.tool_settings)
-    rescue JSON::JSONError
-      nil
-    end
-    if tool_settings && tool_settings["#{params[:app]}_app_settings"]
+    tool_app_settings = @lti_launch.tool.app_settings || {}
+    if tool_app_settings[params[:app]]
       logger.info "Adding tool settings for '#{params[:app]}' app as custom params"
-      tool_settings["#{params[:app]}_app_settings"].each do |key, value|
+      tool_app_settings[params[:app]].each do |key, value|
         new_message['custom_params'][key] = value
       end
     end
