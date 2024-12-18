@@ -127,10 +127,10 @@ en:
     new: "New Tenant"
     settings: "Settings"
     settings_fields:
-      worka_saas_domain: "World domain"
       worka_saas_enabled: "Worka SaaS enabled"
       worka_saas_toggle: "Toggle Workadventure SaaS settings"
-      worka_saas_world: "World name"
+      worka_saas_world_domain: "World domain"
+      worka_saas_world_name: "World name"
       worka_self_hosted_companion_list_json_url: "Companion list JSON URL"
       worka_self_hosted_bbb_url: "BBB server URL"
       worka_self_hosted_map_file_url: "Map file URL"
