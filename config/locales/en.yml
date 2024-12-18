@@ -50,8 +50,8 @@ en:
   registration:
     goback:         "Go Back"
     issuer:         "Issuer"
-    clientid:       "Client ID"
-    keyseturl:      "Key set URL"
+    client_id:       "Client ID"
+    key_set_url:      "Key set URL"
     auth_token_url:   "Access Token URL"
     auth_login_url:   "Auth request URL"
     rsa_key_pair_id:  "RSA key pair ID"

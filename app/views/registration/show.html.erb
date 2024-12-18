@@ -16,80 +16,69 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>. %>
 
 <div class='container'>
     <h3><%= t('registration.show') %></h3>
-    <%= content_tag :div, class: "form-group row" do %>
-        <%= label_tag(:uuid, t('tool.uuid') + ':', class: "col-sm-2 col-form-label") %>
-        <%= content_tag :div, class: "col-sm-10 col" do %>
-            <%= text_field_tag(:uuid, @tool.uuid, size: 90, class: 'form-control', readonly: true) %>
-        <% end %>
-    <% end %>
-    <%= content_tag :div, class: "form-group row" do %>
-        <%= label_tag(:shared_secret, t('tool.shared_secret') + ':', class: "col-sm-2 col-form-label") %>
-        <%= content_tag :div, class: "col-sm-10 col" do %>
-            <%= text_field_tag(:shared_secret, @tool.shared_secret, size: 90, class: 'form-control', readonly: true) %>
-        <% end %>
-    <% end %>
-    <%= content_tag :div, class: "form-group row" do %>
-        <%= label_tag(:lti_version, t('tool.lti_version') + ':', class: "col-sm-2 col-form-label") %>
-        <%= content_tag :div, class: "col-sm-10 col" do %>
-            <%= text_field_tag(:lti_version, @tool.lti_version, size: 90, class: 'form-control', readonly: true) %>
-        <% end %>
-    <% end %>
-    <%= content_tag :div, class: "form-group row" do %>
-        <%= label_tag(:tenant, t('tool.tenant') + ':', class: "col-sm-2 col-form-label") %>
-        <%= content_tag :div, class: "col-sm-10 col" do %>
-            <%= text_field_tag(:tenant, @tool.tenant.uid, size: 90, class: 'form-control', readonly: true) %>
-        <% end %>
-    <% end %>
+    <%# uuid %>
     <div class='form-group row'>
-        <%= label_tag(:created_at, t('tool.created_at') + ':', class: "col-sm-2 col-form-label") %>
-        <div class='col-sm-10 col'>
-            <%= text_field_tag(:created_at, @tool.created_at, class: 'form-control', readonly: true) %>
-        </div>
+        <%= label_tag(:uuid, t('tool.uuid') + ':',
+            class: 'col-sm-2 col-form-label') %>
+        <%= text_field_tag(:uuid, @tool.uuid,
+            class: 'form-control col-sm-10 col', readonly: true) %>
     </div>
+    <%# shared_secret %>
     <div class='form-group row'>
-        <%= label_tag(:updated_at, t('tool.updated_at') + ':', class: "col-sm-2 col-form-label") %>
-        <div class='col-sm-10 col'>
-            <%= text_field_tag(:updated_at, @tool.updated_at, class: 'form-control', readonly: true) %>
-        </div>
+        <%= label_tag(:shared_secret, t('tool.shared_secret') + ':',
+            class: 'col-sm-2 col-form-label') %>
+        <%= text_field_tag(:shared_secret, @tool.shared_secret,
+            class: 'form-control col-sm-10 col', readonly: true) %>
+    </div>
+    <%# lti_version %>
+    <div class='form-group row'>
+        <%= label_tag(:lti_version, t('tool.lti_version') + ':',
+            class: 'col-sm-2 col-form-label') %>
+        <%= text_field_tag(:lti_version, @tool.lti_version,
+            class: 'form-control col-sm-10 col', readonly: true) %>
+    </div>
+    <%# tenant %>
+    <div class='form-group row'>
+        <%= label_tag(:tenant, t('tool.tenant') + ':',
+            class: 'col-sm-2 col-form-label') %>
+        <%= text_field_tag(:tenant, @tool.tenant.uid,
+            class: 'form-control col-sm-10 col', readonly: true) %>
+    </div>
+    <%# created_at %>
+    <div class='form-group row'>
+        <%= label_tag(:created_at, t('tool.created_at') + ':',
+            class: 'col-sm-2 col-form-label') %>
+        <%= text_field_tag(:created_at, @tool.created_at,
+            class: 'form-control col-sm-10 col', readonly: true) %>
+    </div>
+    <%# updated_at %>
+    <div class='form-group row'>
+        <%= label_tag(:updated_at, t('tool.updated_at') + ':',
+            class: 'col-sm-2 col-form-label') %>
+        <%= text_field_tag(:updated_at, @tool.updated_at,
+            class: 'form-control col-sm-10 col', readonly: true) %>
     </div>
 
     <%# Tool Settings %>
     <h5><%= t('tool.tool_settings') %></h5>
-    <%= content_tag :div, class: "form-group row" do %>
-        <%= label_tag(:iss, t('registration.issuer') + ':', class: "col-sm-2 col-form-label") %>
-        <%= content_tag :div, class: "col-sm-10 col" do %>
-            <%= text_field_tag(:iss, @registration['issuer'], size: 90, class: 'form-control', readonly: true) %>
+    <% @registration.each do |key, value| %>
+        <div class='form-group row'>
+            <%= label_tag(key, t("registration.#{key}") + ':', class: 'col-sm-2 col-form-label') %>
+            <%= text_field_tag(key, value, class: 'form-control col-sm-10 col', readonly: true) %>
+        </div>
+    <% end %>
+
+    <%# App Settings %>
+    <h4><%= t('tool.app_settings') %></h4>
+    <% @tool.app_settings.each do |key, value| %>
+        <h5><%= key.humanize %></h5>
+        <% value.each do |key, value| %>
+            <div class='form-group row'>
+                <%= label_tag(key, key.humanize + ':', class: 'col-sm-2 col-form-label') %>
+                <%= text_field_tag(key, value, class: 'form-control col-sm-10 col', readonly: true) %>
+            </div>
         <% end %>
     <% end %>
-    <%= content_tag :div, class: "form-group row" do %>
-        <%= label_tag(:client_id, t('registration.clientid') + ':', class: "col-sm-2 col-form-label") %>
-        <%= content_tag :div, class: "col-sm-10 col" do %>
-            <%= text_field_tag(:client_id, @registration['client_id'], size: 90, class: 'form-control', readonly: true) %>
-        <% end %>
-    <% end %>
-    <%= content_tag :div, class: "form-group row" do %>
-        <%= label_tag(:key_set_url, t('registration.keyseturl') + ':', class: "col-sm-2 col-form-label") %>
-        <%= content_tag :div, class: "col-sm-10 col" do %>
-            <%= text_field_tag(:key_set_url, @registration['key_set_url'], size: 90, class: 'form-control', readonly: true) %>
-        <% end %>
-    <% end %>
-    <%= content_tag :div, class: "form-group row" do %>
-        <%= label_tag(:auth_token_url, t('registration.auth_token_url') + ':', class: "col-sm-2 col-form-label") %>
-        <%= content_tag :div, class: "col-sm-10 col" do %>
-            <%= text_field_tag(:auth_token_url, @registration['auth_token_url'], size: 90, class: 'form-control', readonly: true) %>
-        <% end %>
-    <% end %>
-    <%= content_tag :div, class: "form-group row" do %>
-        <%= label_tag(:auth_login_url, t('registration.auth_login_url') + ':', class: "col-sm-2 col-form-label") %>
-        <%= content_tag :div, class: "col-sm-10 col" do %>
-            <%= text_field_tag(:auth_login_url, @registration['auth_login_url'], size: 90, class: 'form-control', readonly: true) %>
-        <% end %>
-    <% end %>
-    <%= content_tag :div, class: "form-group row" do %>
-        <%= label_tag(:tenant_id, t('registration.rsa_key_pair_id') + ':', class: "col-sm-2 col-form-label") %>
-        <%= content_tag :div, class: "col-sm-10 col" do %>
-            <%= text_field_tag(:auth_login_url, @registration['rsa_key_pair_id'], size: 90, class: 'form-control', readonly: true) %>
-        <% end %>
-    <% end %>
+
     <%= link_to t('ui.goback'), registration_list_url, class: 'btn btn-secondary' %>
 </div>
