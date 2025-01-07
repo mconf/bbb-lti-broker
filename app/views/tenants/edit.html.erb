@@ -23,87 +23,11 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>. %>
         </div>
 
         <%# settings %>
-        <%= form.fields :settings, model: OpenStruct.new(@tenant.settings) do |setting_fields| %>
+        <%= form.fields :settings do |settings_form| %>
             <%# 'worka' app settings %>
-            <%= setting_fields.fields 'worka_app_settings',
-                model: OpenStruct.new(setting_fields.object[:worka_app_settings]) do |worka_app_settings| %>
-                <%# Worka SaaS %>
-                <div class='form-group row'>
-                    <div class='col'>
-                        <%= button_tag t('tenant.settings_fields.worka_saas_toggle'),
-                            data: {toggle: 'collapse', target: '#worka-saas-settings'},
-                            type: 'button', class: 'btn btn-link' %>
-                        <div id='worka-saas-settings' class='collapse'>
-                            <div class='form-group row'>
-                                <%= worka_app_settings.label :worka_saas_enabled,
-                                    t('tenant.settings_fields.worka_saas_enabled') + ':',
-                                    class: 'col-sm-2 col-form-label' %>
-                                <%= worka_app_settings.check_box :worka_saas_enabled %>
-                            </div>
-                            <div class='form-group row'>
-                                <%= worka_app_settings.label :worka_saas_world_domain,
-                                    t('tenant.settings_fields.worka_saas_world_domain') + ':',
-                                    class: 'col-sm-2 col-form-label' %>
-                                <%= worka_app_settings.text_field :worka_saas_world_domain,
-                                    class: 'form-control col-sm-10 col' %>
-                            </div>
-                            <div class='form-group row'>
-                                <%= worka_app_settings.label :worka_saas_world_name,
-                                    t('tenant.settings_fields.worka_saas_world_name') + ':',
-                                    class: 'col-sm-2 col-form-label' %>
-                                <%= worka_app_settings.text_field :worka_saas_world_name,
-                                    class: 'form-control col-sm-10 col' %>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <%# Worka self-hosted %>
-                <div class='form-group row'>
-                    <div class='col'>
-                        <%= button_tag t('tenant.settings_fields.worka_self_hosted_toggle'),
-                            data: {toggle: 'collapse', target: '#worka-self-hosted-settings'},
-                            type: 'button', class: 'btn btn-link' %>
-                        <div id='worka-self-hosted-settings' class='collapse'>
-                            <div class='form-group row'>
-                                <%= worka_app_settings.label :worka_self_hosted_url,
-                                    t('tenant.settings_fields.worka_self_hosted_url') + ':',
-                                    class: 'col-sm-2 col-form-label' %>
-                                <%= worka_app_settings.text_field :worka_self_hosted_url,
-                                    class: 'form-control col-sm-10 col' %>
-                            </div>
-                            <div class='form-group row'>
-                                <%= worka_app_settings.label :worka_self_hosted_bbb_url,
-                                    t('tenant.settings_fields.worka_self_hosted_bbb_url') + ':',
-                                    class: 'col-sm-2 col-form-label' %>
-                                <%= worka_app_settings.text_field :worka_self_hosted_bbb_url,
-                                    class: 'form-control col-sm-10 col' %>
-                            </div>
-                            <div class='form-group row'>
-                                <%= worka_app_settings.label :worka_self_hosted_map_file_url,
-                                    t('tenant.settings_fields.worka_self_hosted_map_file_url') + ':',
-                                    class: 'col-sm-2 col-form-label' %>
-                                <%= worka_app_settings.text_field :worka_self_hosted_map_file_url,
-                                    class: 'form-control col-sm-10 col' %>
-                            </div>
-                            <div class='form-group row'>
-                                <%= worka_app_settings.label :worka_self_hosted_woka_list_json_url,
-                                    t('tenant.settings_fields.worka_self_hosted_woka_list_json_url') + ':',
-                                    class: 'col-sm-2 col-form-label' %>
-                                <%= worka_app_settings.text_field :worka_self_hosted_woka_list_json_url,
-                                    class: 'form-control col-sm-10 col' %>
-                            </div>
-                            <div class='form-group row'>
-                                <%= worka_app_settings.label :worka_self_hosted_companion_list_json_url,
-                                    t('tenant.settings_fields.worka_self_hosted_companion_list_json_url') + ':',
-                                    class: 'col-sm-2 col-form-label' %>
-                                <%= worka_app_settings.text_field :worka_self_hosted_companion_list_json_url,
-                                    class: 'form-control col-sm-10 col' %>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            <% end %>
+            <%= render 'shared/worka_app_settings_form',
+                parent_form: settings_form,
+                hash_for_model: @tenant.settings['worka'] %>
         <% end %>
 
         <%= submit_tag(t('ui.submit'), class: 'btn btn-success') %>

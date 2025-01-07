@@ -153,9 +153,9 @@ class MessageController < ApplicationController
 
     # add tenant settings
     tenant_settings = @lti_launch.tool.tenant&.settings || {}
-    if tenant_settings["#{params[:app]}_app_settings"]
+    if tenant_settings[params[:app]]
       logger.info "Adding tenant settings for '#{params[:app]}' app as custom params"
-      tenant_settings["#{params[:app]}_app_settings"].each do |key, value|
+      tenant_settings[params[:app]].each do |key, value|
         new_message['custom_params'][key] = value
       end
     end
