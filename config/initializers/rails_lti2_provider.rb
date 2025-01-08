@@ -58,6 +58,24 @@ Rails.application.config.to_prepare do
 
       save
     end
+
+    # Merge Tenant and Tool app_settings
+    # tool settings have priority over tenant settings, i.e. any setting with the same key will be overwritten
+    def merged_app_settings(app_name)
+      if app_name.blank? || Doorkeeper::Application.find_by(name: app_name).nil?
+        raise(ArgumentError, 'Invalid app name')
+      end
+
+      merged_settings = {}
+      tenant_settings = self.tenant&.settings || {}
+      merged_settings = tenant_settings[app_name] if tenant_settings[app_name]
+      # add tool settings with priority over tenant settings, i.e.
+      # any setting with the same key will be overwritten
+      merged_settings.merge!(self.app_settings[app_name]) if self.app_settings[app_name]
+      logger.info(merged_settings)
+
+      merged_settings
+    end
   end
 
 end

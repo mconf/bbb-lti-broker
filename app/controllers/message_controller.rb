@@ -151,24 +151,10 @@ class MessageController < ApplicationController
     # add the oauth consumer key
     new_message['custom_params']['oauth_consumer_key'] = params[:oauth_consumer_key]
 
-    # add tenant settings
-    tenant_settings = @lti_launch.tool.tenant&.settings || {}
-    if tenant_settings[params[:app]]
-      logger.info "Adding tenant settings for '#{params[:app]}' app as custom params"
-      tenant_settings[params[:app]].each do |key, value|
-        new_message['custom_params'][key] = value
-      end
-    end
-
-    # add tool settings with priority over tenant settings, i.e.
-    # any setting with the same key will be overwritten
-    tool_app_settings = @lti_launch.tool.app_settings || {}
-    if tool_app_settings[params[:app]]
-      logger.info "Adding tool settings for '#{params[:app]}' app as custom params"
-      tool_app_settings[params[:app]].each do |key, value|
-        new_message['custom_params'][key] = value
-      end
-    end
+    # add tenant and tool merged settings
+    merged_app_settings = @lti_launch.tool.merged_app_settings(params[:app])
+    logger.debug(log_hash(merged_app_settings))
+    new_message['custom_params'].merge!(merged_app_settings)
 
     @lti_launch.update(message: new_message.to_json)
   end
