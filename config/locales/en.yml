@@ -135,9 +135,8 @@ en:
       world_domain: "World domain"
       world_name: "World name"
     self_hosted:
-      bbb_url: "BBB server URL"
-      companion_list_json_url: "Companion list JSON URL"
-      map_file_url: "Map file URL"
+      companion_list_url: "Companion list URL"
+      map_url: "Map URL"
       toggle_btn: "Toggle self-hosted Workadventure settings"
       url: "Workadventure URL"
-      woka_list_json_url: "Woka list JSON URL"
+      woka_list_url: "Woka list URL"
