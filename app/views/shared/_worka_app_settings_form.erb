@@ -35,6 +35,14 @@
                     <%= worka_settings.text_field :worka_saas_world_name,
                         class: 'form-control col-sm-10 col' %>
                 </div>
+                <%# worka_saas_map_url %>
+                <div class='form-group row'>
+                    <%= worka_settings.label :worka_saas_map_url,
+                        t('worka_app_settings.saas.map_url') + ':',
+                        class: 'col-sm-2 col-form-label' %>
+                    <%= worka_settings.text_field :worka_saas_map_url,
+                        class: 'form-control col-sm-10 col' %>
+                </div>
             </div>
         </div>
     </div>
