@@ -130,6 +130,7 @@ en:
   worka_app_settings:
     saas:
       enabled: "Worka SaaS enabled"
+      map_storage_url: "Map Storage API URL"
       map_url: "Map URL"
       toggle_btn: "Toggle Workadventure SaaS settings"
       world_domain: "World domain"
