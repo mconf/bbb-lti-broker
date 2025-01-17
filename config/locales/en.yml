@@ -50,8 +50,8 @@ en:
   registration:
     goback:         "Go Back"
     issuer:         "Issuer"
-    clientid:       "Client ID"
-    keyseturl:      "Key set URL"
+    client_id:       "Client ID"
+    key_set_url:      "Key set URL"
     auth_token_url:   "Access Token URL"
     auth_login_url:   "Auth request URL"
     rsa_key_pair_id:  "RSA key pair ID"
@@ -112,6 +112,7 @@ en:
         message: "Server error"
         suggestion: "Please try again later or contact an administrator."
   tool:
+    app_settings: "App settings"
     created_at: "Created at"
     edit: "Edit Tool - LTI 1.0"
     lti_version: "LTI Version"
@@ -126,3 +127,17 @@ en:
     new: "New Tenant"
     settings: "Settings"
     uid: "UID"
+  worka_app_settings:
+    saas:
+      enabled: "Worka SaaS enabled"
+      map_storage_url: "Map Storage API URL"
+      map_url: "Map URL"
+      toggle_btn: "Toggle Workadventure SaaS settings"
+      world_domain: "World domain"
+      world_name: "World name"
+    self_hosted:
+      companion_list_url: "Companion list URL"
+      map_url: "Map URL"
+      toggle_btn: "Toggle self-hosted Workadventure settings"
+      url: "Workadventure URL"
+      woka_list_url: "Woka list URL"

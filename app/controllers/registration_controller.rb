@@ -47,6 +47,7 @@ class RegistrationController < ApplicationController
     @app = Rails.configuration.default_tool
     @apps = lti_apps
     @tenants = RailsLti2Provider::Tenant.all.sort.pluck(:uid, :id)
+    @tool = RailsLti2Provider::Tool.new(tenant_id: @tenants[0][1])
     set_rsa_keys
     set_starter_info
   end
@@ -61,42 +62,36 @@ class RegistrationController < ApplicationController
   end
 
   def submit
-    return if params[:client_id] == ''
+    settings_params = tool_params[:tool_settings]
+    return if settings_params[:client_id] == ''
 
-    reg = {
-      issuer: params[:iss],
-      client_id: params[:client_id],
-      key_set_url: params[:key_set_url],
-      auth_token_url: params[:auth_token_url],
-      auth_login_url: params[:auth_login_url],
-    }
-
-    if params.key?('key_pair_id')
-      key_pair = RsaKeyPair.find(params[:key_pair_id])
+    if settings_params.key?('rsa_key_pair_id')
+      key_pair = RsaKeyPair.find(settings_params[:rsa_key_pair_id])
       redirect_to(new_registration_path) and return if key_pair.nil?
 
-      reg[:rsa_key_pair_id] = params[:key_pair_id]
-      key_pair.update(tool_id: params[:client_id])
+      key_pair.update(tool_id: settings_params[:client_id])
     end
 
-    registration = lti_registration(params[:client_id]) if params.key?('client_id')
+    registration = lti_registration(settings_params[:client_id]) if tool_params[:tool_settings].key?('client_id')
     unless registration.nil?
-      reg[:rsa_key_pair_id] = lti_registration_params(params[:client_id])['rsa_key_pair_id']
+      settings_params[:rsa_key_pair_id] = lti_registration_params(settings_params[:client_id])['rsa_key_pair_id']
       registration.update(
-        tool_settings: reg.to_json,
-        shared_secret: params[:client_id],
-        tenant: RailsLti2Provider::Tenant.find_by(id: params[:tenant_id])
+        tool_settings: settings_params.to_json,
+        shared_secret: settings_params[:client_id],
+        app_settings: tool_params[:app_settings],
+        tenant: RailsLti2Provider::Tenant.find_by(id: tool_params[:tenant_id])
       )
       registration.save
       redirect_to(registration_list_path) and return
     end
 
     RailsLti2Provider::Tool.create!(
-      uuid: params[:client_id],
-      shared_secret: params[:client_id],
-      tool_settings: reg.to_json,
+      uuid: settings_params[:client_id],
+      shared_secret: settings_params[:client_id],
+      tool_settings: settings_params.to_json,
+      app_settings: tool_params[:app_settings],
       lti_version: '1.3.0',
-      tenant: RailsLti2Provider::Tenant.find_by(id: params[:tenant_id])
+      tenant: RailsLti2Provider::Tenant.find_by(id: tool_params[:tenant_id])
     )
 
     redirect_to(registration_list_path)
@@ -137,5 +132,15 @@ class RegistrationController < ApplicationController
     basic_launch_url = openid_launch_url(app: @app)
     deep_link_url = deep_link_request_launch_url(app: @app)
     @redirect_uri = "#{basic_launch_url}\n#{deep_link_url}"
+  end
+
+  def tool_params
+    params.require(:tool).permit(:uuid, :shared_secret, :tenant_id,
+    tool_settings: {}, app_settings: {}).tap do |whitelisted|
+      # Reject blank values inside inner hashes
+      whitelisted[:app_settings].each do |key, value|
+        value.compact_blank!
+      end
+    end
   end
 end

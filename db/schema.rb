@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_02_19_190044) do
+ActiveRecord::Schema.define(version: 2024_12_13_090345) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -102,6 +102,7 @@ ActiveRecord::Schema.define(version: 2024_02_19_190044) do
     t.string "lti_version"
     t.integer "tenant_id"
     t.datetime "expired_at"
+    t.jsonb "app_settings", default: {}, null: false
     t.index ["id", "tenant_id"], name: "index_tool_id_tenant_id", unique: true
     t.index ["tenant_id"], name: "index_tenant_id"
     t.index ["uuid"], name: "index_uuid", unique: true

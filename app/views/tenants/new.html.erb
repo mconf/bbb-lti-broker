@@ -14,15 +14,20 @@ PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along
 with BigBlueButton; if not, see <http://www.gnu.org/licenses/>. %>
 
-<div class="registration-form container">
+<div class='registration-form container'>
     <h3><%= t('tenant.new') %></h3>
-    <%= form_tag(tenants_path) do %>
-        <%= content_tag :div, class: "form-group row" do %>
-            <%= label_tag(:uid, t('tenant.uid') + ':', class: "col-sm-2 col-form-label") %>
-            <%= content_tag :div, class: "col-sm-10 col" do %>
-                <%= text_field_tag(:uid, "", size: 90, class: 'form-control', required: true) %>
-            <% end %>
+    <%= form_with model: RailsLti2Provider::Tenant.new do |form| %>
+        <div class='form-group row'>
+            <%= form.label :uid, t('tenant.uid') + ':', class: 'col-sm-2 col-form-label' %>
+            <%= form.text_field :uid, class: 'form-control col-sm-10 col', required: true %>
+        </div>
+
+        <%# settings %>
+        <%= form.fields :settings do |settings_form| %>
+            <%# 'worka' app settings %>
+            <%= render 'shared/worka_app_settings_form', parent_form: settings_form %>
         <% end %>
+
         <%= submit_tag(t('ui.submit'), class: 'btn btn-success') %>
         <%= link_to t('ui.cancel'), registration_list_url, class: 'btn btn-secondary' %>
     <% end %>

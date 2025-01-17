@@ -31,7 +31,7 @@ class TenantsController < ApplicationController
   end
 
   def create
-    tenant = RailsLti2Provider::Tenant.new(uid: params[:uid], settings: {})
+    tenant = RailsLti2Provider::Tenant.new(tenant_params)
     if tenant.save
       redirect_to(registration_list_path)
     else
@@ -40,9 +40,11 @@ class TenantsController < ApplicationController
   end
 
   def update
-    @tenant.update!(uid: params[:uid])
-
-    redirect_to(registration_list_path)
+    if @tenant.update(tenant_params)
+      redirect_to(registration_list_path)
+    else
+      redirect_to(edit_tenant_path(@tenant.uid))
+    end
   end
 
   def destroy
@@ -55,5 +57,14 @@ class TenantsController < ApplicationController
 
   def find_tenant
     @tenant = RailsLti2Provider::Tenant.find_by(uid: params['id'])
+  end
+
+  def tenant_params
+    params.require(:tenant).permit(:uid, settings: {}).tap do |whitelisted|
+      # Reject blank values inside inner hashes
+      whitelisted[:settings].each do |key, value|
+        whitelisted[:settings][key].reject! { |_, value| value.blank? }
+      end
+    end
   end
 end

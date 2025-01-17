@@ -26,15 +26,9 @@ class AppsController < ApplicationController
   def launch
     # Make launch request to LTI-APP
     lti_launch = RailsLti2Provider::LtiLaunch.find_by(nonce: params[:oauth_nonce])
-
-    # add the oauth key to the data of this launch
-    message = lti_launch.message
-    message.custom_params['oauth_consumer_key'] = params[:oauth_consumer_key]
-
-    lti_launch.update(message: message.to_json)
-
     redirector = "#{lti_app_url(params[:app])}?#{{ launch_nonce: lti_launch.nonce }.to_query}"
     logger.info("redirect_post to LTI app url=#{redirector}")
+
     redirect_post(redirector, options: { authenticity_token: :auto })
   end
 end
