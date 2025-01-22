@@ -1,6 +1,7 @@
 <%# arguments:
     parent_form [FormBuilder] => 'worka_settings' form will be added inside this form
     hash_for_model (optional) [Hash] => hash with data to pre-fill 'worka_settings' form
+    hide_saas_enabled_checkbox (optional) (Boolean) => if true, won't render the checkbox
 %>
 <% hash_for_model ||= {} %>
 <%= parent_form.fields 'worka', model: OpenStruct.new(hash_for_model) do |worka_settings| %>
@@ -12,13 +13,15 @@
                 data: {toggle: 'collapse', target: '#worka-saas-settings'},
                 type: 'button', class: 'btn btn-link' %>
             <div id='worka-saas-settings' class='collapse'>
-                <%# worka_saas_enabled %>
-                <div class='form-group row'>
-                    <%= worka_settings.label :worka_saas_enabled,
-                        t('worka_app_settings.saas.enabled') + ':',
-                        class: 'col-sm-2 col-form-label' %>
-                    <%= worka_settings.check_box :worka_saas_enabled %>
-                </div>
+                <% unless local_assigns[:hide_saas_enabled_checkbox] %>
+                    <%# worka_saas_enabled %>
+                    <div class='form-group row'>
+                        <%= worka_settings.label :worka_saas_enabled,
+                            t('worka_app_settings.saas.enabled') + ':',
+                            class: 'col-sm-2 col-form-label' %>
+                        <%= worka_settings.check_box :worka_saas_enabled %>
+                    </div>
+                <% end %>
                 <%# worka_saas_world_url %>
                 <div class='form-group row'>
                     <%= worka_settings.label :worka_saas_world_url,
