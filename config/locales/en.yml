@@ -133,8 +133,7 @@ en:
       map_storage_url: "Map Storage API URL"
       map_url: "Map URL"
       toggle_btn: "Toggle Workadventure SaaS settings"
-      world_domain: "World domain"
-      world_name: "World name"
+      world_url: "World URL"
     self_hosted:
       companion_list_url: "Companion list URL"
       map_url: "Map URL"

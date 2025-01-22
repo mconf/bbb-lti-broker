@@ -19,20 +19,12 @@
                         class: 'col-sm-2 col-form-label' %>
                     <%= worka_settings.check_box :worka_saas_enabled %>
                 </div>
-                <%# worka_saas_world_domain %>
+                <%# worka_saas_world_url %>
                 <div class='form-group row'>
-                    <%= worka_settings.label :worka_saas_world_domain,
-                        t('worka_app_settings.saas.world_domain') + ':',
+                    <%= worka_settings.label :worka_saas_world_url,
+                        t('worka_app_settings.saas.world_url') + ':',
                         class: 'col-sm-2 col-form-label' %>
-                    <%= worka_settings.text_field :worka_saas_world_domain,
-                        class: 'form-control col-sm-10 col' %>
-                </div>
-                <%# worka_saas_world_name %>
-                <div class='form-group row'>
-                    <%= worka_settings.label :worka_saas_world_name,
-                        t('worka_app_settings.saas.world_name') + ':',
-                        class: 'col-sm-2 col-form-label' %>
-                    <%= worka_settings.text_field :worka_saas_world_name,
+                    <%= worka_settings.text_field :worka_saas_world_url,
                         class: 'form-control col-sm-10 col' %>
                 </div>
                 <%# worka_saas_map_url %>
