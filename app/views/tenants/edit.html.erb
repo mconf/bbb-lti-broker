@@ -29,6 +29,10 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>. %>
                 parent_form: settings_form,
                 hash_for_model: @tenant.settings['worka'],
                 hide_saas_enabled_checkbox: true %>
+            <%# 'rooms' app settings %>
+            <%= render 'shared/rooms_app_settings_form',
+                parent_form: settings_form,
+                hash_for_model: @tenant.settings['rooms'] %>
         <% end %>
 
         <%= submit_tag(t('ui.submit'), class: 'btn btn-success') %>
