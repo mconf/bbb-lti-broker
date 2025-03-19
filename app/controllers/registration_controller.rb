@@ -137,9 +137,12 @@ class RegistrationController < ApplicationController
   def tool_params
     params.require(:tool).permit(:uuid, :shared_secret, :tenant_id,
     tool_settings: {}, app_settings: {}).tap do |whitelisted|
-      # Reject blank values inside inner hashes
-      whitelisted[:app_settings].each do |key, value|
-        value.compact_blank!
+      # Filter app_settings params
+      whitelisted[:app_settings].each do |app_name, settings|
+        # Reject blank values
+        settings.compact_blank!
+        # Reject 'false' values from checkboxes
+        settings.delete_if { |key, val| key.include?('_enabled') && val == '0' }
       end
     end
   end
