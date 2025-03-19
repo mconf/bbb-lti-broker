@@ -135,11 +135,11 @@ en:
       toggle_btn: "Toggle Workadventure SaaS settings"
       world_url: "World URL"
     self_hosted:
-      companion_list_url: "Companion list URL"
+      bbb_api_secret: "BigBlueButton API secret"
+      bbb_api_url: "BigBlueButton API URL"
       map_url: "Map URL"
       toggle_btn: "Toggle self-hosted Workadventure settings"
       url: "Workadventure URL"
-      woka_list_url: "Woka list URL"
   rooms_app_settings:
     institution_guid: "Institution GUID"
     toggle_btn: "Toggle Rooms settings"
