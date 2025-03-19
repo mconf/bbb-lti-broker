@@ -37,11 +37,11 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>. %>
                     <td><%= reg['client_id'] %></td>
                     <td class='text-wrap'>
                         <ul class='px-0'>
-                            <% tool['app_settings'].each do |key, value| %>
-                                <span> <%= key %> </span>
+                            <% tool['app_settings'].each do |app_name, settings| %>
+                                <span> <%= app_name unless settings.blank? %> </span>
                                 <ul>
-                                    <% value.each do |inner_k, inner_val| %>
-                                        <li><%= "#{inner_k} => #{inner_val}" %></li>
+                                    <% settings.each do |key, val| %>
+                                        <li><%= "#{key} => #{val}" %></li>
                                     <% end %>
                                 </ul>
                             <% end %>
@@ -80,11 +80,11 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>. %>
                     <td><%= tool['shared_secret'] %></td>
                     <td class='text-wrap'>
                         <ul class='px-0'>
-                            <% tool['app_settings'].each do |key, value| %>
-                                <span> <%= key %> </span>
+                            <% tool['app_settings'].each do |app_name, settings| %>
+                                <span> <%= app_name unless settings.blank? %> </span>
                                 <ul>
-                                    <% value.each do |inner_k, inner_val| %>
-                                        <li><%= "#{inner_k} => #{inner_val}" %></li>
+                                    <% settings.each do |key, val| %>
+                                        <li><%= "#{key} => #{val}" %></li>
                                     <% end %>
                                 </ul>
                             <% end %>
