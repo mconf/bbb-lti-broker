@@ -90,6 +90,14 @@
                     <%= worka_settings.text_field :worka_self_hosted_bbb_api_secret,
                         class: 'form-control col-sm-10 col' %>
                 </div>
+                <%# worka_self_hosted_institution_guid %>
+                <div class='form-group row'>
+                    <%= worka_settings.label :worka_self_hosted_institution_guid,
+                        t('worka_app_settings.self_hosted.institution_guid') + ':',
+                        class: 'col-sm-2 col-form-label' %>
+                    <%= worka_settings.text_field :worka_self_hosted_institution_guid,
+                        class: 'form-control col-sm-10 col' %>
+                </div>
             </div>
         </div>
     </div>

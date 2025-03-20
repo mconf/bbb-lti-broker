@@ -137,6 +137,7 @@ en:
     self_hosted:
       bbb_api_secret: "BigBlueButton API secret"
       bbb_api_url: "BigBlueButton API URL"
+      institution_guid: "Institution GUID"
       map_url: "Map URL"
       toggle_btn: "Toggle self-hosted Workadventure settings"
       url: "Workadventure URL"
