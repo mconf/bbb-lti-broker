@@ -143,3 +143,6 @@ en:
   rooms_app_settings:
     institution_guid: "Institution GUID"
     toggle_btn: "Toggle Rooms settings"
+  tool_app_settings:
+    institution_guid: "Institution GUID"
+    toggle_btn: "Toggle Tool settings"

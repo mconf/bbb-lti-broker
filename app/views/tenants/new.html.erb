@@ -31,6 +31,9 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>. %>
             <%# 'rooms' app settings %>
             <%= render 'shared/rooms_app_settings_form',
                 parent_form: settings_form %>
+            <%# 'tool' app settings %>
+            <%= render 'shared/tool_app_settings_form',
+                parent_form: settings_form %>
         <% end %>
 
         <%= submit_tag(t('ui.submit'), class: 'btn btn-success') %>
