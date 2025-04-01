@@ -142,7 +142,7 @@ en:
       woka_list_url: "Woka list URL"
   rooms_app_settings:
     institution_guid: "Institution GUID"
-    toggle_btn: "Toggle Rooms settings"
+    toggle_btn: "Toggle App settings - Rooms"
   tool_app_settings:
     institution_guid: "Institution GUID"
-    toggle_btn: "Toggle Tool settings"
+    toggle_btn: "Toggle App settings - Tool"
