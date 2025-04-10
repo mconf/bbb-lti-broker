@@ -1,0 +1,24 @@
+<%# arguments:
+  parent_form [FormBuilder] => 'tool_settings' form will be added inside this form
+  hash_for_model (optional) [Hash] => hash with data to pre-fill 'tool_settings' form
+%>
+
+<% hash_for_model ||= {} %>
+<%= parent_form.fields 'tool', model: OpenStruct.new(hash_for_model) do |tool_settings| %>
+  <div class='form-group'>
+    <%# tool toggle button %>
+    <%= button_tag t('tool_app_settings.toggle_btn'),
+      data: {toggle: 'collapse', target: '#tool-settings'},
+      type: 'button', class: 'btn btn-link' %>
+    <div id='tool-settings' class='collapse'>
+      <%# institution guid %>
+      <div class='form-group row'>
+        <%= tool_settings.label :institution_guid,
+          t('tool_app_settings.institution_guid') + ':',
+          class: 'col-sm-2 col-form-label' %>
+        <%= tool_settings.text_field :institution_guid,
+          class: 'form-control col-sm-10 col' %>
+      </div>
+    </div>
+  </div>
+<% end %>

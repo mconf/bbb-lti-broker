@@ -71,9 +71,14 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>. %>
             <%= render 'shared/worka_app_settings_form',
                 parent_form: app_settings_form,
                 hash_for_model: @tool.app_settings['worka'] %>
+            <%# 'rooms' app settings %>
             <%= render 'shared/rooms_app_settings_form',
                 parent_form: app_settings_form,
                 hash_for_model: @tool.app_settings['rooms'] %>
+            <%# 'tool' app settings %>
+            <%= render 'shared/tool_app_settings_form',
+                parent_form: app_settings_form,
+                hash_for_model: @tool.app_settings['tool'] %>
         <% end %>
 
         <%= submit_tag(t('ui.submit'), class: 'btn btn-success') %>
