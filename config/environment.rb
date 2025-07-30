@@ -17,7 +17,7 @@
 # with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
 
 # Load the Rails application.
-require_relative 'application'
+require_relative "application"
 OAUTH_10_SUPPORT = true
 # Initialize the Rails application.
 Rails.application.initialize!
