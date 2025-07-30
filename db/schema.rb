@@ -10,8 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_12_13_090345) do
-
+ActiveRecord::Schema[7.0].define(version: 2025_07_30_195800) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -21,8 +20,8 @@ ActiveRecord::Schema.define(version: 2024_12_13_090345) do
     t.string "token", null: false
     t.integer "expires_in", null: false
     t.text "redirect_uri", null: false
-    t.datetime "created_at", null: false
-    t.datetime "revoked_at"
+    t.datetime "created_at", precision: nil, null: false
+    t.datetime "revoked_at", precision: nil
     t.string "scopes", default: "", null: false
     t.index ["application_id"], name: "index_oauth_access_grants_on_application_id"
     t.index ["resource_owner_id"], name: "index_oauth_access_grants_on_resource_owner_id"
@@ -35,8 +34,8 @@ ActiveRecord::Schema.define(version: 2024_12_13_090345) do
     t.string "token", null: false
     t.string "refresh_token"
     t.integer "expires_in"
-    t.datetime "revoked_at"
-    t.datetime "created_at", null: false
+    t.datetime "revoked_at", precision: nil
+    t.datetime "created_at", precision: nil, null: false
     t.string "scopes"
     t.string "previous_refresh_token", default: "", null: false
     t.index ["application_id"], name: "index_oauth_access_tokens_on_application_id"
@@ -53,8 +52,8 @@ ActiveRecord::Schema.define(version: 2024_12_13_090345) do
     t.text "redirect_uri", null: false
     t.string "scopes", default: "", null: false
     t.boolean "confidential", default: true, null: false
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.index ["uid"], name: "index_oauth_applications_on_uid", unique: true
   end
 
@@ -62,8 +61,8 @@ ActiveRecord::Schema.define(version: 2024_12_13_090345) do
     t.bigint "tool_id"
     t.string "nonce"
     t.text "message"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.bigint "user_id"
     t.boolean "expired"
     t.index ["created_at"], name: "index_rails_lti2_provider_lti_launches_on_created_at"
@@ -78,8 +77,8 @@ ActiveRecord::Schema.define(version: 2024_12_13_090345) do
     t.text "registration_request_params"
     t.text "tool_proxy_json"
     t.string "workflow_state"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.bigint "tool_id"
     t.text "correlation_id"
     t.index ["correlation_id"], name: "index_rails_lti2_provider_registrations_on_correlation_id", unique: true
@@ -87,8 +86,8 @@ ActiveRecord::Schema.define(version: 2024_12_13_090345) do
 
   create_table "rails_lti2_provider_tenants", force: :cascade do |t|
     t.string "uid"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.jsonb "settings", default: {}, null: false
     t.index ["uid"], name: "index_tenant_uid", unique: true
   end
@@ -97,11 +96,11 @@ ActiveRecord::Schema.define(version: 2024_12_13_090345) do
     t.string "uuid"
     t.text "shared_secret"
     t.text "tool_settings"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.string "lti_version"
     t.integer "tenant_id"
-    t.datetime "expired_at"
+    t.datetime "expired_at", precision: nil
     t.jsonb "app_settings", default: {}, null: false
     t.index ["id", "tenant_id"], name: "index_tool_id_tenant_id", unique: true
     t.index ["tenant_id"], name: "index_tenant_id"
@@ -112,15 +111,15 @@ ActiveRecord::Schema.define(version: 2024_12_13_090345) do
     t.text "private_key"
     t.text "public_key"
     t.string "tool_id"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "sessions", force: :cascade do |t|
     t.string "session_id", null: false
     t.text "data"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.index ["session_id"], name: "index_sessions_on_session_id", unique: true
     t.index ["updated_at"], name: "index_sessions_on_updated_at"
   end
@@ -131,9 +130,9 @@ ActiveRecord::Schema.define(version: 2024_12_13_090345) do
     t.string "full_name"
     t.string "first_name"
     t.string "last_name"
-    t.datetime "last_accessed_at"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "last_accessed_at", precision: nil
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.index ["context", "uid"], name: "index_users_on_context_and_uid"
     t.index ["id"], name: "index_users_on_id"
   end

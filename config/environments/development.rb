@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU Lesser General Public License along
 # with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
 
-require 'active_support/core_ext/integer/time'
+require "active_support/core_ext/integer/time"
 
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
@@ -34,7 +34,10 @@ Rails.application.configure do
 
   # Show full error reports.
   config.consider_all_requests_local = true
-  
+
+  # Enable server timing
+  config.server_timing = true
+
   config.action_dispatch.default_headers['X-Frame-Options'] = 'ALLOW-FROM http://localhost'
 
   # Enable/disable caching. By default caching is disabled.
