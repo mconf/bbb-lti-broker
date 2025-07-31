@@ -30,7 +30,7 @@ RUN yarn install --check-files
 COPY . $RAILS_ROOT
 
 RUN if [ "$RAILS_ENV" == "production" ]; \
-  then SECRET_KEY_BASE=`bin/rake secret` bundle exec rake assets:precompile --trace; \
+  then SECRET_KEY_BASE=`bin/rails secret` bundle exec rake assets:precompile --trace; \
   fi
 
 EXPOSE 3000
