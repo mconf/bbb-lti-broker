@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_30_195800) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_01_184817) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -89,6 +89,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_30_195800) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.jsonb "settings", default: {}, null: false
+    t.jsonb "metadata", default: {}, null: false
     t.index ["uid"], name: "index_tenant_uid", unique: true
   end
 
@@ -102,6 +103,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_30_195800) do
     t.integer "tenant_id"
     t.datetime "expired_at", precision: nil
     t.jsonb "app_settings", default: {}, null: false
+    t.integer "status", default: 1, null: false
     t.index ["id", "tenant_id"], name: "index_tool_id_tenant_id", unique: true
     t.index ["tenant_id"], name: "index_tenant_id"
     t.index ["uuid"], name: "index_uuid", unique: true

@@ -13,19 +13,19 @@ GIT
       simple_oauth (~> 0.3.1.1)
 
 GIT
-  remote: https://github.com/blindsidenetworks/rails_lti2_provider.git
-  revision: 5ca1cc0427c04187bbeb81848f0e7bfee72f9534
-  tag: 0.1.5
-  specs:
-    rails_lti2_provider (0.1.5)
-      ims-lti (~> 2.3.2.1)
-
-GIT
   remote: https://github.com/blindsidenetworks/simple_oauth.git
   revision: 7f8e49ea7891c431424ddd53a659ebb569cd3947
   tag: v0.3.1.1
   specs:
     simple_oauth (0.3.1.1)
+
+GIT
+  remote: https://github.com/mconf/rails_lti2_provider.git
+  revision: ec748e81b7eef45adc3bde067ae9314fee44552d
+  branch: elos
+  specs:
+    rails_lti2_provider (0.2.1.2)
+      ims-lti (~> 2.3.2.1)
 
 GEM
   remote: http://rubygems.org/
@@ -115,11 +115,11 @@ GEM
       securerandom (>= 0.3)
       tzinfo (~> 2.0, >= 2.0.5)
       uri (>= 0.13.1)
-    addressable (2.8.5)
-      public_suffix (>= 2.0.2, < 6.0)
+    addressable (2.8.7)
+      public_suffix (>= 2.0.2, < 7.0)
     aes_key_wrap (1.1.0)
     ast (2.4.2)
-    autoprefixer-rails (10.4.13.0)
+    autoprefixer-rails (10.4.21.0)
       execjs (~> 2)
     babel-source (5.8.35)
     babel-transpiler (0.7.0)
@@ -128,7 +128,7 @@ GEM
     base64 (0.1.2)
     benchmark (0.4.1)
     bigdecimal (3.2.2)
-    bindata (2.4.15)
+    bindata (2.5.1)
     bindex (0.8.1)
     bootstrap (4.5.3)
       autoprefixer-rails (>= 9.1.0)
@@ -172,8 +172,8 @@ GEM
     erubi (1.13.1)
     et-orbi (1.2.7)
       tzinfo
-    execjs (2.9.1)
-    faraday (1.10.3)
+    execjs (2.10.0)
+    faraday (1.10.4)
       faraday-em_http (~> 1.0)
       faraday-em_synchrony (~> 1.0)
       faraday-excon (~> 1.1)
@@ -186,17 +186,17 @@ GEM
       faraday-retry (~> 1.0)
       ruby2_keywords (>= 0.0.4)
     faraday-em_http (1.0.0)
-    faraday-em_synchrony (1.0.0)
+    faraday-em_synchrony (1.0.1)
     faraday-excon (1.1.0)
     faraday-httpclient (1.0.1)
-    faraday-multipart (1.0.4)
-      multipart-post (~> 2)
-    faraday-net_http (1.0.1)
+    faraday-multipart (1.1.1)
+      multipart-post (~> 2.0)
+    faraday-net_http (1.0.2)
     faraday-net_http_persistent (1.2.0)
     faraday-patron (1.0.0)
     faraday-rack (1.0.0)
     faraday-retry (1.0.3)
-    faraday_middleware (1.2.0)
+    faraday_middleware (1.2.1)
       faraday (~> 1.0)
     ffi (1.17.2)
     ffi (1.17.2-x86_64-linux-gnu)
@@ -211,7 +211,8 @@ GEM
     http-accept (1.7.0)
     http-cookie (1.0.5)
       domain_name (~> 0.5)
-    httpclient (2.8.3)
+    httpclient (2.9.0)
+      mutex_m
     i18n (1.14.7)
       concurrent-ruby (~> 1.0)
     io-console (0.8.1)
@@ -227,7 +228,7 @@ GEM
       railties (>= 4.2.0)
       thor (>= 0.14, < 2.0)
     json (2.6.3)
-    json-jwt (1.15.3)
+    json-jwt (1.15.3.1)
       activesupport (>= 4.2)
       aes_key_wrap
       bindata
@@ -276,9 +277,10 @@ GEM
     minitest-stub_any_instance (1.0.3)
     mono_logger (1.1.2)
     multi_json (1.15.0)
-    multipart-post (2.3.0)
+    multipart-post (2.4.1)
     mustermann (3.0.0)
       ruby2_keywords (~> 0.0.1)
+    mutex_m (0.3.0)
     nested_form (0.3.2)
     net-imap (0.5.9)
       date
@@ -316,7 +318,7 @@ GEM
     psych (5.2.6)
       date
       stringio
-    public_suffix (5.0.3)
+    public_suffix (6.0.2)
     puma (6.4.2)
       nio4r (~> 2.0)
     raabro (1.4.0)
@@ -407,7 +409,7 @@ GEM
       http-cookie (>= 1.0.2, < 2.0)
       mime-types (>= 1.16, < 4.0)
       netrc (~> 0.8)
-    rexml (3.2.6)
+    rexml (3.4.1)
     rspec (3.12.0)
       rspec-core (~> 3.12.0)
       rspec-expectations (~> 3.12.0)
@@ -492,7 +494,7 @@ GEM
     terser (1.1.17)
       execjs (>= 0.3.0, < 3)
     thor (1.4.0)
-    tilt (2.3.0)
+    tilt (2.6.1)
     timeout (0.4.3)
     tins (1.32.1)
       sync
