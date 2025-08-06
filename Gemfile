@@ -3,8 +3,10 @@
 source 'http://rubygems.org'
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
+ruby '3.4.5'
+
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '~> 6.1', '>= 6.1.7.5'
+gem 'rails', '~> 8.0.2'
 # Use sqlite3 as the database for Active Record
 # gem 'sqlite3', '~> 1.3'
 # Use postgres as the database for Active Record
@@ -32,7 +34,7 @@ gem 'jquery-rails', '>= 4.6.0'
 # Turbolinks makes navigating your web application faster. Read more: https://github.com/turbolinks/turbolinks
 gem 'turbolinks', '~> 5'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
-gem 'jbuilder', '~> 2.11', '>= 2.11.5'
+gem 'jbuilder'
 # Use Redis adapter to run Action Cable in production
 gem 'redis', '~> 4.2'
 # Use ActiveModel has_secure_password
@@ -47,8 +49,8 @@ gem 'repost', '~> 0.3.8'
 gem 'lodash-rails'
 gem 'react-rails', '>= 3.2.0'
 
-# gem 'rails_lti2_provider', git: 'https://github.com/mconf/rails_lti2_provider.git', branch: 'elos'
-gem 'rails_lti2_provider', git: 'https://github.com/blindsidenetworks/rails_lti2_provider.git', tag: '0.1.5'
+gem 'rails_lti2_provider', git: 'https://github.com/mconf/rails_lti2_provider.git', branch: 'elos'
+# gem 'rails_lti2_provider', git: 'https://github.com/blindsidenetworks/rails_lti2_provider.git', tag: '0.1.5'
 
 gem 'ims-lti', git: 'https://github.com/blindsidenetworks/ims-lti.git', tag: 'v2.3.2.1'
 
@@ -77,7 +79,7 @@ group :development do
   gem 'rubocop', '~> 1.54', require: false
   gem 'rubocop-rails', '~> 2.21', '>= 2.21.0', require: false
   # Access an IRB console on exception pages or by using <%= console %> anywhere in the code.
-  gem 'listen', '~> 3.0.5'
+  gem 'listen'
   gem 'web-console', '>= 4.2.1'
   # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
   gem 'spring'

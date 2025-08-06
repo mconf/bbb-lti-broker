@@ -1,4 +1,4 @@
-FROM ruby:3.2.2-alpine
+FROM ruby:3.4.5-alpine
 
 ARG RAILS_ROOT=/usr/src/app
 ENV RAILS_ROOT=${RAILS_ROOT}
@@ -10,7 +10,8 @@ RUN apk update \
   && apk upgrade \
   && apk add --update --no-cache \
      build-base curl-dev git postgresql-dev \
-     yaml-dev zlib-dev nodejs yarn dumb-init
+     yaml-dev zlib-dev nodejs yarn dumb-init \
+     linux-headers libffi-dev
 
 ARG BUILD_NUMBER
 ENV BUILD_NUMBER=${BUILD_NUMBER}
@@ -30,7 +31,7 @@ RUN yarn install --check-files
 COPY . $RAILS_ROOT
 
 RUN if [ "$RAILS_ENV" == "production" ]; \
-  then SECRET_KEY_BASE=`bin/rake secret` bundle exec rake assets:precompile --trace; \
+  then SECRET_KEY_BASE=`bin/rails secret` bundle exec rake assets:precompile --trace; \
   fi
 
 EXPOSE 3000
