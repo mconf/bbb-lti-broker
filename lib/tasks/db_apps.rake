@@ -67,6 +67,16 @@ namespace :db do
       exit(1)
     end
 
+    desc 'Add a new blti app, or updates it if already exists - add_or_update[name,hostname,uid,secret]'
+    task :add_or_update, [:name, :hostname, :uid, :secret] => :environment do |_t, args|
+      ActiveRecord::Base.connection
+      task = Doorkeeper::Application.find_by(uid: args[:uid]) ? 'db:apps:update' : 'db:apps:add'
+      Rake.application.invoke_task("#{task}[#{args[:name]}, #{args[:hostname]}, #{args[:uid]}, #{args[:secret]}]")
+    rescue StandardError => e
+      puts(e.backtrace)
+      exit(1)
+    end
+
     desc 'Delete an existent blti app if exists - delete[name]'
     task :delete, [:name] => :environment do |_t, args|
       include BbbLtiBroker::Helpers
