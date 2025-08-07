@@ -44,45 +44,43 @@ module BbbLtiBroker
     # Settings in config/environments/* take precedence over those specified here.
     # Application configuration should go into files in config/initializers
     # -- all .rb files in that directory are automatically loaded.
-    config.url_host = ENV['URL_HOST'] || 'localhost'
+    config.url_host = Mconf::Env.fetch('URL_HOST', 'localhost')
 
-    config.build_number = ENV['BUILD_NUMBER'] || VERSION
+    config.build_number = Mconf::Env.fetch('BUILD_NUMBER', VERSION)
 
-    config.app_rooms_url = ENV['APP_ROOMS_URL'] || 'localhost'
+    config.developer_mode_enabled = Mconf::Env.fetch_boolean('DEVELOPER_MODE_ENABLED', false)
 
-    config.developer_mode_enabled = (ENV['DEVELOPER_MODE_ENABLED'] == 'true')
+    config.relative_url_root = "/#{Mconf::Env.fetch('RELATIVE_URL_ROOT')}"
 
-    config.relative_url_root = "/#{ENV['RELATIVE_URL_ROOT']}"
+    config.handler_legacy_patterns = Mconf::Env.fetch('HANDLER_LEGACY_PATTERNS', 'param-resource_link_id,param-oauth_consumer_key')
 
-    config.handler_legacy_patterns = ENV['HANDLER_LEGACY_PATTERNS'] || 'param-resource_link_id,param-oauth_consumer_key'
+    config.default_tool = Mconf::Env.fetch('DEFAULT_LTI_TOOL', 'default')
 
-    config.default_tool = ENV['DEFAULT_LTI_TOOL'] || 'default'
+    config.log_level = Mconf::Env.fetch('LOG_LEVEL', :debug)
 
-    config.log_level = ENV['LOG_LEVEL'] || :debug
-
-    config.launch_nonce_duration = (ENV['LAUNCH_NONCE_DURATION'] || 300).to_i.seconds
+    config.launch_nonce_duration = Mconf::Env.fetch_int('LAUNCH_NONCE_DURATION', 300).seconds
 
     # Configures how many days LtiLaunches will be kept on the db.
     # LtiLaunches that are more than {lti_launch_days_to_delete} days old will be deleted
     # every time the RemoveOldLtiLaunchJob runs.
-    config.lti_launch_days_to_delete = (ENV['LTI_LAUNCH_DAYS_TO_DELETE'] || 1).to_i
-    config.limit_launch_to_delete = (ENV['LIMIT_LAUNCH_TO_DELETE'] || 1000).to_i
+    config.lti_launch_days_to_delete = Mconf::Env.fetch_int('LTI_LAUNCH_DAYS_TO_DELETE', 1)
+    config.limit_launch_to_delete = Mconf::Env.fetch_int('LIMIT_LAUNCH_TO_DELETE', 1000)
 
-    config.app_name = ENV['APP_NAME'] || 'BbbLtiBroker'
+    config.app_name = Mconf::Env.fetch('APP_NAME', 'BbbLtiBroker')
 
     # use a json formatter to match lograge's logs
-    config.log_formatter = SimpleJsonFormatter.new if ENV['LOGRAGE_ENABLED'] == '1'
+    config.log_formatter = SimpleJsonFormatter.new if Mconf::Env.fetch_boolean('LOGRAGE_ENABLED', false)
 
     config.active_job.queue_adapter = :resque
 
     # Redis configurations. Defaults to a localhost instance.
-    config.redis_host      = ENV['MCONF_REDIS_HOST']
-    config.redis_port      = ENV['MCONF_REDIS_PORT']
-    config.redis_db        = ENV['MCONF_REDIS_DB']
-    config.redis_password  = ENV['MCONF_REDIS_PASSWORD']
+    config.redis_host      = Mconf::Env.fetch('MCONF_REDIS_HOST')
+    config.redis_port      = Mconf::Env.fetch('MCONF_REDIS_PORT')
+    config.redis_db        = Mconf::Env.fetch('MCONF_REDIS_DB')
+    config.redis_password  = Mconf::Env.fetch('MCONF_REDIS_PASSWORD')
 
     # Prevent errors when precompiling assets in local production
-    if ENV['RAILS_ENV'] == 'development'
+    if Rails.env.development?
       config.assets.configure do |env|
         env.export_concurrent = false
       end

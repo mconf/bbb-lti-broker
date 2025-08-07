@@ -61,7 +61,7 @@ module AppsValidator
   def lti_icon(app_name)
     return "http://#{request.host_with_port}#{Rails.configuration.assets.prefix}/favicon.svg" if app_name == 'default'
 
-    if ENV["TOOL_#{app_name.upcase}_ICON"].blank?
+    if Mconf::Env.fetch("TOOL_#{app_name.upcase}_ICON").blank?
       begin
         app = lti_app(app_name)
         uri = URI.parse(app['redirect_uri']).sub('https', 'http')
@@ -76,7 +76,7 @@ module AppsValidator
       end
       "#{site}#{"#{path_base}#{app_name}/assets/favicon.svg"}"
     else
-      ENV["TOOL_#{app_name.upcase}_ICON"]
+      Mconf::Env.fetch("TOOL_#{app_name.upcase}_ICON")
     end
   end
 end

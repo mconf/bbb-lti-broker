@@ -20,8 +20,9 @@
 
 attrs = {
   key: '_bbb_lti_broker_session',
-  secure: ENV['COOKIES_SECURE_OFF'].blank?,
-  same_site: ENV['COOKIES_SAME_SITE'].presence || 'None',
+  secure: !Mconf::Env.fetch_boolean('COOKIES_SECURE_OFF', false),
+  same_site: Mconf::Env.fetch('COOKIES_SAME_SITE', 'None'),
+  partitioned: true
 }
 
 Rails.application.config.session_store(:active_record_store, **attrs)

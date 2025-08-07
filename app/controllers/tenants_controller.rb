@@ -19,7 +19,7 @@
 class TenantsController < ApplicationController
   skip_before_action :verify_authenticity_token
 
-  http_basic_authenticate_with name: ENV['ADMIN_KEY'], password: ENV['ADMIN_PASSWORD']
+  http_basic_authenticate_with name: Mconf::Env.fetch('ADMIN_KEY'), password: Mconf::Env.fetch('ADMIN_PASSWORD')
 
   before_action :print_parameters if Rails.configuration.developer_mode_enabled
   before_action :find_tenant, only: [:edit, :update, :destroy]

@@ -71,11 +71,11 @@ Rails.application.routes.draw do
     use_doorkeeper do
       # Including 'skip_controllers :application' disables the controller for managing external applications
       #   [http://example.com/lti/oauth/applications]
-      skip_controllers :applications unless ENV['DEVELOPER_MODE_ENABLED'] == 'true'
+      skip_controllers :applications unless Rails.configuration.developer_mode_enabled
       controllers :authorizations => 'custom_authorizations'
     end
 
-    root to: 'application#index', app: ENV['DEFAULT_LTI_TOOL'] || 'default'
+    root to: 'application#index'
 
     # lti 1.3 authenticate user through login
     get ':app/auth/login', to: 'auth#login'

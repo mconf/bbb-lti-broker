@@ -41,9 +41,9 @@ Rails.application.configure do
   # Enable/disable Action Controller caching. By default Action Controller caching is disabled.
   # Run rails dev:cache to toggle Action Controller caching.
   config.action_controller.perform_caching = true
-  config.cache_store = if ENV['REDIS_URL'].present?
+  config.cache_store = if Mconf::Env.fetch('REDIS_URL').present?
                          # Set up Redis cache store
-                         [:redis_cache_store, { url: ENV['REDIS_URL'],
+                         [:redis_cache_store, { url: Mconf::Env.fetch('REDIS_URL'),
 
                                                 connect_timeout: 30, # Defaults to 20 seconds
                                                 read_timeout: 0.2, # Defaults to 1 second
