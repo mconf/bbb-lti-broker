@@ -22,6 +22,7 @@ namespace :db do
       tool = RailsLti2Provider::Tool.find_by(uuid: key)
       unless tool.nil?
         puts("Key '#{key}' already exists, it can not be added")
+        Rake.application.invoke_task("db:keys:show[#{key},#{tenant.uid}]")
         exit(1)
       end
       RailsLti2Provider::Tool.create!(uuid: key, shared_secret: secret, lti_version: 'LTI-1p0', tool_settings: 'none', tenant: tenant)
