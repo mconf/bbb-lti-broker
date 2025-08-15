@@ -43,7 +43,7 @@ max_threads_count = ENV.fetch('RAILS_MAX_THREADS', 5)
 min_threads_count = ENV.fetch('RAILS_MIN_THREADS') { max_threads_count }
 threads min_threads_count, max_threads_count
 
-if ENV['RAILS_ENV'] == 'production'
+if Rails.env.production?
   require 'prometheus_exporter/instrumentation'
   require 'concurrent-ruby'
   # Specifies the number of `workers` to boot in clustered mode.
@@ -86,13 +86,13 @@ pidfile ENV.fetch('PIDFILE', 'tmp/pids/server.pid')
 plugin :tmp_restart
 
 # Run the Solid Queue supervisor inside of Puma for single-server deployments
-plugin :solid_queue if ENV["SOLID_QUEUE_IN_PUMA"]
+plugin :solid_queue if Mconf::Env.fetch_boolean('SOLID_QUEUE_IN_PUMA', false)
 
 # Specify the PID file. Defaults to tmp/pids/server.pid in development.
 # In other environments, only set the PID file if requested.
-pidfile ENV["PIDFILE"] if ENV["PIDFILE"]
+pidfile Mconf::Env.fetch('PIDFILE') if Mconf::Env.fetch('PIDFILE')
 
 activate_control_app(
   'tcp://127.0.0.1:9090',
-  auth_token: ENV.fetch('PUMA_TOKEN') { SecureRandom.hex(6) }
+  auth_token: Mconf::Env.fetch('PUMA_TOKEN', SecureRandom.hex(6))
 )

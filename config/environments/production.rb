@@ -46,7 +46,7 @@ Rails.application.configure do
   # Do not fall back to assets pipeline if a precompiled asset is missed.
   config.assets.compile = false
 
-  if ENV['RAILS_SERVE_STATIC_FILES'].present?
+  if Mconf::Env.fetch_boolean('RAILS_SERVE_STATIC_FILES', true)
     # Disable serving static files from the `/public` folder by default since
     # Apache or NGINX already handles this.
     config.public_file_server.enabled = true
@@ -60,7 +60,7 @@ Rails.application.configure do
   # Enable serving of images, stylesheets, and JavaScripts from an asset server.
   # config.asset_host = "http://assets.example.com"
 
-  config.action_controller.asset_host = ENV['ASSET_HOST'] if ENV['ASSET_HOST'].present?
+  config.action_controller.asset_host = Mconf::Env.fetch('ASSET_HOST')
 
   # Specifies the header that your server uses for sending files.
   # config.action_dispatch.x_sendfile_header = "X-Sendfile" # for Apache
@@ -79,7 +79,7 @@ Rails.application.configure do
   # config.assume_ssl = true
 
   # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
-  config.force_ssl = (ENV['ENABLE_SSL'] == 'true')
+  config.force_ssl = Mconf::Env.fetch_boolean('ENABLE_SSL', true)
 
   # Skip http-to-https redirect for the default health check endpoint.
   # config.ssl_options = { redirect: { exclude: ->(request) { request.path == "/up" } } }
@@ -90,7 +90,7 @@ Rails.application.configure do
   # "info" includes generic and useful information about system operation, but avoids logging too much
   # information to avoid inadvertent exposure of personally identifiable information (PII). If you
   # want to log everything, set the level to "debug".
-  config.log_level = ENV['LOG_LEVEL'] || 'warn'
+  config.log_level = Mconf::Env.fetch('RAILS_LOG_LEVEL', 'info')
 
   # Prevent health checks from clogging up the logs.
   config.silence_healthcheck_path = "/up"
@@ -132,7 +132,7 @@ Rails.application.configure do
   # Don't log any deprecations.
   config.active_support.report_deprecations = :notify
 
-  if ENV['LOGRAGE_ENABLED'] != '1'
+  unless Mconf::Env.fetch_boolean('LOGRAGE_ENABLED', true)
     # Use default logging formatter so that PID and timestamp are not suppressed.
     config.log_formatter = ::Logger::Formatter.new
   end
@@ -148,7 +148,7 @@ Rails.application.configure do
   # config.logger = ActiveSupport::TaggedLogging.new(Syslog::Logger.new "app-name")
   config.action_dispatch.default_headers['X-Frame-Options'] = 'ALLOW-FROM http://localhost'
 
-  if ENV['RAILS_LOG_TO_STDOUT'].present?
+  if Mconf::Env.fetch_boolean('RAILS_LOG_TO_STDOUT', true)
     # Disable output buffering when STDOUT isn't a tty (e.g. Docker images, systemd services)
     $stdout.sync = true
     logger = ActiveSupport::Logger.new($stdout)
@@ -156,20 +156,20 @@ Rails.application.configure do
     config.logger = logger
   end
 
-  if ENV['RAILS_LOG_REMOTE_NAME'] && ENV['RAILS_LOG_REMOTE_PORT']
+  if Mconf::Env.fetch('RAILS_LOG_REMOTE_NAME') && Mconf::Env.fetch('RAILS_LOG_REMOTE_PORT')
     require 'remote_syslog_logger'
-    logger_program = ENV['RAILS_LOG_REMOTE_TAG'] || "bbb-lti-broker-#{ENV['RAILS_ENV']}"
-    logger = RemoteSyslogLogger.new(ENV['RAILS_LOG_REMOTE_NAME'],
-                                    ENV['RAILS_LOG_REMOTE_PORT'], program: logger_program)
+    logger_program = Mconf::Env.fetch('RAILS_LOG_REMOTE_TAG', "bbb-lti-broker-#{Rails.env.to_s}")
+    logger = RemoteSyslogLogger.new(Mconf::Env.fetch('RAILS_LOG_REMOTE_NAME'),
+                                    Mconf::Env.fetch('RAILS_LOG_REMOTE_PORT'), program: logger_program)
     logger.formatter = ::Logger::Formatter.new
     config.logger = ActiveSupport::TaggedLogging.new(logger)
   end
 
-  config.cache_store = if ENV['REDIS_URL'].present?
+  config.cache_store = if Mconf::Env.fetch('REDIS_URL').present?
                         # Set up Redis cache store
                         [:redis_cache_store,
                           {
-                            url: ENV['REDIS_URL'],
+                            url: Mconf::Env.fetch('REDIS_URL'),
                             expires_in: 1.day,
                             connect_timeout: 30, # Defaults to 20 seconds
                             read_timeout: 0.2, # Defaults to 1 second
@@ -184,7 +184,7 @@ Rails.application.configure do
                           [:file_store, Rails.root.join('tmp/cache_store')]
                        end
 
-  config.hosts = ENV['WHITELIST_HOST'].presence || nil
+  config.hosts = Mconf::Env.fetch('WHITELIST_HOST')
 
   config.react.variant = :production
 

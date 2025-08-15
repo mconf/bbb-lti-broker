@@ -21,7 +21,7 @@ Resque.redis = Redis.new(attrs)
 # NOTE: the scheduler is configured on lib/tasks/resque.rake
 
 # Authentication for the Resque web interface
-Resque::Server.use(Rack::Auth::Basic) do |_user, password|
-  ENV['ADMIN_KEY']
-  password == ENV['ADMIN_PASSWORD']
+Resque::Server.use(Rack::Auth::Basic) do |user, password|
+  user == Mconf::Env.fetch('ADMIN_KEY')
+  password == Mconf::Env.fetch("ADMIN_PASSWORD")
 end
