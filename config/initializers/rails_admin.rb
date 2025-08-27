@@ -255,6 +255,8 @@ RailsAdmin.config do |config|
         hide
       end
       configure [:created_at, :updated_at]
+      configure :worka_app_configs_for_launch, :json
+      configure :rooms_app_configs_for_launch, :json
     end
   end
   ### Tool ###

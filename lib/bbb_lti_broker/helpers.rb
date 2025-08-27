@@ -102,7 +102,7 @@ module BbbLtiBroker
     #
     def custom_overrides(message)
       custom_params = message['custom_params'].to_h
-      custom_params.each do |key, value|
+      custom_params.select{ |key, _| key.start_with?('custom_') }.each do |key, value|
         custom_param = key.delete_prefix('custom_')
         pattern = value.split(':')
         message[custom_param] = pattern[1] if pattern[0] == 'static'

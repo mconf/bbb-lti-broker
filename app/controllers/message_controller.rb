@@ -152,8 +152,12 @@ class MessageController < ApplicationController
     new_message['custom_params']['oauth_consumer_key'] = params[:oauth_consumer_key]
 
     # add tenant and tool merged settings
-    merged_app_settings = @lti_launch.tool.merged_app_settings(params[:app])
-    logger.debug(log_hash(merged_app_settings))
+    case params[:app]
+    when 'worka'
+      merged_app_settings = @lti_launch.tool.worka_app_configs_for_launch
+    else
+      merged_app_settings = @lti_launch.tool.rooms_app_configs_for_launch
+    end
     new_message['custom_params'].merge!(merged_app_settings)
 
     @lti_launch.update(message: new_message.to_json)
