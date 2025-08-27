@@ -10,9 +10,19 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_01_184817) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_13_183627) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "bbb_configs", force: :cascade do |t|
+    t.bigint "tool_id"
+    t.string "url"
+    t.string "internal_url"
+    t.string "secret"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["tool_id"], name: "index_bbb_configs_on_tool_id"
+  end
 
   create_table "oauth_access_grants", force: :cascade do |t|
     t.bigint "resource_owner_id", null: false
@@ -109,6 +119,30 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_01_184817) do
     t.index ["uuid"], name: "index_uuid", unique: true
   end
 
+  create_table "rooms_app_configs", force: :cascade do |t|
+    t.bigint "tool_id"
+    t.boolean "set_duration", default: false, null: false
+    t.boolean "download_presentation_video", default: true, null: false
+    t.boolean "message_reference_terms_use", default: true, null: false
+    t.boolean "force_disable_external_link", default: false, null: false
+    t.string "external_disclaimer"
+    t.string "external_widget"
+    t.string "external_context_url"
+    t.boolean "moodle_integration_enabled", default: false, null: false
+    t.string "moodle_url"
+    t.string "moodle_token"
+    t.boolean "moodle_group_select_enabled", default: false, null: false
+    t.boolean "moodle_show_all_groups", default: true, null: false
+    t.boolean "brightspace_integration_enabled", default: false, null: false
+    t.string "brightspace_oauth_url"
+    t.string "brightspace_oauth_client_id"
+    t.string "brightspace_oauth_client_secret"
+    t.string "brightspace_oauth_scopes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["tool_id"], name: "index_rooms_app_configs_on_tool_id"
+  end
+
   create_table "rsa_key_pairs", force: :cascade do |t|
     t.text "private_key"
     t.text "public_key"
@@ -137,6 +171,19 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_01_184817) do
     t.datetime "updated_at", null: false
     t.index ["context", "uid"], name: "index_users_on_context_and_uid"
     t.index ["id"], name: "index_users_on_id"
+  end
+
+  create_table "worka_app_configs", force: :cascade do |t|
+    t.bigint "tool_id"
+    t.boolean "saas_enabled", default: false, null: false
+    t.string "saas_world_url"
+    t.string "saas_map_url"
+    t.string "saas_map_storage_url"
+    t.string "self_hosted_url"
+    t.string "self_hosted_map_url"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["tool_id"], name: "index_worka_app_configs_on_tool_id"
   end
 
   add_foreign_key "oauth_access_grants", "oauth_applications", column: "application_id"
