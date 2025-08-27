@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_13_183627) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_13_183728) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -100,6 +100,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_13_183627) do
     t.datetime "updated_at", null: false
     t.jsonb "settings", default: {}, null: false
     t.jsonb "metadata", default: {}, null: false
+    t.string "institution_guid"
+    t.index ["institution_guid"], name: "index_rails_lti2_provider_tenants_on_institution_guid", unique: true
     t.index ["uid"], name: "index_tenant_uid", unique: true
   end
 
