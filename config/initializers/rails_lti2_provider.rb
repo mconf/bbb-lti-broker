@@ -1,80 +1,40 @@
 Rails.application.config.to_prepare do
 
   RailsLti2Provider::Tenant.class_eval do
-    def set_app_settings(key_or_hash, value = nil, app_name:)
-      if app_name.blank? || Doorkeeper::Application.find_by(name: app_name).nil?
-        raise(ArgumentError, 'Invalid app name')
-      end
-      raise(ArgumentError, 'Key cannot be nil') if key_or_hash.nil?
-
-      new_settings = self.settings[app_name] || {}
-      if key_or_hash.is_a?(Hash)
-        new_settings = new_settings.merge(key_or_hash)
-      else
-        new_settings[key_or_hash] = value
-      end
-      self.settings[app_name] = new_settings
-
-      save
-    end
-
-    def remove_app_settings(*keys, app_name:)
-      if app_name.blank? || Doorkeeper::Application.find_by(name: app_name).nil?
-        raise(ArgumentError, 'Invalid app name')
-      end
-      raise(ArgumentError, 'At least 1 key must be informed') if keys.blank?
-
-      self.settings[app_name] = self.settings[app_name].except(*keys)
-
-      save
-    end
+    validates :uid, uniqueness: true
+    validates :institution_guid, uniqueness: true, allow_nil: true
   end
 
   RailsLti2Provider::Tool.class_eval do
-    def set_app_settings(key_or_hash, value = nil, app_name:)
-      if app_name.blank? || Doorkeeper::Application.find_by(name: app_name).nil?
-        raise(ArgumentError, 'Invalid app name')
-      end
-      raise(ArgumentError, 'Key cannot be nil') if key_or_hash.nil?
+    validates :uuid, uniqueness: true
 
-      new_settings = self.app_settings[app_name] || {}
-      if key_or_hash.is_a?(Hash)
-        new_settings = new_settings.merge(key_or_hash)
-      else
-        new_settings[key_or_hash] = value
-      end
-      self.app_settings[app_name] = new_settings
+    has_one :rooms_app_config, dependent: :destroy
+    has_one :worka_app_config, dependent: :destroy
+    has_one :bbb_config, dependent: :destroy
+    accepts_nested_attributes_for :rooms_app_config, :worka_app_config, :bbb_config
 
-      save
+    after_initialize do
+      self.tool_settings ||= 'none'
     end
 
-    def remove_app_settings(*keys, app_name:)
-      if app_name.blank? || Doorkeeper::Application.find_by(name: app_name).nil?
-        raise(ArgumentError, 'Invalid app name')
-      end
-      raise(ArgumentError, 'At least 1 key must be informed') if keys.blank?
+    # Prepare configs to be sent as custom_params on Rooms app launch
+    def rooms_app_configs_for_launch
+      configs = { 'institution_guid' => self.tenant.institution_guid }
+      configs.merge!(self.rooms_app_config&.rooms_configs || {})
+      configs['moodle'] = self.rooms_app_config&.moodle_configs
+      configs['brightspace'] = self.rooms_app_config&.brightspace_configs
+      configs['bbb'] = self.bbb_config&.attributes_for_launch
 
-      self.app_settings[app_name] = self.app_settings[app_name].except(*keys)
-
-      save
+      configs.compact
     end
 
-    # Merge Tenant and Tool app_settings
-    # tool settings have priority over tenant settings, i.e. any setting with the same key will be overwritten
-    def merged_app_settings(app_name)
-      if app_name.blank? || Doorkeeper::Application.find_by(name: app_name).nil?
-        raise(ArgumentError, 'Invalid app name')
-      end
+    # Prepare configs to be sent as custom_params on Worka app launch
+    def worka_app_configs_for_launch
+      configs = { 'institution_guid' => self.tenant.institution_guid }
+      configs.merge!(self.worka_app_config&.attributes_for_launch || {})
+      configs['bbb'] = self.bbb_config&.attributes_for_launch
 
-      merged_settings = {}
-      tenant_settings = self.tenant&.settings || {}
-      merged_settings = tenant_settings[app_name] if tenant_settings[app_name]
-      # add tool settings with priority over tenant settings, i.e.
-      # any setting with the same key will be overwritten
-      merged_settings.merge!(self.app_settings[app_name]) if self.app_settings[app_name]
-      logger.info(merged_settings)
-
-      merged_settings
+      configs.compact
     end
   end
 
