@@ -101,7 +101,7 @@ def init_bbb_configs_from_app_settings
       params = {
         url: worka_app_settings['worka_self_hosted_bbb_api_url'],
         secret: worka_app_settings['worka_self_hosted_bbb_api_secret']
-      }
+      }.compact
       # Update/create bbb_config for the tool
       if tool.bbb_config
         puts2 "\t *** Updating bbb_config, params=#{params}"
@@ -126,23 +126,25 @@ def init_worka_app_configs_from_app_settings
       next
     end
 
-    puts2 ">>> From settings['worka'] of tenant '#{tenant.uid}':"
-    params = {
-      self_hosted_url: worka_app_settings['worka_self_hosted_url'],
-      self_hosted_map_url: worka_app_settings['worka_self_hosted_map_url'],
-      saas_enabled: !!worka_app_settings['worka_saas_enabled'],
-      saas_world_url: worka_app_settings['worka_saas_world_url'],
-      saas_map_url: worka_app_settings['worka_saas_map_url'],
-      saas_map_storage_url: worka_app_settings['worka_saas_map_storage_url']
-    }
-    # Update/create worka_app_configs for all tools associated with the tenant
-    tenant.tools.each do |tool|
-      if tool.worka_app_config
-        puts2 "\t *** Updating worka_app_config of tool '#{tool.uuid}', params=#{params}"
-        tool.worka_app_config.update(params) unless DRYRUN
-      else
-        puts2 "\t +++ Creating worka_app_config for tool '#{tool.uuid}', params=#{params}"
-        tool.create_worka_app_config(params) unless DRYRUN
+    # If has any non-BBB settings for Worka app
+    if worka_app_settings.reject { |key, _| key.start_with?('worka_self_hosted_bbb_') }.any?
+      puts2 ">>> From settings['worka'] of tenant '#{tenant.uid}':"
+      params = {
+        self_hosted_url: worka_app_settings['worka_self_hosted_url'],
+        self_hosted_map_url: worka_app_settings['worka_self_hosted_map_url'],
+        saas_world_url: worka_app_settings['worka_saas_world_url'],
+        saas_map_url: worka_app_settings['worka_saas_map_url'],
+        saas_map_storage_url: worka_app_settings['worka_saas_map_storage_url']
+      }
+      # Update/create worka_app_configs for all tools associated with the tenant
+      tenant.tools.each do |tool|
+        if tool.worka_app_config
+          puts2 "\t *** Updating worka_app_config of tool '#{tool.uuid}', params=#{params}"
+          tool.worka_app_config.update(params) unless DRYRUN
+        else
+          puts2 "\t +++ Creating worka_app_config for tool '#{tool.uuid}', params=#{params}"
+          tool.create_worka_app_config(params) unless DRYRUN
+        end
       end
     end
   end
@@ -155,22 +157,25 @@ def init_worka_app_configs_from_app_settings
       next
     end
 
-    puts2 ">>> From app_settings['worka'] of tool '#{tool.uuid}':"
-    params = {
-      self_hosted_url: worka_app_settings['worka_self_hosted_url'],
-      self_hosted_map_url: worka_app_settings['worka_self_hosted_map_url'],
-      saas_enabled: !!worka_app_settings['worka_saas_enabled'],
-      saas_world_url: worka_app_settings['worka_saas_world_url'],
-      saas_map_url: worka_app_settings['worka_saas_map_url'],
-      saas_map_storage_url: worka_app_settings['worka_saas_map_storage_url']
-    }
-    # Update/create worka_app_config for the tool
-    if tool.worka_app_config
-      puts2 "\t *** Updating worka_app_config, params=#{params}"
-      tool.worka_app_config.update(params) unless DRYRUN
-    else
-      puts2 "\t +++ Creating worka_app_config, params=#{params}"
-      tool.create_worka_app_config(params) unless DRYRUN
+    # If has any non-BBB settings for Worka app
+    if worka_app_settings.reject { |key, _| key.start_with?('worka_self_hosted_bbb_') }.any?
+      puts2 ">>> From app_settings['worka'] of tool '#{tool.uuid}':"
+      params = {
+        self_hosted_url: worka_app_settings['worka_self_hosted_url'],
+        self_hosted_map_url: worka_app_settings['worka_self_hosted_map_url'],
+        saas_enabled: !!worka_app_settings['worka_saas_enabled'],
+        saas_world_url: worka_app_settings['worka_saas_world_url'],
+        saas_map_url: worka_app_settings['worka_saas_map_url'],
+        saas_map_storage_url: worka_app_settings['worka_saas_map_storage_url']
+      }.compact
+      # Update/create worka_app_config for the tool
+      if tool.worka_app_config
+        puts2 "\t *** Updating worka_app_config, params=#{params}"
+        tool.worka_app_config.update(params) unless DRYRUN
+      else
+        puts2 "\t +++ Creating worka_app_config, params=#{params}"
+        tool.create_worka_app_config(params) unless DRYRUN
+      end
     end
   end
 end
