@@ -90,7 +90,6 @@ RailsAdmin.config do |config|
 
       # Moodle Configs
       group :moodle_configs do
-        # help 'When not configured, the MoodleToken is destroyed in Rooms database.'
         active false
 
         field :moodle_integration_enabled do
