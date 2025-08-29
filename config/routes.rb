@@ -20,8 +20,8 @@ require 'resque/server'
 
 Rails.application.routes.draw do
 
-  get '/health_check', to: 'health_check#show'
-  get '/healthz', to: 'health_check#show'
+  get '/health_check', to: 'rails/health#show'
+  get '/healthz', to: 'rails/health#show'
 
   if Mconf::Env.fetch_boolean("MCONF_SERVE_RESQUE_INTERFACE", false)
     mount Resque::Server.new, at: '/resque'
