@@ -188,7 +188,13 @@ def init_rooms_app_configs_from_json_file
     return
   end
 
-  json_data = JSON.parse(File.read(JSONFILE))
+  begin
+    json_data = JSON.parse(File.read(JSONFILE))
+  rescue StandardError => e
+    puts2 "!!! Error parsing JSON file: #{e}"
+    return
+  end
+
   json_data.each do |consumer_config|
     tool = RailsLti2Provider::Tool.find_by(uuid: consumer_config['key'])
     unless tool
@@ -197,80 +203,92 @@ def init_rooms_app_configs_from_json_file
     end
 
     puts2 ">>> Processing tool with uuid '#{tool.uuid}'"
-
-    # RoomsAppConfig
-    rooms_app_config_params = {
-      set_duration: consumer_config['set_duration'],
-      download_presentation_video: consumer_config['download_presentation_video'],
-      message_reference_terms_use: consumer_config['message_reference_terms_use'],
-      force_disable_external_link: consumer_config['force_disable_external_link'],
-      external_disclaimer: consumer_config['external_disclaimer'],
-      external_widget: consumer_config['external_widget'],
-      external_context_url: consumer_config['external_context_url']
-    }
-    if tool.rooms_app_config
-      puts2 "\t *** Updating rooms_app_config, params=#{rooms_app_config_params}"
-      tool.rooms_app_config.update(rooms_app_config_params) unless DRYRUN
-    else
-      puts2 "\t +++ Creating rooms_app_config, params=#{rooms_app_config_params}"
-      tool.create_rooms_app_config(rooms_app_config_params) unless DRYRUN
-    end
-
-    # BbbConfig
-    if consumer_config['server']
-      bbb_config_params = {
-        url: consumer_config['server']['endpoint'],
-        internal_url: consumer_config['server']['internal_endpoint'],
-        secret: consumer_config['server']['secret']
+    begin
+      # RoomsAppConfig
+      rooms_app_config_params = {
+        set_duration: consumer_config['set_duration'].nil? ? false : consumer_config['set_duration'],
+        download_presentation_video: consumer_config['download_presentation_video'].nil? ? true : consumer_config['download_presentation_video'],
+        message_reference_terms_use: consumer_config['message_reference_terms_use'].nil? ? true : consumer_config['message_reference_terms_use'],
+        force_disable_external_link: consumer_config['force_disable_external_link'].nil? ? false : consumer_config['force_disable_external_link'],
+        external_disclaimer: consumer_config['external_disclaimer'],
+        external_widget: consumer_config['external_widget'],
+        external_context_url: consumer_config['external_context_url']
       }
-      if tool.bbb_config
-        puts2 "\t *** Updating bbb_config, params=#{bbb_config_params}"
-        tool.bbb_config.update(bbb_config_params) unless DRYRUN
-      else
-        puts2 "\t +++ Creating bbb_config, params=#{bbb_config_params}"
-        tool.create_bbb_config(bbb_config_params) unless DRYRUN
+      ['set_duration', 'download_presentation_video', 'message_reference_terms_use', 'force_disable_external_link'].each do |key|
+        puts2 "\t !!! ConsumerConfig flag '#{key}' is nil, using default value '#{rooms_app_config_params[key.to_sym]}'" if consumer_config[key].nil?
       end
-    end
 
-    # Moodle attributes
-    if consumer_config['moodle_token']
-      moodle_params = {
-        moodle_integration_enabled: true,
-        moodle_url: consumer_config['moodle_token']['url'],
-        moodle_token: consumer_config['moodle_token']['token'],
-        moodle_group_select_enabled: consumer_config['moodle_token']['group_select_enabled'],
-        moodle_show_all_groups: consumer_config['moodle_token']['show_all_groups']
-      }
       if tool.rooms_app_config
-        puts2 "\t *** Updating Moodle attrs of rooms_app_config, params=#{moodle_params}"
-        tool.rooms_app_config.update(moodle_params) unless DRYRUN
+        puts2 "\t *** Updating rooms_app_config, params=#{rooms_app_config_params}"
+        tool.rooms_app_config.update(rooms_app_config_params) unless DRYRUN
       else
-        puts2 "\t +++ Creating rooms_app_config with Moodle attrs, params=#{moodle_params}"
-        tool.create_rooms_app_config(moodle_params) unless DRYRUN
+        puts2 "\t +++ Creating rooms_app_config, params=#{rooms_app_config_params}"
+        tool.create_rooms_app_config(rooms_app_config_params) unless DRYRUN
       end
-    end
 
-    # Brightspace attributes
-    if consumer_config['brightspace_oauth']
-      brightspace_params = {
-        brightspace_integration_enabled: true,
-        brightspace_oauth_url: consumer_config['brightspace_oauth']['url'],
-        brightspace_oauth_client_id: consumer_config['brightspace_oauth']['client_id'],
-        brightspace_oauth_client_secret: consumer_config['brightspace_oauth']['client_secret'],
-        brightspace_oauth_scopes: consumer_config['brightspace_oauth']['scope']
-      }
-      if tool.rooms_app_config
-        puts2 "\t *** Updating Brightspace attrs of rooms_app_config, params=#{brightspace_params}"
-        tool.rooms_app_config.update(brightspace_params) unless DRYRUN
-      else
-        puts2 "\t +++ Creating rooms_app_config with Brightspace attrs, params=#{brightspace_params}"
-        tool.create_rooms_app_config(brightspace_params) unless DRYRUN
+      # BbbConfig
+      if consumer_config['server']
+        bbb_config_params = {
+          url: consumer_config['server']['endpoint'],
+          internal_url: consumer_config['server']['internal_endpoint'],
+          secret: consumer_config['server']['secret']
+        }
+        if tool.bbb_config
+          puts2 "\t *** Updating bbb_config, params=#{bbb_config_params}"
+          tool.bbb_config.update(bbb_config_params) unless DRYRUN
+        else
+          puts2 "\t +++ Creating bbb_config, params=#{bbb_config_params}"
+          tool.create_bbb_config(bbb_config_params) unless DRYRUN
+        end
       end
+
+      # Moodle attributes
+      if consumer_config['moodle_token']
+        moodle_token = consumer_config['moodle_token']
+        moodle_params = {
+          moodle_integration_enabled: true,
+          moodle_url: moodle_token['url'],
+          moodle_token: moodle_token['token'],
+          moodle_group_select_enabled: moodle_token['group_select_enabled'].nil? ? false : moodle_token['group_select_enabled'],
+          moodle_show_all_groups: moodle_token['show_all_groups'].nil? ? true : moodle_token['show_all_groups']
+        }
+        ['group_select_enabled', 'show_all_groups'].each do |key|
+          puts2 "\t !!! MoodleToken flag '#{key}' is nil, using default value " \
+          "'#{moodle_params["moodle_#{key}".to_sym]}'" if moodle_token[key].nil?
+        end
+
+        if tool.rooms_app_config
+          puts2 "\t *** Updating Moodle attrs of rooms_app_config, params=#{moodle_params}"
+          tool.rooms_app_config.update(moodle_params) unless DRYRUN
+        else
+          puts2 "\t +++ Creating rooms_app_config with Moodle attrs, params=#{moodle_params}"
+          tool.create_rooms_app_config(moodle_params) unless DRYRUN
+        end
+      end
+
+      # Brightspace attributes
+      if consumer_config['brightspace_oauth']
+        brightspace_params = {
+          brightspace_integration_enabled: true,
+          brightspace_oauth_url: consumer_config['brightspace_oauth']['url'],
+          brightspace_oauth_client_id: consumer_config['brightspace_oauth']['client_id'],
+          brightspace_oauth_client_secret: consumer_config['brightspace_oauth']['client_secret'],
+          brightspace_oauth_scopes: consumer_config['brightspace_oauth']['scope']
+        }
+        if tool.rooms_app_config
+          puts2 "\t *** Updating Brightspace attrs of rooms_app_config, params=#{brightspace_params}"
+          tool.rooms_app_config.update(brightspace_params) unless DRYRUN
+        else
+          puts2 "\t +++ Creating rooms_app_config with Brightspace attrs, params=#{brightspace_params}"
+          tool.create_rooms_app_config(brightspace_params) unless DRYRUN
+        end
+      end
+      puts2 '<<<'
+    rescue StandardError => e
+      puts2 "\t !!! Error caught while processing consumer_config '#{consumer_config['key']}', skipping. Error => #{e}<<<"
+      next
     end
-    puts2 '<<<'
   end
-rescue StandardError => e
-  puts2 "!!! Error processing JSON file: #{e}"
 end
 
 def run
