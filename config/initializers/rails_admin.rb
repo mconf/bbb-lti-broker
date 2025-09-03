@@ -250,7 +250,7 @@ RailsAdmin.config do |config|
     end
 
     show do
-      configure [:tool_settings, :app_settings] do
+      configure [:tool_settings, :app_settings, :lti_launches] do
         hide
       end
       configure [:created_at, :updated_at]
