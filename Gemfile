@@ -59,7 +59,7 @@ gem 'simple_oauth', git: 'https://github.com/blindsidenetworks/simple_oauth.git'
 gem 'activerecord-session_store', '>= 2.1.0'
 
 # frontend
-gem 'bootstrap', '~> 4.5.0'
+gem 'bootstrap', '~> 5.0.0'
 gem 'font-awesome-sass', '~> 6.4.0'
 
 # Use Capistrano for deployment
