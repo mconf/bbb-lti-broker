@@ -21,8 +21,8 @@ namespace :db do
       tenant = RailsLti2Provider::Tenant.find_by(uid: args[:tenant]) || RailsLti2Provider::Tenant.first
       tool = RailsLti2Provider::Tool.find_by(uuid: key)
       unless tool.nil?
-        puts("Key '#{key}' already exists, it can not be added")
-        Rake.application.invoke_task("db:keys:show[#{key},#{tenant.uid}]")
+        puts("Key '#{key}' already exists, it cannot be added")
+        Rake.application.invoke_task("db:keys:show[#{key}]")
         exit(1)
       end
       RailsLti2Provider::Tool.create!(uuid: key, shared_secret: secret, lti_version: 'LTI-1p0', tool_settings: 'none', tenant: tenant)
@@ -114,20 +114,18 @@ namespace :db do
       exit(1)
     end
 
-    desc 'Show a key-secret pair if it exists'
-    task :show, [:key, :tenant] => :environment do |_t, args|
+    desc 'Show a key-secret pair, if it exists'
+    task :show, [:key, :tool_name] => :environment do |_t, args|
       Rake::Task['environment'].invoke
       ActiveRecord::Base.connection
       unless args[:key]
         puts('No key provided')
         exit(1)
       end
-      tenant = RailsLti2Provider::Tenant.find_by(uid: args[:tenant] || '')
-      tool = RailsLti2Provider::Tool.find_by(uuid: args[:key], tenant: tenant)
-      for_tenant = tenant.uid.empty? ? '' : tenant.uid
-      abort("Key '#{args[:key]}' does not exist for tenant '#{for_tenant}'.") if tool.nil?
+      tool = RailsLti2Provider::Tool.find_by(uuid: args[:key])
+      abort("Key '#{args[:key]}' does not exist.") if tool.nil?
 
-      tool_name = Rails.configuration.default_tool
+      tool_name = args[:tool_name] || Rails.configuration.default_tool
       url = Rails.configuration.url_host
       url_root = Rails.configuration.relative_url_root[1..] # remove leading '/'
       url = "https://#{url}" unless url.first(4) == 'http'
