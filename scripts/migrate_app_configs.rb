@@ -163,7 +163,7 @@ def init_worka_app_configs_from_app_settings
       params = {
         self_hosted_url: worka_app_settings['worka_self_hosted_url'],
         self_hosted_map_url: worka_app_settings['worka_self_hosted_map_url'],
-        saas_enabled: !!worka_app_settings['worka_saas_enabled'],
+        saas_enabled: worka_app_settings['worka_saas_enabled'] == '1',
         saas_world_url: worka_app_settings['worka_saas_world_url'],
         saas_map_url: worka_app_settings['worka_saas_map_url'],
         saas_map_storage_url: worka_app_settings['worka_saas_map_storage_url']
