@@ -97,3 +97,6 @@ RAILS_SERVE_STATIC_FILES=true
 #
 # Default: param-resource_link_id,param-oauth_consumer_key
 # HANDLER_LEGACY_PATTERNS='param-tool_consumer_instance_guid|fqdn-ext_tc_profile_url,param-context_id,param-resource_link_id'
+
+# Show Worka App Configs in RailsAdmin dashboard
+SHOW_WORKA_APP_CONFIGS_IN_DASH=true

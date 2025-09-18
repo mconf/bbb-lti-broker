@@ -139,6 +139,8 @@ RailsAdmin.config do |config|
 
   ### WorkaAppConfig ###
   config.model WorkaAppConfig do
+    hide unless Mconf::Env.fetch_boolean('SHOW_WORKA_APP_CONFIGS_IN_DASH', true)
+
     list do
       configure [:created_at, :updated_at] do
         hide
@@ -235,17 +237,35 @@ RailsAdmin.config do |config|
       end
 
       configure :shared_secret, :string
+
+      unless Mconf::Env.fetch_boolean('SHOW_WORKA_APP_CONFIGS_IN_DASH', true)
+        configure :worka_app_config do
+          hide
+        end
+      end
     end
 
     create do
       configure :expired_at do
         hide
       end
+
+      unless Mconf::Env.fetch_boolean('SHOW_WORKA_APP_CONFIGS_IN_DASH', true)
+        configure :worka_app_config do
+          hide
+        end
+      end
     end
 
     list do
       configure [:created_at, :updated_at, :tool_settings, :app_settings, :lti_launches, :registrations] do
         hide
+      end
+
+      unless Mconf::Env.fetch_boolean('SHOW_WORKA_APP_CONFIGS_IN_DASH', true)
+        configure :worka_app_config do
+          hide
+        end
       end
     end
 
@@ -256,6 +276,12 @@ RailsAdmin.config do |config|
       configure [:created_at, :updated_at]
       configure :worka_app_configs_for_launch, :json
       configure :rooms_app_configs_for_launch, :json
+
+      unless Mconf::Env.fetch_boolean('SHOW_WORKA_APP_CONFIGS_IN_DASH', true)
+        configure [:worka_app_config, :worka_app_configs_for_launch] do
+          hide
+        end
+      end
     end
   end
   ### Tool ###
