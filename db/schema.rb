@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_13_183728) do
+ActiveRecord::Schema[8.0].define(version: 2026_01_15_191050) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -22,6 +22,18 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_13_183728) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["tool_id"], name: "index_bbb_configs_on_tool_id"
+  end
+
+  create_table "eduplay_app_configs", force: :cascade do |t|
+    t.bigint "tool_id"
+    t.string "client_id"
+    t.string "client_key"
+    t.string "eduplay_url"
+    t.string "eduplay_username"
+    t.string "eduplay_password"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["tool_id"], name: "index_eduplay_app_configs_on_tool_id"
   end
 
   create_table "oauth_access_grants", force: :cascade do |t|

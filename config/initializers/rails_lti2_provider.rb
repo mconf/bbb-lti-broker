@@ -10,8 +10,9 @@ Rails.application.config.to_prepare do
 
     has_one :rooms_app_config, dependent: :destroy
     has_one :worka_app_config, dependent: :destroy
+    has_one :eduplay_app_config, dependent: :destroy
     has_one :bbb_config, dependent: :destroy
-    accepts_nested_attributes_for :rooms_app_config, :worka_app_config, :bbb_config
+    accepts_nested_attributes_for :rooms_app_config, :worka_app_config, :eduplay_app_config, :bbb_config
 
     after_initialize do
       self.tool_settings ||= 'none'
@@ -33,6 +34,14 @@ Rails.application.config.to_prepare do
       configs = { 'institution_guid' => self.tenant.institution_guid }
       configs.merge!(self.worka_app_config&.attributes_for_launch || {})
       configs['bbb'] = self.bbb_config&.attributes_for_launch
+
+      configs.compact
+    end
+
+    # Prepare configs to be sent as custom_params on Eduplay app launch
+    def eduplay_app_configs_for_launch
+      configs = {}
+      configs.merge!(self.eduplay_app_config&.attributes_for_launch || {})
 
       configs.compact
     end
