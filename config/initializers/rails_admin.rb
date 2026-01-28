@@ -158,6 +158,31 @@ RailsAdmin.config do |config|
   ### WorkaAppConfig ###
 
 
+  ### EduplayAppConfig ###
+  config.model EduplayAppConfig do
+    configure :client_id do
+      label 'Client ID'
+    end
+
+    list do
+      configure [:created_at, :updated_at] do
+        hide
+      end
+    end
+
+    show do
+      configure [:created_at, :updated_at]
+    end
+
+    edit do
+      configure :tool do
+        hide
+      end
+    end
+  end
+  ### EduplayAppConfig ###
+
+
   ### RsaKeyPair ###
   config.model RsaKeyPair do
     label 'RSA Key Pair'
@@ -255,6 +280,7 @@ RailsAdmin.config do |config|
       end
       configure [:created_at, :updated_at]
       configure :worka_app_configs_for_launch, :json
+      configure :eduplay_app_configs_for_launch, :json
       configure :rooms_app_configs_for_launch, :json
     end
   end
