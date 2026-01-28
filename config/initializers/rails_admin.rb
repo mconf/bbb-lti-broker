@@ -160,6 +160,10 @@ RailsAdmin.config do |config|
 
   ### EduplayAppConfig ###
   config.model EduplayAppConfig do
+    configure :client_id do
+      label 'Client ID'
+    end
+
     list do
       configure [:created_at, :updated_at] do
         hide
