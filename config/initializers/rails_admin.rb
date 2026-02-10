@@ -69,6 +69,13 @@ RailsAdmin.config do |config|
 
   ### RoomsAppConfig ###
   config.model RoomsAppConfig do
+    unless Mconf::Env.fetch_boolean('SHOW_BRIGHTSPACE_CONFIGS_IN_DASH', true)
+      configure [:brightspace_integration_enabled, :brightspace_oauth_url, :brightspace_oauth_client_id,
+      :brightspace_oauth_client_secret, :brightspace_oauth_scopes] do
+        hide
+      end
+    end
+
     list do
       configure [:created_at, :updated_at] do
         hide
@@ -111,26 +118,31 @@ RailsAdmin.config do |config|
       end
 
       # Brightspace Configs
-      group :brightspace_configs do
-        label 'Brightspace configs'
-        active false
+      if Mconf::Env.fetch_boolean('SHOW_BRIGHTSPACE_CONFIGS_IN_DASH', true)
+        group :brightspace_configs do
+          label 'Brightspace configs'
+          active false
 
-        field :brightspace_integration_enabled do
-          label 'Brightspace integration enabled'
-          help 'If disabled, the Brightspace configs are not sent. The ConsumerConfigBrightspaceOauth is destroyed in Rooms database.'
+          field :brightspace_integration_enabled do
+            label 'Brightspace integration enabled'
+            help 'If disabled, the Brightspace configs are not sent. The ConsumerConfigBrightspaceOauth is destroyed in Rooms database.'
+          end
+          field :brightspace_oauth_url do
+            label 'Brightspace URL'
+          end
+          field :brightspace_oauth_client_id do
+            label 'Client ID'
+          end
+          field :brightspace_oauth_client_secret do
+            label 'Client secret'
+          end
+          field :brightspace_oauth_scopes do
+            label 'OAuth scopes'
+          end
         end
-        field :brightspace_oauth_url do
-          label 'Brightspace URL'
-        end
-        field :brightspace_oauth_client_id do
-          label 'Client ID'
-        end
-        field :brightspace_oauth_client_secret do
-          label 'Client secret'
-        end
-        field :brightspace_oauth_scopes do
-          label 'OAuth scopes'
-        end
+      else
+        exclude_fields :brightspace_integration_enabled, :brightspace_oauth_url, :brightspace_oauth_client_id,
+                       :brightspace_oauth_client_secret, :brightspace_oauth_scopes
       end
     end
   end
@@ -139,6 +151,8 @@ RailsAdmin.config do |config|
 
   ### WorkaAppConfig ###
   config.model WorkaAppConfig do
+    hide unless Mconf::Env.fetch_boolean('SHOW_WORKA_APP_CONFIGS_IN_DASH', true)
+
     list do
       configure [:created_at, :updated_at] do
         hide
@@ -260,17 +274,35 @@ RailsAdmin.config do |config|
       end
 
       configure :shared_secret, :string
+
+      unless Mconf::Env.fetch_boolean('SHOW_WORKA_APP_CONFIGS_IN_DASH', true)
+        configure :worka_app_config do
+          hide
+        end
+      end
     end
 
     create do
       configure :expired_at do
         hide
       end
+
+      unless Mconf::Env.fetch_boolean('SHOW_WORKA_APP_CONFIGS_IN_DASH', true)
+        configure :worka_app_config do
+          hide
+        end
+      end
     end
 
     list do
       configure [:created_at, :updated_at, :tool_settings, :app_settings, :lti_launches, :registrations] do
         hide
+      end
+
+      unless Mconf::Env.fetch_boolean('SHOW_WORKA_APP_CONFIGS_IN_DASH', true)
+        configure :worka_app_config do
+          hide
+        end
       end
     end
 
@@ -282,6 +314,12 @@ RailsAdmin.config do |config|
       configure :worka_app_configs_for_launch, :json
       configure :eduplay_app_configs_for_launch, :json
       configure :rooms_app_configs_for_launch, :json
+
+      unless Mconf::Env.fetch_boolean('SHOW_WORKA_APP_CONFIGS_IN_DASH', true)
+        configure [:worka_app_config, :worka_app_configs_for_launch] do
+          hide
+        end
+      end
     end
   end
   ### Tool ###
