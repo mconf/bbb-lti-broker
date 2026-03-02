@@ -102,3 +102,5 @@ RAILS_SERVE_STATIC_FILES=true
 SHOW_WORKA_APP_CONFIGS_IN_DASH=true
 # Show Brightspace Configs in RailsAdmin dashboard
 SHOW_BRIGHTSPACE_CONFIGS_IN_DASH=true
+# Show Eduplay App Configs in RailsAdmin dashboard
+SHOW_EDUPLAY_APP_CONFIGS_IN_DASH=true

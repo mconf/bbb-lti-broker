@@ -174,6 +174,8 @@ RailsAdmin.config do |config|
 
   ### EduplayAppConfig ###
   config.model EduplayAppConfig do
+    hide unless Mconf::Env.fetch_boolean('SHOW_EDUPLAY_APP_CONFIGS_IN_DASH', true)
+
     configure :client_id do
       label 'Client ID'
     end
@@ -280,6 +282,12 @@ RailsAdmin.config do |config|
           hide
         end
       end
+
+      unless Mconf::Env.fetch_boolean('SHOW_EDUPLAY_APP_CONFIGS_IN_DASH', true)
+        configure :eduplay_app_config do
+          hide
+        end
+      end
     end
 
     create do
@@ -292,6 +300,12 @@ RailsAdmin.config do |config|
           hide
         end
       end
+
+      unless Mconf::Env.fetch_boolean('SHOW_EDUPLAY_APP_CONFIGS_IN_DASH', true)
+        configure :eduplay_app_config do
+          hide
+        end
+      end
     end
 
     list do
@@ -301,6 +315,12 @@ RailsAdmin.config do |config|
 
       unless Mconf::Env.fetch_boolean('SHOW_WORKA_APP_CONFIGS_IN_DASH', true)
         configure :worka_app_config do
+          hide
+        end
+      end
+
+      unless Mconf::Env.fetch_boolean('SHOW_EDUPLAY_APP_CONFIGS_IN_DASH', true)
+        configure :eduplay_app_config do
           hide
         end
       end
@@ -317,6 +337,12 @@ RailsAdmin.config do |config|
 
       unless Mconf::Env.fetch_boolean('SHOW_WORKA_APP_CONFIGS_IN_DASH', true)
         configure [:worka_app_config, :worka_app_configs_for_launch] do
+          hide
+        end
+      end
+
+      unless Mconf::Env.fetch_boolean('SHOW_EDUPLAY_APP_CONFIGS_IN_DASH', true)
+        configure [:eduplay_app_config, :eduplay_app_configs_for_launch] do
           hide
         end
       end
