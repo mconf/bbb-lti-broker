@@ -1,6 +1,10 @@
 class RoomsAppConfig < ApplicationRecord
   belongs_to :tool, class_name: 'RailsLti2Provider::Tool'
 
+  validates :moodle_url,
+            format: { with: /\Ahttps:\/\//i, message: 'permite apenas URLs que começam com https://' },
+            allow_blank: true
+
   def attributes_for_launch
     self.attributes.except('id', 'created_at', 'updated_at', 'tool_id').compact
   end
