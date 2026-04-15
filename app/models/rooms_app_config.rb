@@ -26,4 +26,13 @@ class RoomsAppConfig < ApplicationRecord
     .select{ |key, _| key.start_with?('brightspace_') }
     .transform_keys { |key| key.delete_prefix('brightspace_') }
   end
+
+  after_save :log_moodle_url_update, if: :saved_change_to_moodle_url?
+
+  private
+
+  def log_moodle_url_update
+    Rails.logger.info("[Security] moodle_url updated: #{moodle_url}")
+  end
+
 end
