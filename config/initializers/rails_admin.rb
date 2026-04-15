@@ -105,6 +105,9 @@ RailsAdmin.config do |config|
         end
         field :moodle_url do
           label 'API URL'
+          html_attributes do
+            { pattern: 'https://.*', title: 'O campo deve começar com https://' }
+          end
         end
         field :moodle_token do
           label 'API Token'

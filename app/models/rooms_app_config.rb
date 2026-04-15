@@ -1,6 +1,10 @@
 class RoomsAppConfig < ApplicationRecord
   belongs_to :tool, class_name: 'RailsLti2Provider::Tool'
 
+  validates :moodle_url,
+            format: { with: /\Ahttps:\/\//i, message: 'permite apenas URLs que começam com https://' },
+            allow_blank: true
+
   def attributes_for_launch
     self.attributes.except('id', 'created_at', 'updated_at', 'tool_id').compact
   end
@@ -26,4 +30,13 @@ class RoomsAppConfig < ApplicationRecord
     .select{ |key, _| key.start_with?('brightspace_') }
     .transform_keys { |key| key.delete_prefix('brightspace_') }
   end
+
+  after_save :log_moodle_url_update, if: :saved_change_to_moodle_url?
+
+  private
+
+  def log_moodle_url_update
+    Rails.logger.info("[Security] moodle_url updated: #{moodle_url}")
+  end
+
 end
