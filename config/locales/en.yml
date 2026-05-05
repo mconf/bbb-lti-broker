@@ -111,6 +111,9 @@ en:
         code: "ServerError"
         message: "Server error"
         suggestion: "Please try again later or contact an administrator."
+  messages:
+    rooms_app_config:
+      moodle_url_https_only: "only allows URLs that start with https://"
   tool:
     app_settings: "App settings"
     created_at: "Created at"
