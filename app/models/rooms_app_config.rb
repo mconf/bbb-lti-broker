@@ -44,7 +44,22 @@ class RoomsAppConfig < ApplicationRecord
   private
 
   def log_moodle_url_update
-    Rails.logger.info("[Security] moodle_url updated: #{moodle_url}")
+    old_url, new_url = saved_change_to_moodle_url
+
+    Rails.logger.info(
+      "[Security] moodle_url updated from #{sanitize_moodle_url(old_url)} to #{sanitize_moodle_url(new_url)}"
+    )
+  end
+
+  def sanitize_moodle_url(url)
+    return 'blank' if url.blank?
+
+    uri = URI.parse(url)
+    sanitized = "#{uri.scheme}://#{uri.host}"
+    sanitized += ":#{uri.port}" if uri.port && ![80, 443].include?(uri.port)
+    sanitized
+  rescue URI::InvalidURIError
+    url.to_s.sub(%r{\?.*}, '').sub(%r{#.*}, '')
   end
 
 end
