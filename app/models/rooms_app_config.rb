@@ -1,6 +1,18 @@
 class RoomsAppConfig < ApplicationRecord
   belongs_to :tool, class_name: 'RailsLti2Provider::Tool'
 
+  validates :moodle_url,
+            format: {
+              with: /\Ahttps:\/\//i,
+              message: ->(_object, _data) {
+                I18n.t(
+                  'errors.messages.rooms_app_config.moodle_url_https_only',
+                  default: 'permite apenas URLs que começam com https://'
+                )
+              }
+            },
+            allow_blank: true
+
   def attributes_for_launch
     self.attributes.except('id', 'created_at', 'updated_at', 'tool_id').compact
   end
@@ -26,4 +38,28 @@ class RoomsAppConfig < ApplicationRecord
     .select{ |key, _| key.start_with?('brightspace_') }
     .transform_keys { |key| key.delete_prefix('brightspace_') }
   end
+
+  after_save :log_moodle_url_update, if: :saved_change_to_moodle_url?
+
+  private
+
+  def log_moodle_url_update
+    old_url, new_url = saved_change_to_moodle_url
+
+    Rails.logger.info(
+      "[Security] moodle_url updated from #{sanitize_moodle_url(old_url)} to #{sanitize_moodle_url(new_url)}"
+    )
+  end
+
+  def sanitize_moodle_url(url)
+    return 'blank' if url.blank?
+
+    uri = URI.parse(url)
+    sanitized = "#{uri.scheme}://#{uri.host}"
+    sanitized += ":#{uri.port}" if uri.port && ![80, 443].include?(uri.port)
+    sanitized
+  rescue URI::InvalidURIError
+    url.to_s.sub(%r{\?.*}, '').sub(%r{#.*}, '')
+  end
+
 end
