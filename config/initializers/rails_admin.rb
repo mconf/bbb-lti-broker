@@ -197,6 +197,32 @@ RailsAdmin.config do |config|
       configure :tool do
         hide
       end
+
+      include_all_fields
+      group :default do
+      end
+
+      # Moodle Configs
+      group :moodle_configs do
+        active false
+
+        field :moodle_integration_enabled do
+          label 'Moodle integration enabled'
+          help 'If disabled, the Moodle configs are not sent. The MoodleToken is destroyed in Eduplay database.'
+        end
+        field :moodle_url do
+          label 'API URL'
+        end
+        field :moodle_token do
+          label 'API Token'
+        end
+        field :moodle_group_select_enabled do
+          label 'Group select enabled'
+        end
+        field :moodle_show_all_groups do
+          label 'Show all groups'
+        end
+      end
     end
   end
   ### EduplayAppConfig ###
