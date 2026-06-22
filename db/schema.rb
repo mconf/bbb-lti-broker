@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_02_25_161610) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_31_181216) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -33,6 +33,11 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_25_161610) do
     t.string "eduplay_password"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "moodle_integration_enabled", default: false, null: false
+    t.string "moodle_url"
+    t.string "moodle_token"
+    t.boolean "moodle_group_select_enabled", default: false, null: false
+    t.boolean "moodle_show_all_groups", default: false, null: false
     t.index ["tool_id"], name: "index_eduplay_app_configs_on_tool_id"
   end
 

@@ -41,7 +41,8 @@ Rails.application.config.to_prepare do
     # Prepare configs to be sent as custom_params on Eduplay app launch
     def eduplay_app_configs_for_launch
       configs = {}
-      configs.merge!(self.eduplay_app_config&.attributes_for_launch || {})
+      configs.merge!(self.eduplay_app_config&.eduplay_configs || {})
+      configs['moodle'] = self.eduplay_app_config&.moodle_configs
 
       configs.compact
     end
