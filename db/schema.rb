@@ -10,7 +10,11 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
+<<<<<<< HEAD
 ActiveRecord::Schema[8.0].define(version: 2026_06_15_120000) do
+=======
+ActiveRecord::Schema[8.0].define(version: 2026_07_06_115418) do
+>>>>>>> origin/master
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -33,6 +37,11 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_15_120000) do
     t.string "eduplay_password"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "moodle_integration_enabled", default: false, null: false
+    t.string "moodle_url"
+    t.string "moodle_token"
+    t.boolean "moodle_group_select_enabled", default: false, null: false
+    t.boolean "moodle_show_all_groups", default: false, null: false
     t.index ["tool_id"], name: "index_eduplay_app_configs_on_tool_id"
   end
 
@@ -155,7 +164,11 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_15_120000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "allow_student_scheduling", default: false, null: false
+<<<<<<< HEAD
     t.boolean "allow_ai_artifacts", default: true, null: false
+=======
+    t.boolean "hide_recordings_history", default: false, null: false
+>>>>>>> origin/master
     t.index ["tool_id"], name: "index_rooms_app_configs_on_tool_id"
   end
 
