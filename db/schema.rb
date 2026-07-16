@@ -160,6 +160,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_06_115418) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "allow_student_scheduling", default: false, null: false
+    t.boolean "allow_ai_artifacts", default: true, null: false
     t.boolean "hide_recordings_history", default: false, null: false
     t.index ["tool_id"], name: "index_rooms_app_configs_on_tool_id"
   end
