@@ -1,5 +1,49 @@
 # frozen_string_literal: true
 
+# RailsAdmin's built-in :json/:jsonb/:serialized field types blindly JSON.parse (or
+# yaml_load) the raw global-search query string for every field of that type, before
+# even checking whether it could match anything. That crashes the dashboard search
+# (500) whenever the query text isn't valid JSON/YAML (plain words, or e.g. "@"), and
+# the same call happens again for per-column filter submissions.
+#
+# These subclasses replace the registered field types for those three type keys, so
+# the fix applies automatically to every current AND future json/jsonb/serialized
+# column across the whole dash - no per-field config needed. Rather than trying to
+# make search/filter tolerate arbitrary text being parsed as JSON/YAML (which turned
+# out to have more failure modes than expected - deeply-nested input, invalid
+# encoding, non-String params - and, once made to work, risked exposing columns that
+# are hidden for good reason), these fields are simply excluded from search and
+# filtering entirely: #queryable (governs the global search box) and #searchable
+# (governs the per-column filter widgets, via #filterable?) are both hardcoded to
+# false, so #parse_value is never called on them by search/filter code at all.
+# `(*)` absorbs the setter form's argument instead of raising, without acting on it -
+# these fields are never searchable, so there's nothing to configure otherwise.
+# #parse_value/#parse_input are left untouched (the base classes' own, so the save
+# path - editing these fields through the dash's forms - keeps its original,
+# unmodified behavior).
+class SafeJsonField < RailsAdmin::Config::Fields::Types::Json
+  def queryable(*)
+    false
+  end
+
+  def searchable(*)
+    false
+  end
+end
+RailsAdmin::Config::Fields::Types.register(:json, SafeJsonField)
+RailsAdmin::Config::Fields::Types.register(:jsonb, SafeJsonField)
+
+class SafeSerializedField < RailsAdmin::Config::Fields::Types::Serialized
+  def queryable(*)
+    false
+  end
+
+  def searchable(*)
+    false
+  end
+end
+RailsAdmin::Config::Fields::Types.register(:serialized, SafeSerializedField)
+
 RailsAdmin.config do |config|
   config.main_app_name = 'Broker'
 
