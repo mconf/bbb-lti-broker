@@ -13,6 +13,22 @@ class RoomsAppConfig < ApplicationRecord
             },
             allow_blank: true
 
+  validates :moodle_presence_threshold_percentage,
+            :moodle_partial_presence_threshold_percentage,
+            numericality: {
+              only_integer: true,
+              greater_than_or_equal_to: 0,
+              less_than_or_equal_to: 100,
+              message: ->(_object, _data) {
+                I18n.t(
+                  'errors.messages.rooms_app_config.percentage_out_of_range',
+                  default: 'deve ser um número inteiro entre 0 e 100'
+                )
+              }
+            }
+
+  validate :partial_presence_threshold_within_presence_threshold
+
   def attributes_for_launch
     self.attributes.except('id', 'created_at', 'updated_at', 'tool_id').compact
   end
@@ -42,6 +58,26 @@ class RoomsAppConfig < ApplicationRecord
   after_save :log_moodle_url_update, if: :saved_change_to_moodle_url?
 
   private
+
+  # A partial presence threshold above the full presence threshold leaves no range for partial
+  # presence: everyone below the full threshold would be marked absent, silently
+  def partial_presence_threshold_within_presence_threshold
+    # nothing to compare while either value is not a valid percentage on its own
+    return if errors[:moodle_presence_threshold_percentage].any? ||
+              errors[:moodle_partial_presence_threshold_percentage].any?
+
+    partial = self.moodle_partial_presence_threshold_percentage
+    full = self.moodle_presence_threshold_percentage
+    return if partial.blank? || full.blank? || partial <= full
+
+    errors.add(
+      :moodle_partial_presence_threshold_percentage,
+      I18n.t(
+        'errors.messages.rooms_app_config.partial_presence_threshold_above_presence',
+        default: 'não pode ser maior que o percentual mínimo para presença cheia'
+      )
+    )
+  end
 
   def log_moodle_url_update
     old_url, new_url = saved_change_to_moodle_url

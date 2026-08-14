@@ -114,6 +114,8 @@ en:
   messages:
     rooms_app_config:
       moodle_url_https_only: "only allows URLs that start with https://"
+      percentage_out_of_range: "must be a whole number between 0 and 100"
+      partial_presence_threshold_above_presence: "cannot be higher than the full presence threshold"
   tool:
     app_settings: "App settings"
     created_at: "Created at"
