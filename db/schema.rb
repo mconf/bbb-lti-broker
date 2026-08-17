@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_07_06_115418) do
+ActiveRecord::Schema[8.0].define(version: 2026_08_17_145418) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -38,6 +38,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_06_115418) do
     t.string "moodle_token"
     t.boolean "moodle_group_select_enabled", default: false, null: false
     t.boolean "moodle_show_all_groups", default: false, null: false
+    t.boolean "enforce_private_student_submissions", default: false, null: false
     t.index ["tool_id"], name: "index_eduplay_app_configs_on_tool_id"
   end
 
@@ -162,6 +163,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_06_115418) do
     t.boolean "allow_student_scheduling", default: false, null: false
     t.boolean "allow_ai_artifacts", default: true, null: false
     t.boolean "hide_recordings_history", default: false, null: false
+    t.boolean "moodle_presence_percentage_enabled", default: false, null: false
+    t.integer "moodle_presence_threshold_percentage", default: 75, null: false
+    t.integer "moodle_partial_presence_threshold_percentage", default: 10, null: false
     t.index ["tool_id"], name: "index_rooms_app_configs_on_tool_id"
   end
 

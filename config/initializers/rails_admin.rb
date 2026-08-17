@@ -227,6 +227,13 @@ RailsAdmin.config do |config|
       label 'Client ID'
     end
 
+    configure :enforce_private_student_submissions do
+      label 'Enforce private student submissions'
+      help 'If enabled, in every course and group of this tool the students can always submit ' \
+           'videos and only the teachers can watch the submissions. Both settings become ' \
+           'read-only for the teachers in the Eduplay app.'
+    end
+
     list do
       configure [:created_at, :updated_at] do
         hide
