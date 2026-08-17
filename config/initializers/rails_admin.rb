@@ -162,6 +162,18 @@ RailsAdmin.config do |config|
         field :moodle_show_all_groups do
           label 'Show all groups'
         end
+        field :moodle_presence_percentage_enabled do
+          label 'Presence percentage enabled'
+          help 'If enabled, Rooms will consider the percentage of the meeting duration each user attended (instead of a binary present/absent) when marking attendance on Moodle.'
+        end
+        field :moodle_presence_threshold_percentage do
+          label 'Presence threshold (%)'
+          help 'Minimum percentage of the meeting duration a user must have attended to be marked as Present. Only used when "Presence percentage enabled" is on.'
+        end
+        field :moodle_partial_presence_threshold_percentage do
+          label 'Partial presence threshold (%)'
+          help 'Minimum percentage of the meeting duration a user must have attended to be eligible for Partial presence (recorded as "Late" on Moodle). Below this, the user is marked Absent instead. Only used when "Presence percentage enabled" is on.'
+        end
       end
 
       # Brightspace Configs
