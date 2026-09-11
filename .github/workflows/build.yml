@@ -1,0 +1,18 @@
+name: Build and Push Harbor Images
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  build-and-scan:
+    uses: mconf/mconf-ci-jobs/.github/workflows/all-build-push-scan-harbor.yml@main
+    with:
+      image_name: bbb-lti-broker
+      organization: portal
+      trivy-scanners: "vuln,config"
+      # This repository is public, so it cannot use the self-hosted runners the
+      # shared workflow defaults to.
+      runs-on: '["ubuntu-latest"]'
+    secrets: inherit
