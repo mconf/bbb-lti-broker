@@ -71,6 +71,12 @@ jobs:
     env:
       RAILS_ENV: test
       DATABASE_URL: postgres://postgres:postgres@localhost:5432/bbb_lti_broker_test
+      # GitHub Actions sets CI=true, and config/environments/test.rb turns
+      # eager loading on from it, so every controller class body runs at boot.
+      # RegistrationController, TenantsController and ToolsController pass
+      # these to http_basic_authenticate_with, which rejects nil on Rails 8.
+      ADMIN_KEY: ci
+      ADMIN_PASSWORD: ci
       # No redis service: config/initializers/resque.rb only builds a Redis
       # client, it never connects, and nothing in either suite touches a queue.
       # RELATIVE_URL_ROOT is deliberately unset. The routes are not scoped by it

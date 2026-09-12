@@ -20,16 +20,20 @@ require 'rails_helper'
 
 RSpec.describe(ToolProfileController, type: :controller) do
   describe 'GET :app/xml_config' do
+    # developer_mode_enabled is read from the environment once, at boot, so a
+    # test cannot change it by setting ENV. Stub the resolved config instead.
+    def developer_mode(enabled)
+      allow(Rails.configuration).to(receive(:developer_mode_enabled).and_return(enabled))
+    end
+
     it 'gives an xml page when developer mode disabled' do
-      ENV['DEVELOPER_MODE_ENABLED'] = 'false'
+      developer_mode(false)
       get :xml_config, params: { app: 'default' }
       expect(response).to(have_http_status(:not_found))
     end
 
     it 'gives an xml page when developer mode enabled' do
-      ENV['DEVELOPER_MODE_ENABLED'] = 'true'
-      puts xml_config_path.to_yaml
-      puts xml_config_url.to_yaml
+      developer_mode(true)
       get :xml_config, params: { app: 'default' }
       expect(response).to(have_http_status(:success))
 
