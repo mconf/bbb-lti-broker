@@ -23,7 +23,6 @@ log/
 /db/production/*
 /data/*
 
-.ruby-version
 /.ssh
 .env
 
