@@ -100,7 +100,7 @@ class RegistrationController < ApplicationController
   def delete
     if lti_registration_exists?(params[:uuid])
       reg = lti_registration(params[:uuid])
-      if key_pair_id = lti_registration_params(params[:uuid])['rsa_key_pair_id']
+      if (key_pair_id = lti_registration_params(params[:uuid])['rsa_key_pair_id'])
         RsaKeyPair.find(key_pair_id).destroy
       end
       reg.delete
@@ -138,7 +138,7 @@ class RegistrationController < ApplicationController
     params.require(:tool).permit(:uuid, :shared_secret, :tenant_id,
     tool_settings: {}, app_settings: {}).tap do |whitelisted|
       # Filter app_settings params
-      whitelisted[:app_settings].each do |app_name, settings|
+      whitelisted[:app_settings].each do |_app_name, settings|
         # Reject blank values
         settings.compact_blank!
         # Reject 'false' values from checkboxes

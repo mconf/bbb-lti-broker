@@ -79,11 +79,6 @@ namespace :db do
 
       private_key = OpenSSL::PKey::RSA.generate(4096)
       public_key = private_key.public_key
-      jwk = JWT::JWK.new(private_key).export
-      jwk['alg'] = 'RS256' unless jwk.key?('alg')
-      jwk['use'] = 'sig' unless jwk.key?('use')
-      jwk = jwk.to_json
-
       rsa_key_pair = RsaKeyPair.create(
         private_key: private_key.to_s,
         public_key: public_key.to_s,
@@ -118,14 +113,14 @@ namespace :db do
       Rake::Task['environment'].invoke
       ActiveRecord::Base.connection
       $stdout.puts('What is the issuer for the registration you wish to delete?')
-      issuer = $stdin.gets.strip
+      _issuer = $stdin.gets.strip
       $stdout.puts('What is the client ID for the registration?')
       client_id = $stdin.gets.strip
 
 
       reg = RailsLti2Provider::Tool.find_by_uuid(client_id)
 
-      if key_pair_id = JSON.parse(reg.tool_settings)['rsa_key_pair_id']
+      if (key_pair_id = JSON.parse(reg.tool_settings)['rsa_key_pair_id'])
         RsaKeyPair.find(key_pair_id).destroy!
       end
 
@@ -140,7 +135,7 @@ namespace :db do
       abort('Type must be one of [key, jwk]') unless %w[key jwk].include?(args[:type])
 
       $stdout.puts('What is the issuer for the registration?')
-      issuer = $stdin.gets.strip
+      _issuer = $stdin.gets.strip
       $stdout.puts('What is the client ID for the registration?')
       client_id = $stdin.gets.strip
 

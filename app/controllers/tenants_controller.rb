@@ -62,7 +62,7 @@ class TenantsController < ApplicationController
   def tenant_params
     params.require(:tenant).permit(:uid, settings: {}).tap do |whitelisted|
       # Reject blank values inside inner hashes
-      whitelisted[:settings].each do |key, value|
+      whitelisted[:settings].each do |key, _value|
         whitelisted[:settings][key].reject! { |_, value| value.blank? }
       end
     end

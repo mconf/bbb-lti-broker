@@ -70,7 +70,7 @@ class ToolsController < ApplicationController
     params.require(:tool).permit(:uuid, :shared_secret, :tenant_id,
     tool_settings: {}, app_settings: {}).tap do |whitelisted|
       # Filter app_settings params
-      whitelisted[:app_settings].each do |app_name, settings|
+      whitelisted[:app_settings].each do |_app_name, settings|
         # Reject blank values
         settings.compact_blank!
         # Reject 'false' values from checkboxes
