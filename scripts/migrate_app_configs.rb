@@ -22,6 +22,7 @@ def populate_tenant_inst_guids
     # the tenant
     if rooms_app_settings.blank? && worka_app_settings.blank?
       puts2 "XXX No settings found for tenant '#{tenant.uid}', trying its tools... "
+      found = false
       tenant.tools.each do |tool|
         rooms_app_settings = tool.app_settings['rooms'].presence || tool.app_settings['tool'].presence
         worka_app_settings = tool.app_settings['worka']
@@ -32,16 +33,18 @@ def populate_tenant_inst_guids
           puts2 ">>> From app_settings['rooms'] of tool '#{tool.uuid}': \n" \
           "\t *** Updating institution_guid, params=#{params}"
           tenant.update(institution_guid: rooms_app_settings['institution_guid']) unless DRYRUN
-          return
+          found = true
+          break
         elsif worka_app_settings && worka_app_settings.keys.include?('worka_self_hosted_institution_guid')
           params = { institution_guid: worka_app_settings['worka_self_hosted_institution_guid'] }
           puts2 ">>> From app_settings['worka'] of tool '#{tool.uuid}': \n" \
           "\t *** Updating institution_guid, params=#{params}"
           tenant.update(institution_guid: worka_app_settings['worka_self_hosted_institution_guid']) unless DRYRUN
-          return
+          found = true
+          break
         end
       end
-      puts2 'No settings found in any tool either, skipping...'
+      puts2 'No settings found in any tool either, skipping...' unless found
 
     # Get institution_guid from Tenant settings (either for Rooms or Worka)
     else
