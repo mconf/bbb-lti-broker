@@ -29,6 +29,6 @@ class RemoveOldLtiLaunchJob < ApplicationJob
   end
 
   def get_expired_launches(date)
-    lti_launches = RailsLti2Provider::LtiLaunch.where('created_at < ?', date)
+    RailsLti2Provider::LtiLaunch.where('created_at < ?', date)
   end
 end

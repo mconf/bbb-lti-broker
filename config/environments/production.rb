@@ -158,7 +158,7 @@ Rails.application.configure do
 
   if Mconf::Env.fetch('RAILS_LOG_REMOTE_NAME') && Mconf::Env.fetch('RAILS_LOG_REMOTE_PORT')
     require 'remote_syslog_logger'
-    logger_program = Mconf::Env.fetch('RAILS_LOG_REMOTE_TAG', "bbb-lti-broker-#{Rails.env.to_s}")
+    logger_program = Mconf::Env.fetch('RAILS_LOG_REMOTE_TAG', "bbb-lti-broker-#{Rails.env}")
     logger = RemoteSyslogLogger.new(Mconf::Env.fetch('RAILS_LOG_REMOTE_NAME'),
                                     Mconf::Env.fetch('RAILS_LOG_REMOTE_PORT'), program: logger_program)
     logger.formatter = ::Logger::Formatter.new

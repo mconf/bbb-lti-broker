@@ -3,7 +3,10 @@ class RoomsAppConfig < ApplicationRecord
 
   validates :moodle_url,
             format: {
-              with: /\Ahttps:\/\//i,
+              # Anchored at both ends: \A alone only checks that the string
+              # starts with https://, so a newline could carry a second line
+              # past a validation that is meant to pin the scheme.
+              with: /\Ahttps:\/\/[^\n\r]*\z/i,
               message: ->(_object, _data) {
                 I18n.t(
                   'errors.messages.rooms_app_config.moodle_url_https_only',

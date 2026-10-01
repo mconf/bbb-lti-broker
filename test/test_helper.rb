@@ -17,6 +17,10 @@
 # with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
 
 ENV['RAILS_ENV'] ||= 'test'
+# The routes in config/routes.rb are not scoped by relative_url_root, but the path
+# helpers prepend it, so any non-empty value makes every integration request fall
+# through to the catch-all 404 route.
+ENV['RELATIVE_URL_ROOT'] ||= ''
 require_relative '../config/environment'
 require 'rails/test_help'
 require 'rake'

@@ -22,6 +22,5 @@ Resque.redis = Redis.new(attrs)
 
 # Authentication for the Resque web interface
 Resque::Server.use(Rack::Auth::Basic) do |user, password|
-  user == Mconf::Env.fetch('ADMIN_KEY')
-  password == Mconf::Env.fetch("ADMIN_PASSWORD")
+  user == Mconf::Env.fetch('ADMIN_KEY') && password == Mconf::Env.fetch('ADMIN_PASSWORD')
 end

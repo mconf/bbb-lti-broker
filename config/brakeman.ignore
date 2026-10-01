@@ -1,0 +1,14 @@
+{
+  "ignored_warnings": [
+    {
+      "fingerprint": "21ab0fe00fdd5899ffc405cff75aadb91b805ee996a614f7e27b08a287e9062d",
+      "note": "Informational: Rails 8.0.2.1 support ends 2026-11-07. Upgrading is its own work and cannot be done from this PR. Revisit when the Rails upgrade is scheduled."
+    },
+    {
+      "fingerprint": "5933022fc3157afbc2d7b1581325e2c259f416bbf295cc315b12b2ae2af5dde2",
+      "note": "DEFERRED, NOT accepted as safe. This is a real open redirect. resource_owner_authenticator redirects to the raw redirect_uri query parameter whenever the LTI launch nonce is missing or expired, which happens before Doorkeeper validates that parameter against the registered application. config.load_defaults 5.0 also leaves action_controller.raise_on_open_redirects false (verified at runtime), so Rails does not block the external target either. allow_other_host: false is NOT the fix here, unlike in bbb-app-rooms, because the legitimate redirect target is another host: the app registered in Doorkeeper. The fix is to match the parameter against the registered Doorkeeper::Application redirect URIs and refuse anything else, which changes the LTI launch path for every tenant and needs the full OAuth flow exercised before it ships."
+    }
+  ],
+  "updated": "2026-09-14 00:00:00 +0000",
+  "brakeman_version": "8.0.6"
+}

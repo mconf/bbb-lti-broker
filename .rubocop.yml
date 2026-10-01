@@ -44,7 +44,7 @@ Style/DoubleNegation:
   Enabled: false
 Style/MethodCallWithArgsParentheses:
   Enabled: true
-  IgnoredMethods:
+  AllowedMethods:
     - desc
     - gem
     - include

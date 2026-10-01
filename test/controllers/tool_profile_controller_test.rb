@@ -20,9 +20,20 @@ require 'test_helper'
 require 'nokogiri'
 
 class ToolProfileControllerTest < ActionDispatch::IntegrationTest
+  # developer_mode_enabled is read from the environment once, at boot, so a test
+  # cannot change it by setting ENV. Flip the resolved config instead.
+  def with_developer_mode
+    previous = Rails.configuration.developer_mode_enabled
+    Rails.configuration.developer_mode_enabled = true
+    yield
+  ensure
+    Rails.configuration.developer_mode_enabled = previous
+  end
+
   test 'responds with xml_config for default with no parameters when developer mode is true' do
-    ENV['DEVELOPER_MODE_ENABLED'] = 'true'
-    get xml_config_path('default')
+    with_developer_mode do
+      get xml_config_path('default')
+    end
 
     # Response must be successful
     assert_response(:success)
@@ -31,10 +42,17 @@ class ToolProfileControllerTest < ActionDispatch::IntegrationTest
     doc = Nokogiri::XML(response.body)
     assert_not(doc.xpath('//blti:title').text.empty?)
   end
+
   test 'XML builder gives xml properties that are selected for cartridge link' do
-    ENV['DEVELOPER_MODE_ENABLED'] = 'true'
-    get "#{xml_config_path('default')}?selection_height=500&selection_width=500"
-    page = Nokogiri::HTML.parse(@response.body)
-    assert(page.xpath('//extensions/property'))
+    with_developer_mode do
+      get "#{xml_config_path('default')}?selection_height=500&selection_width=500"
+    end
+
+    assert_response(:success)
+
+    # Query parameters become <lticm:property> entries under <blti:extensions>.
+    doc = Nokogiri::XML(response.body)
+    properties = doc.xpath('//blti:extensions/lticm:property')
+    assert_equal(['selection_height', 'selection_width'], properties.map { |p| p['name'] }.sort)
   end
 end
