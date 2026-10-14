@@ -137,6 +137,10 @@ RailsAdmin.config do |config|
 
       include_all_fields
       group :default do
+        field :allow_dash_mr do
+          label 'Allow Dash MR'
+          help 'If enabled, the room shows a button that opens the engagement dashboard in a new tab, for moderators only. Off by default: access is granted per client.'
+        end
       end
 
       # Moodle Configs
