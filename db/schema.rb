@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_08_21_173018) do
+ActiveRecord::Schema[8.0].define(version: 2026_10_14_233000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -167,6 +167,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_08_21_173018) do
     t.integer "moodle_presence_threshold_percentage", default: 75, null: false
     t.integer "moodle_partial_presence_threshold_percentage", default: 10, null: false
     t.boolean "auto_start_recording", default: false, null: false
+    t.boolean "allow_dash_mr", default: false, null: false
     t.index ["tool_id"], name: "index_rooms_app_configs_on_tool_id"
   end
 
