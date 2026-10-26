@@ -41,6 +41,8 @@ class RegistrationController < ApplicationController
 
     @registration = lti_registration_params(params[:uuid])
     @tool = lti_registration(params[:uuid])
+    # find_by: an old duplicated registration may point to a key pair that was already deleted
+    @public_key = RsaKeyPair.find_by(id: @registration['rsa_key_pair_id'])&.public_key
   end
 
   def new
