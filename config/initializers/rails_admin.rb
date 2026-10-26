@@ -298,6 +298,8 @@ RailsAdmin.config do |config|
   ### RsaKeyPair ###
   config.model RsaKeyPair do
     label 'RSA Key Pair'
+    # exclude, not hide: hidden fields can still be requested in the csv export
+    exclude_fields :private_key
   end
   ### RsaKeyPair ###
 
