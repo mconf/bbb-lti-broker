@@ -15,7 +15,7 @@ You should have received a copy of the GNU Lesser General Public License along
 with BigBlueButton; if not, see <http://www.gnu.org/licenses/>. %>
 
 <%= content_tag :div do %>
-    <%= button_tag t('registration.startmeoff'), :data => {:toggle => "collapse", :target => "#collapseStarterInfo"}, :type => "button", :class => "btn btn-primary" %>
+    <%= button_tag t('registration.startmeoff'), :data => {:bs_toggle => "collapse", :bs_target => "#collapseStarterInfo"}, :type => "button", :class => "btn btn-primary" %>
     <%= content_tag :div, class: "collapse", id: "collapseStarterInfo" do %>
         <% if apps.length > 1 %>
             <% random_key = Digest::SHA1.hexdigest([Time.now, rand].join)%>
