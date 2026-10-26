@@ -40,6 +40,8 @@ class ApplicationController < ActionController::Base
 
   protect_from_forgery with: :exception
 
+  helper_method :default_app_hidden?
+
   @build_number = Rails.configuration.build_number
 
   def on404
@@ -56,6 +58,11 @@ class ApplicationController < ActionController::Base
   end
 
   private
+
+  # The default app is only served in developer mode
+  def default_app_hidden?(app = Rails.configuration.default_tool)
+    app == 'default' && !Rails.configuration.developer_mode_enabled
+  end
 
   def render_error(status)
     @error = {
