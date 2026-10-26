@@ -53,7 +53,12 @@ class ApplicationController < ActionController::Base
     render_error(406)
   end
 
-  def on500
+  # rescue_from passes the exception when the handler accepts it
+  def on500(exception = nil)
+    if exception
+      logger.error("#{exception.class}: #{exception.message}")
+      logger.error(Array(exception.backtrace).first(15).join("\n"))
+    end
     render_error(500)
   end
 
