@@ -26,6 +26,27 @@ RSpec.describe('Registration', type: :request) do
     )
   end
 
+  describe 'GET /registration/list' do
+    # Like the 1.3 Tools created through the dash, which default tool_settings to 'none'
+    def create_invalid_registration(uuid, tool_settings)
+      RailsLti2Provider::Tool.create!(uuid: uuid, shared_secret: uuid, tool_settings: tool_settings, lti_version: '1.3.0', tenant: tenant)
+    end
+
+    it 'lists the valid registrations and logs the ones with invalid tool_settings' do
+      create_registration(key_pair.id)
+      invalid = [create_invalid_registration('spec-none', 'none'), create_invalid_registration('spec-array', '[]')]
+      allow(Rails.logger).to(receive(:warn))
+
+      get '/registration/list', headers: auth_headers
+      expect(response).to(have_http_status(:success))
+      expect(response.body).to(include('spec-client-id'))
+      invalid.each do |tool|
+        expect(response.body).not_to(include(tool.uuid))
+        expect(Rails.logger).to(have_received(:warn).with(a_string_including("id=#{tool.id}")))
+      end
+    end
+  end
+
   describe 'GET /registration/new' do
     before { tenant }
 

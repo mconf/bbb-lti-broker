@@ -389,6 +389,14 @@ RailsAdmin.config do |config|
     end
 
     create do
+      # 1.3 Tools need tool_settings, which the dash can't fill; they are created on the registration pages
+      configure :lti_version, :enum do
+        enum do
+          ['LTI-1p0']
+        end
+        default_value 'LTI-1p0'
+      end
+
       configure :expired_at do
         hide
       end

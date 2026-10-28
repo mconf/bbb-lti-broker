@@ -30,7 +30,9 @@ class RegistrationController < ApplicationController
   before_action :print_parameters if Rails.configuration.developer_mode_enabled
 
   def list
-    @tools_1p3 = RailsLti2Provider::Tool.where(lti_version: '1.3.0').sort
+    # 1.3 Tools created through the dash got 'none' as tool_settings; skip them
+    @tools_1p3, invalid = RailsLti2Provider::Tool.where(lti_version: '1.3.0').sort.partition(&:tool_settings_object?)
+    invalid.each { |tool| logger.warn("1.3 Tool id=#{tool.id} uuid=#{tool.uuid} left out of the list: invalid tool_settings") }
     @tools_1p0 = RailsLti2Provider::Tool.where(lti_version: 'LTI-1p0').sort
     @tenants = RailsLti2Provider::Tenant.all.sort
   end
