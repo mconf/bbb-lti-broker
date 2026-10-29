@@ -3,15 +3,7 @@
 require 'rails_helper'
 
 RSpec.describe('Dash RsaKeyPair', type: :request) do
-  let(:auth_headers) do
-    credentials = ActionController::HttpAuthentication::Basic.encode_credentials(ENV.fetch('ADMIN_KEY'), ENV.fetch('ADMIN_PASSWORD'))
-    { 'HTTP_AUTHORIZATION' => credentials }
-  end
-
-  before do
-    private_key = OpenSSL::PKey::RSA.generate(2048)
-    RsaKeyPair.create!(private_key: private_key.to_s, public_key: private_key.public_key.to_s, tool_id: 'dash-spec')
-  end
+  before { create_key_pair(tool_id: 'dash-spec') }
 
   # The HTML sections hide the field, but the json, xml and csv outputs bypass them
   it 'leaves the private key out of the json list' do

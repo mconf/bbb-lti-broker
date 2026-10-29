@@ -3,17 +3,8 @@
 require 'rails_helper'
 
 RSpec.describe('Registration', type: :request) do
-  let(:auth_headers) do
-    credentials = ActionController::HttpAuthentication::Basic.encode_credentials(ENV.fetch('ADMIN_KEY'), ENV.fetch('ADMIN_PASSWORD'))
-    { 'HTTP_AUTHORIZATION' => credentials }
-  end
   let(:tenant) { RailsLti2Provider::Tenant.create!(uid: 'registration-spec') }
   let(:key_pair) { create_key_pair(tool_id: 'spec-client-id') }
-
-  def create_key_pair(tool_id: nil)
-    private_key = OpenSSL::PKey::RSA.generate(2048)
-    RsaKeyPair.create!(private_key: private_key.to_s, public_key: private_key.public_key.to_s, tool_id: tool_id)
-  end
 
   def create_registration(rsa_key_pair_id, uuid: 'spec-client-id')
     RailsLti2Provider::Tool.create!(
@@ -84,7 +75,10 @@ RSpec.describe('Registration', type: :request) do
       create_registration(key_pair.id)
       get '/registration/edit', params: { uuid: 'spec-client-id' }, headers: auth_headers
       expect(response).to(have_http_status(:success))
-      expect(response.body).to(match(/<input[^>]*type="hidden"[^>]*value="spec-client-id"[^>]*name="tool\[uuid\]"/))
+      input = Nokogiri::HTML(response.body).at('input[name="tool[uuid]"]')
+      expect(input).to(be_present)
+      expect(input['type']).to(eq('hidden'))
+      expect(input['value']).to(eq('spec-client-id'))
     end
   end
 

@@ -2,6 +2,8 @@
 
 require 'rails_helper'
 
+# The format MessageController stores the launch in is covered by spec/requests/lti13_launch_spec.rb;
+# these cover the formats it no longer produces and the claims a platform may leave out
 RSpec.describe('Api::V1::Sessions', type: :request) do
   let(:tenant) { RailsLti2Provider::Tenant.create!(uid: 'sessions-spec') }
   let(:tool) do
@@ -10,39 +12,13 @@ RSpec.describe('Api::V1::Sessions', type: :request) do
       app_settings: {}, lti_version: '1.3.0', tenant: tenant
     )
   end
-  let(:claims) do
-    {
-      'sub' => 'user-1',
-      'name' => 'Jane Doe',
-      'given_name' => 'Jane',
-      'family_name' => 'Doe',
-      'email' => 'jane@example.com',
-      'https://purl.imsglobal.org/spec/lti/claim/message_type' => 'LtiResourceLinkRequest',
-      'https://purl.imsglobal.org/spec/lti/claim/version' => '1.3.0',
-      'https://purl.imsglobal.org/spec/lti/claim/roles' => [
-        'http://purl.imsglobal.org/vocab/lis/v2/membership#Learner',
-        'http://purl.imsglobal.org/vocab/lis/v2/institution/person#Student',
-      ],
-      'https://purl.imsglobal.org/spec/lti/claim/context' => { 'id' => 'course-1', 'label' => 'CALC1', 'title' => 'Calculus I' },
-      'https://purl.imsglobal.org/spec/lti/claim/resource_link' => { 'id' => 'link-1', 'title' => 'Class room' },
-      'https://purl.imsglobal.org/spec/lti/claim/tool_platform' => { 'guid' => 'platform-guid', 'url' => 'https://lms.example.com' },
-      'https://purl.imsglobal.org/spec/lti/claim/launch_presentation' => { 'locale' => 'pt_br' },
-    }
-  end
+  let(:claims) { lti13_claims(roles: [LtiHelpers::LEARNER, 'http://purl.imsglobal.org/vocab/lis/v2/institution/person#Student']) }
   let(:custom_params) { { 'oauth_consumer_key' => 'sessions-spec', 'institution_guid' => 'spec-institution' } }
 
-  # Rooms authenticates with a Doorkeeper client token; any token is accepted here
-  before do
-    allow_any_instance_of(Api::V1::SessionsController).to(receive(:doorkeeper_token).and_return(instance_double(Doorkeeper::AccessToken, acceptable?: true)))
-  end
+  before { stub_doorkeeper_token }
 
   def create_launch(message)
     tool.lti_launches.create!(nonce: 'spec-nonce', message: message.to_json)
-  end
-
-  # How MessageController#add_custom_params_to_launch_message stores the 1.3 launch: post_params puts the claims at the root
-  def flat_message(claims)
-    claims.merge('custom_params' => custom_params)
   end
 
   def session_message
@@ -51,13 +27,14 @@ RSpec.describe('Api::V1::Sessions', type: :request) do
     JSON.parse(response.body)['message']
   end
 
-  shared_examples 'a standardized 1.3 message' do
-    it 'maps the claims to the LTI 1.1 parameters' do
+  describe 'GET /api/v1/sessions/:token' do
+    it 'maps the claims of older launches, wrapped in unknown_params' do
+      create_launch('unknown_params' => claims, 'custom_params' => custom_params)
       expect(session_message).to(include(
                                    'user_id' => 'user-1',
                                    'lis_person_name_full' => 'Jane Doe',
                                    'lis_person_contact_email_primary' => 'jane@example.com',
-                                   'roles' => 'http://purl.imsglobal.org/vocab/lis/v2/membership#Learner,http://purl.imsglobal.org/vocab/lis/v2/institution/person#Student',
+                                   'roles' => "#{LtiHelpers::LEARNER},http://purl.imsglobal.org/vocab/lis/v2/institution/person#Student",
                                    'context_id' => 'course-1',
                                    'context_title' => 'Calculus I',
                                    'context_label' => 'CALC1',
@@ -66,32 +43,28 @@ RSpec.describe('Api::V1::Sessions', type: :request) do
                                    'launch_presentation_locale' => 'pt_br'
                                  ))
     end
-  end
-
-  describe 'GET /api/v1/sessions/:token' do
-    context 'with the claims at the root of the message' do
-      before { create_launch(flat_message(claims)) }
-
-      it_behaves_like 'a standardized 1.3 message'
-
-      # The apps read the tenant and app configs from custom_params, without the custom_ prefix
-      it 'keeps the custom params as they were stored' do
-        expect(session_message['custom_params']).to(eq(custom_params))
-      end
-    end
-
-    context 'with the claims wrapped in unknown_params, as older launches were stored' do
-      before { create_launch('unknown_params' => claims, 'custom_params' => custom_params) }
-
-      it_behaves_like 'a standardized 1.3 message'
-    end
 
     # launch_presentation and tool_platform are optional in LTI 1.3
     it 'leaves out the parameters of the claims the platform did not send' do
-      create_launch(flat_message(claims.except('https://purl.imsglobal.org/spec/lti/claim/launch_presentation', 'https://purl.imsglobal.org/spec/lti/claim/tool_platform')))
+      optional = %w[launch_presentation tool_platform].map { |claim| "https://purl.imsglobal.org/spec/lti/claim/#{claim}" }
+      create_launch(claims.except(*optional).merge('custom_params' => custom_params))
       message = session_message
       expect(message).to(include('user_id' => 'user-1', 'context_title' => 'Calculus I'))
       expect(message).not_to(include('launch_presentation_locale', 'tool_consumer_instance_guid'))
+    end
+
+    # LTI 1.0 launches already come with the LTI 1.1 parameters, so the claims are not mapped
+    it 'hands an LTI 1.0 launch over unchanged' do
+      message = {
+        'user_id' => '60',
+        'roles' => 'Learner',
+        'context_id' => '7',
+        'context_title' => 'Calculus I',
+        'lti_version' => 'LTI-1p0',
+        'custom_params' => custom_params,
+      }
+      create_launch(message)
+      expect(session_message).to(eq(message))
     end
   end
 end
