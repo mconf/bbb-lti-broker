@@ -20,6 +20,8 @@
 require 'spec_helper'
 ENV['RAILS_ENV'] ||= 'test'
 ENV['RELATIVE_URL_ROOT'] ||= 'test'
+# The routes only mount the dash with it on, and the dash specs need it
+ENV['SERVE_RAILS_ADMIN'] = 'true'
 
 require File.expand_path('../config/environment', __dir__)
 # Prevent database truncation if the environment is production
