@@ -30,7 +30,9 @@ class RegistrationController < ApplicationController
   before_action :print_parameters if Rails.configuration.developer_mode_enabled
 
   def list
-    @tools_1p3 = RailsLti2Provider::Tool.where(lti_version: '1.3.0').sort
+    # 1.3 Tools created through the dash got 'none' as tool_settings; skip them
+    @tools_1p3, invalid = RailsLti2Provider::Tool.where(lti_version: '1.3.0').sort.partition(&:tool_settings_object?)
+    invalid.each { |tool| logger.warn("1.3 Tool id=#{tool.id} uuid=#{tool.uuid} left out of the list: invalid tool_settings") }
     @tools_1p0 = RailsLti2Provider::Tool.where(lti_version: 'LTI-1p0').sort
     @tenants = RailsLti2Provider::Tenant.all.sort
   end
@@ -41,6 +43,8 @@ class RegistrationController < ApplicationController
 
     @registration = lti_registration_params(params[:uuid])
     @tool = lti_registration(params[:uuid])
+    # find_by: an old duplicated registration may point to a key pair that was already deleted
+    @public_key = RsaKeyPair.find_by(id: @registration['rsa_key_pair_id'])&.public_key
   end
 
   def new
@@ -65,29 +69,38 @@ class RegistrationController < ApplicationController
     settings_params = tool_params[:tool_settings]
     return if settings_params[:client_id] == ''
 
-    if settings_params.key?('rsa_key_pair_id')
-      key_pair = RsaKeyPair.find(settings_params[:rsa_key_pair_id])
-      redirect_to(new_registration_path) and return if key_pair.nil?
+    client_id = settings_params[:client_id]
+    # The edit form sends back the uuid it was opened with; the new form leaves it blank
+    previous_uuid = tool_params[:uuid].presence
 
-      key_pair.update(tool_id: settings_params[:client_id])
+    if client_id != previous_uuid && lti_registration_exists?(client_id)
+      back_path = previous_uuid ? edit_registration_path(uuid: previous_uuid) : new_registration_path
+      redirect_to(back_path, alert: t('registration.client_id_taken', client_id: client_id)) and return
     end
 
-    registration = lti_registration(settings_params[:client_id]) if tool_params[:tool_settings].key?('client_id')
+    if settings_params.key?('rsa_key_pair_id')
+      key_pair = RsaKeyPair.find_by(id: settings_params[:rsa_key_pair_id])
+      redirect_to(new_registration_path) and return if key_pair.nil?
+
+      key_pair.update(tool_id: client_id)
+    end
+
+    registration = lti_registration(previous_uuid) if previous_uuid
     unless registration.nil?
-      settings_params[:rsa_key_pair_id] = lti_registration_params(settings_params[:client_id])['rsa_key_pair_id']
+      settings_params[:rsa_key_pair_id] = lti_registration_params(previous_uuid)['rsa_key_pair_id']
       registration.update(
+        uuid: client_id,
         tool_settings: settings_params.to_json,
-        shared_secret: settings_params[:client_id],
+        shared_secret: client_id,
         app_settings: tool_params[:app_settings],
         tenant: RailsLti2Provider::Tenant.find_by(id: tool_params[:tenant_id])
       )
-      registration.save
       redirect_to(registration_list_path) and return
     end
 
     RailsLti2Provider::Tool.create!(
-      uuid: settings_params[:client_id],
-      shared_secret: settings_params[:client_id],
+      uuid: client_id,
+      shared_secret: client_id,
       tool_settings: settings_params.to_json,
       app_settings: tool_params[:app_settings],
       lti_version: '1.3.0',
@@ -101,7 +114,13 @@ class RegistrationController < ApplicationController
     if lti_registration_exists?(params[:uuid])
       reg = lti_registration(params[:uuid])
       if (key_pair_id = lti_registration_params(params[:uuid])['rsa_key_pair_id'])
-        RsaKeyPair.find(key_pair_id).destroy
+        key_pair = RsaKeyPair.find_by(id: key_pair_id)
+        # Registrations duplicated by the old edit bug share one key pair: keep it for the other one
+        if (other = registration_sharing_key_pair(key_pair_id, reg))
+          key_pair&.update(tool_id: other.uuid)
+        else
+          key_pair&.destroy
+        end
       end
       reg.delete
     end
@@ -109,6 +128,12 @@ class RegistrationController < ApplicationController
   end
 
   private
+
+  def registration_sharing_key_pair(key_pair_id, registration)
+    RailsLti2Provider::Tool.where(lti_version: '1.3.0').where.not(id: registration.id).find do |tool|
+      tool.tool_settings_object? && JSON.parse(tool.tool_settings)['rsa_key_pair_id'].to_s == key_pair_id.to_s
+    end
+  end
 
   def set_rsa_keys
     private_key = OpenSSL::PKey::RSA.generate(4096)

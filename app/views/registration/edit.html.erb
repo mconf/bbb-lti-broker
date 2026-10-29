@@ -16,7 +16,12 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>. %>
 
 <div class='registration-form container'>
     <h3><%= t('registration.edit') %></h3>
+    <% if flash[:alert] %>
+        <div class='alert alert-danger' role='alert'><%= flash[:alert] %></div>
+    <% end %>
     <%= form_with model: @tool, url: submit_registration_path, method: 'post' do |form| %>
+        <%# uuid the registration was opened with, so submit can rename it in place %>
+        <%= form.hidden_field :uuid %>
         <%# tool settings %>
         <%= form.fields :tool_settings, model: OpenStruct.new(@registration) do |tool_settings_form| %>
             <%# issuer %>

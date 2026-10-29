@@ -18,6 +18,13 @@ Rails.application.config.to_prepare do
       self.tool_settings ||= 'none'
     end
 
+    # tool_settings holds a JSON string; 1.3 Tools need it to be an object
+    def tool_settings_object?
+      JSON.parse(tool_settings.to_s).is_a?(Hash)
+    rescue JSON::ParserError
+      false
+    end
+
     # Prepare configs to be sent as custom_params on Rooms app launch
     def rooms_app_configs_for_launch
       configs = { 'institution_guid' => self.tenant.institution_guid }
