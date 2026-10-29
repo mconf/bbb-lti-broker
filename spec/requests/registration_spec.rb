@@ -200,6 +200,19 @@ RSpec.describe('Registration', type: :request) do
       expect(key_pair.reload.tool_id).to(eq('spec-duplicate'))
     end
 
+    # 'none' does not parse; '[]' and 'null' parse, but are not objects
+    it 'deletes the registration when other 1.3 Tools have invalid tool_settings' do
+      create_registration(key_pair.id)
+      %w[none [] null].each_with_index do |settings, index|
+        RailsLti2Provider::Tool.create!(uuid: "spec-invalid-#{index}", shared_secret: 'spec', tool_settings: settings, lti_version: '1.3.0', tenant: tenant)
+      end
+
+      delete_registration('spec-client-id')
+      expect(response.location).to(include('registration/list'))
+      expect(RailsLti2Provider::Tool.find_by(uuid: 'spec-client-id')).to(be_nil)
+      expect(RsaKeyPair.find_by(id: key_pair.id)).to(be_nil)
+    end
+
     it 'deletes a registration whose key pair is already gone' do
       create_registration(key_pair.id)
       key_pair.destroy!

@@ -131,9 +131,7 @@ class RegistrationController < ApplicationController
 
   def registration_sharing_key_pair(key_pair_id, registration)
     RailsLti2Provider::Tool.where(lti_version: '1.3.0').where.not(id: registration.id).find do |tool|
-      JSON.parse(tool.tool_settings)['rsa_key_pair_id'].to_s == key_pair_id.to_s
-    rescue JSON::ParserError
-      false
+      tool.tool_settings_object? && JSON.parse(tool.tool_settings)['rsa_key_pair_id'].to_s == key_pair_id.to_s
     end
   end
 
