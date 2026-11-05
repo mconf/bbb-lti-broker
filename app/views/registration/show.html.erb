@@ -67,6 +67,15 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>. %>
             <%= text_field_tag(key, value, class: 'form-control col-sm-10 col', readonly: true) %>
         </div>
     <% end %>
+    <%# public_key %>
+    <% if @public_key.present? %>
+        <div class='form-group row'>
+            <%= label_tag(:publickey, t('registration.publickey') + ':',
+                class: 'col-sm-2 col-form-label') %>
+            <%= text_area_tag(:publickey, @public_key,
+                class: 'click-to-copy form-control col-sm-10 col', readonly: true, size: '90x15') %>
+        </div>
+    <% end %>
 
     <%# App Settings %>
     <h4><%= t('tool.app_settings') %></h4>

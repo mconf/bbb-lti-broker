@@ -16,6 +16,9 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>. %>
 
 <div class='registration-form container'>
     <h3><%= t('registration.new') %></h3>
+    <% if flash[:alert] %>
+        <div class='alert alert-danger' role='alert'><%= flash[:alert] %></div>
+    <% end %>
     <%= render 'starter_info',
         app: @app, apps: @apps, temp_key_token: @temp_key_token,
         jwk: @jwk, redirect_uri: @redirect_uri, public_key: @public_key %>

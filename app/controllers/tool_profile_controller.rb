@@ -147,7 +147,7 @@ class ToolProfileController < ApplicationController
   end
 
   def lti_authorized_default_application
-    return unless params[:app] == 'default' && !Rails.configuration.developer_mode_enabled
+    return unless default_app_hidden?(params[:app])
     return on404
   end
 end
