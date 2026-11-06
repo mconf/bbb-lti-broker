@@ -141,6 +141,11 @@ RailsAdmin.config do |config|
           label 'Allow Dash MR'
           help 'If enabled, the room shows a button that opens the engagement dashboard in a new tab, for moderators only. Off by default: access is granted per client.'
         end
+
+        field :allow_large_meetings do
+          label 'Allow large meetings'
+          help 'If enabled, shows a checkbox in the scheduled meeting form to mark the session as a large meeting, so it runs on higher-capacity servers. Off by default: access is granted per client.'
+        end
       end
 
       # Moodle Configs
