@@ -65,7 +65,10 @@ RailsAdmin.config do |config|
   config.actions do
     dashboard                     # mandatory
     index                         # mandatory
-    new
+    new do
+      # The private key is left out of the dash, so a pair created here couldn't sign; 1.3 pairs come from /registration/new
+      except ['RsaKeyPair']
+    end
     export
     bulk_delete
     show

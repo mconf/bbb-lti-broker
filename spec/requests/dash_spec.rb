@@ -23,4 +23,10 @@ RSpec.describe('Dash RsaKeyPair', type: :request) do
       expect(response.body).not_to(include('PRIVATE KEY'))
     end
   end
+
+  # A pair created here has no private key, so a registration using it can't sign its JWTs
+  it 'does not create key pairs' do
+    expect { post '/dash/rsa_key_pair/new', params: { rsa_key_pair: { public_key: 'dash-spec' } }, headers: auth_headers }.not_to(change(RsaKeyPair, :count))
+    expect(response).to(have_http_status(:forbidden))
+  end
 end
