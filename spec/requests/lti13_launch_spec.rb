@@ -88,6 +88,21 @@ RSpec.describe('LTI 1.3 launch', type: :request) do
     end
   end
 
+  # The JWT spec allows aud as a list, and some platforms (saltire) send it that way.
+  # The app builds the room handler from the consumer key, so it has to get the client_id as a string.
+  context 'when aud comes as a list' do
+    {
+      'with only the client_id' => { 'aud' => ['launch-spec'] },
+      'with other audiences and the client_id in azp' => { 'aud' => ['other-audience', 'launch-spec'], 'azp' => 'launch-spec' },
+    }.each do |description, aud_claims|
+      it "hands the client_id to the app as the consumer key #{description}" do
+        claims.merge!(aud_claims)
+        body = launch
+        expect(body['message']['custom_params']).to(include('oauth_consumer_key' => 'launch-spec'))
+      end
+    end
+  end
+
   # consider_all_requests_local is on in the test environment, so the errors reach the spec
   describe 'a launch the broker refuses' do
     it 'rejects an id_token signed with another key' do
