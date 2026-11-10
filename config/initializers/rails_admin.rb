@@ -65,7 +65,10 @@ RailsAdmin.config do |config|
   config.actions do
     dashboard                     # mandatory
     index                         # mandatory
-    new
+    new do
+      # The private key is left out of the dash, so a pair created here couldn't sign; 1.3 pairs come from /registration/new
+      except ['RsaKeyPair']
+    end
     export
     bulk_delete
     show
@@ -303,6 +306,8 @@ RailsAdmin.config do |config|
   ### RsaKeyPair ###
   config.model RsaKeyPair do
     label 'RSA Key Pair'
+    # exclude, not hide: hidden fields can still be requested in the csv export
+    exclude_fields :private_key
   end
   ### RsaKeyPair ###
 
@@ -392,6 +397,14 @@ RailsAdmin.config do |config|
     end
 
     create do
+      # 1.3 Tools need tool_settings, which the dash can't fill; they are created on the registration pages
+      configure :lti_version, :enum do
+        enum do
+          ['LTI-1p0']
+        end
+        default_value 'LTI-1p0'
+      end
+
       configure :expired_at do
         hide
       end

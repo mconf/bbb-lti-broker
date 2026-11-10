@@ -51,24 +51,24 @@ module BbbLtiBroker
       uri.to_s
     end
 
+    ##
+    # Standardize a message to be sent to the registered app for backward compatibility with LTI 1.0.
+    #
+    # When the message comes from an LTI 1.3 launch, the claims are extracted and placed at the root level
+    # with the naming and format LTI 1.0 used to have. Launches stored before MessageController started adding
+    # the custom params to the message wrap the claims in 'unknown_params'; newer ones keep them at the root.
+    #
     def standarized_message(message_json)
       message = JSON.parse(message_json)
       if message['user_id'].blank?
-        message['user_id'] = message['unknown_params']['sub']
-        message['lis_person_name_full'] = message['unknown_params']['name']
-        message['lis_person_name_given'] = message['unknown_params']['given_name']
-        message['lis_person_name_family'] = message['unknown_params']['family_name']
-        message['lis_person_contact_email_primary'] = message['unknown_params']['email']
-        message['user_image'] = message['unknown_params']['picture']
-        message['roles'] = message['unknown_params']['https://purl.imsglobal.org/spec/lti/claim/roles'].join(',')
-        message['tool_consumer_instance_guid'] = message['unknown_params']['https://purl.imsglobal.org/spec/lti/claim/tool_platform']['guid']
-        message['tool_consumer_instance_url'] = message['unknown_params']['https://purl.imsglobal.org/spec/lti/claim/tool_platform']['url']
-        message['resource_link_id'] = message['unknown_params']['https://purl.imsglobal.org/spec/lti/claim/resource_link']['id']
-        message['resource_link_title'] = message['unknown_params']['https://purl.imsglobal.org/spec/lti/claim/resource_link']['title']
-        message['resource_link_description'] = message['unknown_params']['https://purl.imsglobal.org/spec/lti/claim/resource_link']['description']
-        message['launch_presentation_locale'] = message['unknown_params']['https://purl.imsglobal.org/spec/lti/claim/launch_presentation']['locale']
-        # We need this id to calculate the `room_handler` on the Rooms application
-        message['context_id'] = message['unknown_params']['https://purl.imsglobal.org/spec/lti/claim/context']['id']
+        claims = message['unknown_params'] || message
+        migration_map.each do |param, claim|
+          name, field = claim.split('#')
+          value = claims[name]
+          value = value.is_a?(Hash) ? value[field] : nil if field
+          value = value.join(',') if value.is_a?(Array)
+          message[param.to_s] = value unless value.nil?
+        end
       end
       custom_overrides(message).to_json
     end
@@ -87,6 +87,46 @@ module BbbLtiBroker
         first_name: params['lis_person_name_given'],
         last_name: params['lis_person_name_family'],
         last_accessed_at: Time.current,
+      }
+    end
+
+    # LTI 1.1 parameter => LTI 1.3 claim, with '#' separating the claim from its field
+    def migration_map
+      {
+        lti_message_type: 'https://purl.imsglobal.org/spec/lti/claim/message_type',
+        lti_version: 'https://purl.imsglobal.org/spec/lti/claim/version',
+        user_id: 'sub',
+        lis_person_name_given: 'given_name',
+        lis_person_name_family: 'family_name',
+        lis_person_name_full: 'name',
+        lis_person_contact_email_primary: 'email',
+        user_image: 'picture',
+        lis_person_sourcedid: 'https://purl.imsglobal.org/spec/lti/claim/lis#person_sourcedid',
+        lis_course_offering_sourcedid: 'https://purl.imsglobal.org/spec/lti/claim/lis#course_offering_sourcedid',
+        lis_course_section_sourcedid: 'https://purl.imsglobal.org/spec/lti/claim/lis#course_section_sourcedid',
+        resource_link_id: 'https://purl.imsglobal.org/spec/lti/claim/resource_link#id',
+        resource_link_title: 'https://purl.imsglobal.org/spec/lti/claim/resource_link#title',
+        resource_link_description: 'https://purl.imsglobal.org/spec/lti/claim/resource_link#description',
+        roles: 'https://purl.imsglobal.org/spec/lti/claim/roles',
+        # The Rooms app needs context_id to calculate the room handler
+        context_id: 'https://purl.imsglobal.org/spec/lti/claim/context#id',
+        context_type: 'https://purl.imsglobal.org/spec/lti/claim/context#type',
+        context_title: 'https://purl.imsglobal.org/spec/lti/claim/context#title',
+        context_label: 'https://purl.imsglobal.org/spec/lti/claim/context#label',
+        launch_presentation_locale: 'https://purl.imsglobal.org/spec/lti/claim/launch_presentation#locale',
+        launch_presentation_document_target: 'https://purl.imsglobal.org/spec/lti/claim/launch_presentation#document_target',
+        launch_presentation_width: 'https://purl.imsglobal.org/spec/lti/claim/launch_presentation#width',
+        launch_presentation_height: 'https://purl.imsglobal.org/spec/lti/claim/launch_presentation#height',
+        launch_presentation_return_url: 'https://purl.imsglobal.org/spec/lti/claim/launch_presentation#return_url',
+        tool_consumer_info_product_family: 'https://purl.imsglobal.org/spec/lti/claim/tool_platform#product_family_code',
+        tool_consumer_info_version: 'https://purl.imsglobal.org/spec/lti/claim/tool_platform#version',
+        tool_consumer_instance_guid: 'https://purl.imsglobal.org/spec/lti/claim/tool_platform#guid',
+        tool_consumer_instance_name: 'https://purl.imsglobal.org/spec/lti/claim/tool_platform#name',
+        tool_consumer_instance_description: 'https://purl.imsglobal.org/spec/lti/claim/tool_platform#description',
+        tool_consumer_instance_url: 'https://purl.imsglobal.org/spec/lti/claim/tool_platform#url',
+        tool_consumer_instance_contact_email: 'https://purl.imsglobal.org/spec/lti/claim/tool_platform#email',
+        custom_keyname: 'https://purl.imsglobal.org/spec/lti/claim/custom#keyname',
+        role_scope_mentor: 'https://purl.imsglobal.org/spec/lti/claim/role_scope_mentor',
       }
     end
 

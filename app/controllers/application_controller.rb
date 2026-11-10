@@ -40,6 +40,8 @@ class ApplicationController < ActionController::Base
 
   protect_from_forgery with: :exception
 
+  helper_method :default_app_hidden?
+
   @build_number = Rails.configuration.build_number
 
   def on404
@@ -51,11 +53,21 @@ class ApplicationController < ActionController::Base
     render_error(406)
   end
 
-  def on500
+  # rescue_from passes the exception when the handler accepts it
+  def on500(exception = nil)
+    if exception
+      logger.error("#{exception.class}: #{exception.message}")
+      logger.error(Array(exception.backtrace).first(15).join("\n"))
+    end
     render_error(500)
   end
 
   private
+
+  # The default app is only served in developer mode
+  def default_app_hidden?(app = Rails.configuration.default_tool)
+    app == 'default' && !Rails.configuration.developer_mode_enabled
+  end
 
   def render_error(status)
     @error = {

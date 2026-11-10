@@ -17,6 +17,19 @@
 # with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
 
 class RsaKeyPair < ApplicationRecord
+  SERIALIZATION_HIDDEN = %w[private_key].freeze
+
+  # Keep the private key out of to_json/to_xml, even when the caller asks for it: the dash
+  # exports take :only and :methods straight from the request params
+  def serializable_hash(options = nil)
+    options = options.to_h
+    super(options.merge(
+      only: options[:only] && (Array(options[:only]).map(&:to_s) - SERIALIZATION_HIDDEN),
+      except: Array(options[:except]).map(&:to_s) | SERIALIZATION_HIDDEN,
+      methods: options[:methods] && (Array(options[:methods]).map(&:to_s) - SERIALIZATION_HIDDEN)
+    ).compact)
+  end
+
   def tool
     RailsLti2Provider::Tool.find_by_uuid(self.tool_id)
   end

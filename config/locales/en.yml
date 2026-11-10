@@ -51,6 +51,7 @@ en:
     goback:         "Go Back"
     issuer:         "Issuer"
     client_id:       "Client ID"
+    client_id_taken: "The Client ID %{client_id} is already used by another registration."
     key_set_url:      "Key set URL"
     auth_token_url:   "Access Token URL"
     auth_login_url:   "Auth request URL"

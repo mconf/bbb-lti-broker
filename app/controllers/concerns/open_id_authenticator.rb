@@ -28,6 +28,8 @@ module OpenIdAuthenticator
     jwt_parts = validate_jwt_format
     jwt_header = JSON.parse(Base64.urlsafe_decode64(jwt_parts[0]))
     jwt_body = JSON.parse(Base64.urlsafe_decode64(jwt_parts[1]))
+    # aud may come as a list; the client_id is then in azp, or is the only audience
+    jwt_body['aud'] = jwt_body['azp'] || jwt_body['aud'].first if jwt_body['aud'].is_a?(Array)
 
     logger.debug(jwt_header)
     logger.debug(jwt_body)
