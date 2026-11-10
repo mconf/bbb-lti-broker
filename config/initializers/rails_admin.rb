@@ -44,6 +44,45 @@ class SafeSerializedField < RailsAdmin::Config::Fields::Types::Serialized
 end
 RailsAdmin::Config::Fields::Types.register(:serialized, SafeSerializedField)
 
+# Opens a real launch into Rooms as support, from a room in the index or from a tool (a new room).
+# Off unless SUPPORT_LAUNCH_ENABLED: only some brokers offer it.
+class SupportLaunchAction < RailsAdmin::Config::Actions::Base
+  RailsAdmin::Config::Actions.register(:support_launch, self)
+
+  register_instance_option(:member) { true }
+  # enabled? and not visible?: RailsAdmin only checks enabled? when the action URL is opened directly
+  register_instance_option :enabled? do
+    Mconf::Env.fetch_boolean('SUPPORT_LAUNCH_ENABLED', false) &&
+      (bindings[:abstract_model].nil? || %w[LtiContext RailsLti2Provider::Tool].include?(bindings[:abstract_model].to_s))
+  end
+  register_instance_option(:http_methods) { %i[get post] }
+  register_instance_option(:link_icon) { 'fas fa-sign-in-alt' }
+  register_instance_option(:turbo?) { false }
+
+  register_instance_option :controller do
+    proc do
+      @support_launch = @object.is_a?(LtiContext) ? SupportLaunch.from_context(@object) : SupportLaunch.new(tool_id: @object.id)
+      @expected_handler = @object.handler if @object.is_a?(LtiContext)
+
+      if request.post?
+        form = params.require(:support_launch)
+        @support_launch.assign_attributes(form.permit(
+          :operator, :display_name, :lti_role, :context_id, :context_title, :resource_link_id, :resource_link_title, :groups_scoping
+        ))
+        # any registered tool can be picked: the dash is for admins only
+        @support_launch.tool_id = form[:tool_id] if form[:tool_id].present?
+        if @support_launch.valid?
+          launch = @support_launch.launch!(ip: request.remote_ip)
+          redirect_to(main_app.app_launch_path(app: @support_launch.app, oauth_nonce: launch.nonce))
+          next
+        end
+      end
+
+      render(@action.template_name, status: @support_launch.errors.any? ? :unprocessable_entity : :ok)
+    end
+  end
+end
+
 RailsAdmin.config do |config|
   config.main_app_name = 'Broker'
 
@@ -67,13 +106,21 @@ RailsAdmin.config do |config|
     index                         # mandatory
     new do
       # The private key is left out of the dash, so a pair created here couldn't sign; 1.3 pairs come from /registration/new
-      except ['RsaKeyPair']
+      # The support index is written by launches, and the access log is an audit trail
+      except ['RsaKeyPair', 'LtiContext', 'SupportAccess']
     end
     export
-    bulk_delete
+    bulk_delete do
+      except ['SupportAccess']
+    end
     show
-    edit
-    delete
+    edit do
+      except ['LtiContext', 'SupportAccess']
+    end
+    delete do
+      except ['SupportAccess']
+    end
+    support_launch
   end
 
   config.excluded_models = ['RailsLti2Provider::Registration']
@@ -301,6 +348,37 @@ RailsAdmin.config do |config|
     end
   end
   ### EduplayAppConfig ###
+
+
+  ### LtiContext ###
+  config.model LtiContext do
+    label 'Room (support index)'
+    list do
+      sort_by :last_launch_at
+      field :context_title do
+        searchable true
+      end
+      field :handler do
+        searchable true
+      end
+      field :tool
+      field :context_id
+      field :resource_link_title
+      field :last_launch_at
+    end
+  end
+  ### LtiContext ###
+
+
+  ### SupportAccess ###
+  config.model SupportAccess do
+    label 'Support access'
+    list do
+      sort_by :created_at
+      fields :created_at, :operator, :kind, :tool, :handler, :role, :ip
+    end
+  end
+  ### SupportAccess ###
 
 
   ### RsaKeyPair ###

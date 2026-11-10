@@ -1,0 +1,9 @@
+en:
+  admin:
+    actions:
+      support_launch_action:
+        title: "Support launch"
+        menu: "Support launch"
+        breadcrumb: "Support launch"
+        link: "Open a support launch"
+        done: "launched"

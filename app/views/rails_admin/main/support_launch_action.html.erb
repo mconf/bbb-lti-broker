@@ -1,0 +1,97 @@
+<%# Support launch form. It opens the launch in a new tab, so the dash stays on this page. %>
+<% launch = @support_launch %>
+<% tools = RailsLti2Provider::Tool.order(:uuid).pluck(:id, :uuid) %>
+
+<% if @expected_handler %>
+  <p>Room in the index: <code id="support-expected-handler"><%= @expected_handler %></code></p>
+<% end %>
+
+<% if launch.errors.any? %>
+  <div class="alert alert-danger">
+    <% launch.errors.full_messages.each do |message| %>
+      <div><%= message %></div>
+    <% end %>
+  </div>
+<% end %>
+
+<%= form_with scope: :support_launch, url: request.path, method: :post, local: true, html: { target: '_blank', id: 'support-launch-form', class: 'form-horizontal' } do |f| %>
+  <div class="mb-3">
+    <%= f.label :operator, 'Who is accessing (required)', class: 'form-label' %>
+    <%= f.text_field :operator, value: launch.operator, required: true, pattern: '[a-z0-9._-]+', class: 'form-control', placeholder: 'first.last' %>
+    <div class="form-text">Recorded in the access log and sent to the app as the user id. The dash login is shared: this is the only record of who you are.</div>
+  </div>
+
+  <div class="mb-3">
+    <%= f.label :tool_id, 'Tool', class: 'form-label' %>
+    <%= f.select :tool_id, options_for_select(tools.map { |id, uuid| [uuid, id, { 'data-uuid' => uuid }] }, launch.tool_id), {}, class: 'form-select' %>
+  </div>
+
+  <div class="mb-3">
+    <%= f.label :lti_role, 'Role', class: 'form-label' %>
+    <%= f.select :lti_role, options_for_select([%w[Teacher Instructor], %w[Student Learner]], launch.lti_role), {}, class: 'form-select' %>
+  </div>
+
+  <div class="mb-3">
+    <%= f.label :display_name, 'Name shown in the room', class: 'form-label' %>
+    <%= f.text_field :display_name, value: launch.display_name, required: true, class: 'form-control' %>
+  </div>
+
+  <fieldset class="mb-3">
+    <legend class="fs-6">Course <button type="button" id="support-randomize" class="btn btn-sm btn-outline-secondary">Randomize (new test room)</button></legend>
+    <%= f.label :context_id, 'Context ID', class: 'form-label' %>
+    <%= f.text_field :context_id, value: launch.context_id, required: true, class: 'form-control mb-2' %>
+    <%= f.label :context_title, 'Course title', class: 'form-label' %>
+    <%= f.text_field :context_title, value: launch.context_title, class: 'form-control mb-2' %>
+    <%= f.label :resource_link_id, 'Resource link ID', class: 'form-label' %>
+    <%= f.text_field :resource_link_id, value: launch.resource_link_id, class: 'form-control mb-2' %>
+    <%= f.label :resource_link_title, 'Resource link title', class: 'form-label' %>
+    <%= f.text_field :resource_link_title, value: launch.resource_link_title, class: 'form-control mb-2' %>
+    <div class="form-check">
+      <%= f.check_box :groups_scoping, { checked: launch.groups_scoping, class: 'form-check-input' } %>
+      <%= f.label :groups_scoping, 'Room per resource link (groups scoping)', class: 'form-check-label' %>
+    </div>
+  </fieldset>
+
+  <p>Room this launch opens: <code id="support-handler">…</code></p>
+  <div id="support-handler-warning" class="alert alert-warning d-none">This launch opens another room, not the one in the index.</div>
+
+  <%= f.submit 'Launch', class: 'btn btn-primary' %>
+<% end %>
+
+<script>
+  // Same formula as the server (LtiContext.rooms_handler): the room the app will open
+  (function () {
+    var form = document.getElementById('support-launch-form');
+    var field = function (name) { return form.elements['support_launch[' + name + ']']; };
+    var expected = document.getElementById('support-expected-handler');
+
+    function refresh() {
+      var tool = field('tool_id');
+      var key = tool.options[tool.selectedIndex].dataset.uuid || '';
+      var groups = form.querySelector('input[type=checkbox][name="support_launch[groups_scoping]"]').checked;
+      var link = field('resource_link_id').value;
+      var seed = 'rooms' + key + field('context_id').value + (groups && link ? link : '');
+      if (!window.crypto || !window.crypto.subtle) { return; }
+      crypto.subtle.digest('SHA-1', new TextEncoder().encode(seed)).then(function (buffer) {
+        var hex = Array.from(new Uint8Array(buffer)).map(function (b) { return b.toString(16).padStart(2, '0'); }).join('');
+        document.getElementById('support-handler').textContent = hex;
+        var differs = expected && expected.textContent.trim() !== hex;
+        document.getElementById('support-handler-warning').classList.toggle('d-none', !differs);
+      });
+    }
+
+    document.getElementById('support-randomize').addEventListener('click', function () {
+      var suffix = Math.random().toString(16).slice(2, 10);
+      var today = new Date().toISOString().slice(0, 10);
+      field('context_id').value = 'support-test-' + suffix;
+      field('resource_link_id').value = 'support-test-' + suffix;
+      field('context_title').value = 'Teste suporte ' + today;
+      field('resource_link_title').value = 'Teste suporte ' + today;
+      refresh();
+    });
+
+    form.addEventListener('input', refresh);
+    form.addEventListener('change', refresh);
+    refresh();
+  })();
+</script>

@@ -39,6 +39,9 @@ class MessageController < ApplicationController
   before_action :lti_authentication, only: %i[basic_lti_launch_request basic_lti_launch_request_legacy]
   # validates message corresponds to a LTI launch
   before_action :process_openid_message, only: %i[openid_launch_request deep_link]
+  # after_actions run in reverse order: this one runs after the custom params are added,
+  # so it reads the message as the app will
+  after_action :record_lti_context, only: %i[basic_lti_launch_request openid_launch_request]
   # add custom params to lti_launch message
   after_action :add_custom_params_to_launch_message, only: %i[basic_lti_launch_request openid_launch_request]
 
@@ -163,6 +166,16 @@ class MessageController < ApplicationController
     new_message['custom_params'].merge!(launch_configs)
 
     @lti_launch.update(message: new_message.to_json)
+  end
+
+  # Keeps the index support uses to find a room; a failure here must not break the launch
+  def record_lti_context
+    return if @lti_launch.nil?
+
+    message = JSON.parse(standarized_message(@lti_launch[:message]))
+    LtiContext.record_launch(@lti_launch.tool, params[:app], message)
+  rescue StandardError => e
+    logger.error("Could not record the LTI context of launch nonce=#{@lti_launch&.nonce}: #{e.class}: #{e.message}")
   end
 
   # called by all requests to process the message first
