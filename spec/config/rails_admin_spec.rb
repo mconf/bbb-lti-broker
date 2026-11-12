@@ -30,3 +30,19 @@ RSpec.describe('RailsAdmin EduplayAppConfig config') do
     expect(form_value(:eduplay_url, config)).to(eq('https://own.example'))
   end
 end
+
+RSpec.describe('RailsAdmin EduplayAppConfig form help') do
+  def help_by_field
+    RailsAdmin.config(EduplayAppConfig).edit.with(object: EduplayAppConfig.new).visible_fields.to_h { |field| [field.name, field.help] }
+  end
+
+  # RailsAdmin's generic "Optional. Length up to 255." hint is noise in this form
+  it 'shows no generic optional hint' do
+    expect(help_by_field.values).to(all(satisfy { |help| !help.to_s.start_with?('Optional') }))
+  end
+
+  it 'keeps the help written for specific fields' do
+    expect(help_by_field[:enforce_private_student_submissions]).to(start_with('If enabled'))
+    expect(help_by_field[:moodle_integration_enabled]).to(start_with('If disabled'))
+  end
+end
