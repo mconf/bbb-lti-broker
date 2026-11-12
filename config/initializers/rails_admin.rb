@@ -239,8 +239,18 @@ RailsAdmin.config do |config|
   config.model EduplayAppConfig do
     hide unless Mconf::Env.fetch_boolean('SHOW_EDUPLAY_APP_CONFIGS_IN_DASH', true)
 
+    # New configs come filled with the default Eduplay client; only applied to new records
     configure :client_id do
       label 'Client ID'
+      default_value { Mconf::Env.fetch('EDUPLAY_DEFAULT_CLIENT_ID').presence }
+    end
+
+    configure :client_key do
+      default_value { Mconf::Env.fetch('EDUPLAY_DEFAULT_CLIENT_KEY').presence }
+    end
+
+    configure :eduplay_url do
+      default_value { Mconf::Env.fetch('EDUPLAY_DEFAULT_URL').presence }
     end
 
     configure :enforce_private_student_submissions do
