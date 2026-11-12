@@ -104,3 +104,7 @@ SHOW_WORKA_APP_CONFIGS_IN_DASH=true
 SHOW_BRIGHTSPACE_CONFIGS_IN_DASH=true
 # Show Eduplay App Configs in RailsAdmin dashboard
 SHOW_EDUPLAY_APP_CONFIGS_IN_DASH=true
+# Values the dash fills in client_id, client_key and eduplay_url when creating an Eduplay App Config
+EDUPLAY_DEFAULT_CLIENT_ID=
+EDUPLAY_DEFAULT_CLIENT_KEY=
+EDUPLAY_DEFAULT_URL=

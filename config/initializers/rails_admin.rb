@@ -239,8 +239,25 @@ RailsAdmin.config do |config|
   config.model EduplayAppConfig do
     hide unless Mconf::Env.fetch_boolean('SHOW_EDUPLAY_APP_CONFIGS_IN_DASH', true)
 
+    # Drops RailsAdmin's generic "Optional. Length up to 255." hint; the fields with a help of
+    # their own set it below
+    configure [:client_id, :client_key, :eduplay_url, :eduplay_username, :eduplay_password,
+               :moodle_url, :moodle_token, :moodle_group_select_enabled, :moodle_show_all_groups] do
+      help ''
+    end
+
+    # New configs come filled with the default Eduplay client; only applied to new records
     configure :client_id do
       label 'Client ID'
+      default_value { Mconf::Env.fetch('EDUPLAY_DEFAULT_CLIENT_ID').presence }
+    end
+
+    configure :client_key do
+      default_value { Mconf::Env.fetch('EDUPLAY_DEFAULT_CLIENT_KEY').presence }
+    end
+
+    configure :eduplay_url do
+      default_value { Mconf::Env.fetch('EDUPLAY_DEFAULT_URL').presence }
     end
 
     configure :enforce_private_student_submissions do
