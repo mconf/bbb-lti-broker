@@ -155,20 +155,12 @@ class MessageController < ApplicationController
     new_message['custom_params']['oauth_consumer_key'] = params[:oauth_consumer_key]
 
     # add app configs
-    case params[:app]
-    when 'worka'
-      launch_configs = @lti_launch.tool.worka_app_configs_for_launch
-    when 'eduplay'
-      launch_configs = @lti_launch.tool.eduplay_app_configs_for_launch
-    else
-      launch_configs = @lti_launch.tool.rooms_app_configs_for_launch
-    end
-    new_message['custom_params'].merge!(launch_configs)
+    new_message['custom_params'].merge!(@lti_launch.tool.app_configs_for_launch(params[:app]))
 
     @lti_launch.update(message: new_message.to_json)
   end
 
-  # Keeps the index support uses to find a room; a failure here must not break the launch
+  # Keeps the launch history (see LtiContext); a failure here must not break the launch
   def record_lti_context
     return if @lti_launch.nil?
 

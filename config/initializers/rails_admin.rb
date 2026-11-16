@@ -44,7 +44,7 @@ class SafeSerializedField < RailsAdmin::Config::Fields::Types::Serialized
 end
 RailsAdmin::Config::Fields::Types.register(:serialized, SafeSerializedField)
 
-# Opens a real launch into Rooms from the dash, from a room in the index or from a tool (a new room).
+# Opens a real launch into an app from the dash, from a row of the launch history or from a tool (a new context).
 # Off unless DASH_LAUNCH_ENABLED: only some brokers offer it.
 class DashLaunchAction < RailsAdmin::Config::Actions::Base
   RailsAdmin::Config::Actions.register(:dash_launch, self)
@@ -62,12 +62,12 @@ class DashLaunchAction < RailsAdmin::Config::Actions::Base
   register_instance_option :controller do
     proc do
       @dash_launch = @object.is_a?(LtiContext) ? DashLtiLaunch.from_context(@object) : DashLtiLaunch.new(tool_id: @object.id)
-      @expected_handler = @object.handler if @object.is_a?(LtiContext)
+      @expected_handler = @object.rooms_handler if @object.is_a?(LtiContext)
 
       if request.post?
         form = params.require(:dash_launch)
         @dash_launch.assign_attributes(form.permit(
-          :operator, :display_name, :lti_role, :context_id, :context_title, :resource_link_id, :resource_link_title, :groups_scoping
+          :app, :operator, :display_name, :lti_role, :context_id, :context_title, :resource_link_id, :resource_link_title, :groups_scoping
         ))
         # any registered tool can be picked: the dash is for admins only
         @dash_launch.tool_id = form[:tool_id] if form[:tool_id].present?
@@ -106,7 +106,7 @@ RailsAdmin.config do |config|
     index                         # mandatory
     new do
       # The private key is left out of the dash, so a pair created here couldn't sign; 1.3 pairs come from /registration/new
-      # The support index is written by launches, and the access log is an audit trail
+      # The launch history is written by launches, and the dash launch log is an audit trail
       except ['RsaKeyPair', 'LtiContext', 'DashLaunchLog']
     end
     export
@@ -352,13 +352,15 @@ RailsAdmin.config do |config|
 
   ### LtiContext ###
   config.model LtiContext do
-    label 'Room (support index)'
+    label 'Launch history'
+    label_plural 'Launch history'
     list do
       sort_by :last_launch_at
+      field :app
       field :context_title do
         searchable true
       end
-      field :handler do
+      field :rooms_handler do
         searchable true
       end
       field :tool
@@ -375,7 +377,7 @@ RailsAdmin.config do |config|
     label 'Dash launch log'
     list do
       sort_by :created_at
-      fields :created_at, :operator, :kind, :tool, :handler, :role, :ip
+      fields :created_at, :operator, :app, :tool, :rooms_handler, :role, :ip
     end
   end
   ### DashLaunchLog ###

@@ -41,25 +41,25 @@ RSpec.describe('LTI 1.1 launch', type: :request) do
     JSON.parse(response.body)['message']
   end
 
-  it 'records the room in the support index with the handler Rooms computes' do
+  it 'records the launch in the history with the room Rooms computes' do
     message = launch
     expect(message['custom_params']).to(include('oauth_consumer_key' => 'blti-spec'))
     expect(LtiContext.sole).to(have_attributes(
-                                 app: 'rooms', handler: Digest::SHA1.hexdigest('roomsblti-speccourse-1'),
+                                 app: 'rooms', rooms_handler: Digest::SHA1.hexdigest('roomsblti-speccourse-1'),
                                  context_id: 'course-1', context_title: 'Calculus I', resource_link_id: 'link-1',
                                  tool_consumer_instance_guid: 'lms.example.com', groups_scoping: false
                                ))
   end
 
   # Rooms reads custom_params['custom_enable_groups_scoping'], but the LMS custom param reaches it
-  # without the custom_ prefix, so Rooms ignores it and so must the index
+  # without the custom_ prefix, so Rooms ignores it and so must the history
   context 'when the LMS sends custom_enable_groups_scoping' do
     let(:custom_params) { { 'enable_groups_scoping' => 'true' } }
 
     it 'keeps the handler Rooms computes, without the resource link' do
       message = launch
       expect(message['custom_params']).to(include('enable_groups_scoping' => 'true'))
-      expect(LtiContext.sole).to(have_attributes(handler: Digest::SHA1.hexdigest('roomsblti-speccourse-1'), groups_scoping: false))
+      expect(LtiContext.sole).to(have_attributes(rooms_handler: Digest::SHA1.hexdigest('roomsblti-speccourse-1'), groups_scoping: false))
     end
   end
 

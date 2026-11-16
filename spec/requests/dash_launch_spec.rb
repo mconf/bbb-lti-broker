@@ -7,7 +7,7 @@ RSpec.describe('Dash launch', type: :request) do
   let(:tool) { RailsLti2Provider::Tool.create!(uuid: 'dash-request', shared_secret: 'secret', lti_version: 'LTI-1p0', tenant: tenant, app_settings: {}) }
   let(:handler) { Digest::SHA1.hexdigest('roomsdash-requestcourse-1') }
   let(:context) do
-    LtiContext.create!(tool: tool, app: 'rooms', handler: handler, oauth_consumer_key: 'dash-request', context_id: 'course-1',
+    LtiContext.create!(tool: tool, app: 'rooms', rooms_handler: handler, oauth_consumer_key: 'dash-request', context_id: 'course-1',
                        context_title: 'Calculus I', last_launch_at: Time.current)
   end
   let(:context_path) { "/dash/lti_context/#{context.id}/dash_launch_action" }
@@ -62,12 +62,12 @@ RSpec.describe('Dash launch', type: :request) do
 
     launch = RailsLti2Provider::LtiLaunch.find_by(nonce: launch_nonce)
     expect(User.find(launch.user_id).uid).to(eq(message['user_id']))
-    expect(DashLaunchLog.sole).to(have_attributes(operator: 'jane.doe', handler: handler, role: 'Learner'))
+    expect(DashLaunchLog.sole).to(have_attributes(operator: 'jane.doe', app: 'rooms', rooms_handler: handler, role: 'Learner'))
     expect(LtiContext.sole).to(eq(context))
   end
 
   it 'keeps the access log read-only in the dash' do
-    access = DashLaunchLog.create!(operator: 'jane.doe', kind: 'launch')
+    access = DashLaunchLog.create!(operator: 'jane.doe')
     get "/dash/dash_launch_log/#{access.id}/edit", headers: auth_headers
     expect(response).not_to(have_http_status(:success))
     get "/dash/dash_launch_log/#{access.id}/delete", headers: auth_headers

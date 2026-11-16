@@ -5,5 +5,5 @@
 class DashLaunchLog < ApplicationRecord
   belongs_to :tool, class_name: 'RailsLti2Provider::Tool', optional: true
 
-  validates :operator, :kind, presence: true
+  validates :operator, presence: true
 end

@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
-# A real launch into Rooms made from the dash, as if the LMS had sent it: it lands in
-# the room the handler points to and carries the tool's current configs, like any launch.
+# A real launch into an app made from the dash, as if the LMS had sent it: it carries the tool's
+# current configs for that app, like any launch. Only for Rooms the room it lands in is known
+# beforehand (rooms_handler).
 class DashLtiLaunch
   include ActiveModel::Model
   include ActiveModel::Attributes
@@ -28,11 +29,17 @@ class DashLtiLaunch
   validates :display_name, :context_id, presence: true
   validates :lti_role, inclusion: { in: ROLES }
   validate :tool_exists
+  validate :app_registered
+
+  # Apps a launch can go to: the ones registered in Doorkeeper, which is where the broker finds their URL
+  def self.apps
+    Doorkeeper::Application.where.not(name: LtiContext::SKIPPED_APP).order(:name).pluck(:name)
+  end
 
   def self.from_context(context)
     new(
-      tool_id: context.tool_id, app: context.app, context_id: context.context_id, context_title: context.context_title,
-      resource_link_id: context.resource_link_id, resource_link_title: context.resource_link_title,
+      tool_id: context.tool_id, app: context.app, context_id: context.context_id.presence, context_title: context.context_title,
+      resource_link_id: context.resource_link_id.presence, resource_link_title: context.resource_link_title,
       groups_scoping: context.groups_scoping, tool_consumer_instance_guid: context.tool_consumer_instance_guid
     )
   end
@@ -42,17 +49,17 @@ class DashLtiLaunch
     @tool ||= RailsLti2Provider::Tool.find_by(id: tool_id)
   end
 
-  def handler
-    LtiContext.rooms_handler(message) if tool
+  def rooms_handler
+    LtiContext.rooms_handler(message) if tool && app == LtiContext::ROOMS_APP
   end
 
   def user_id
     "#{USER_CONTEXT}-#{operator}"
   end
 
-  # Shaped like the 1.1 launch MessageController stores, so the sessions API hands it to Rooms the same way
+  # Shaped like the 1.1 launch MessageController stores, so the sessions API hands it to the app the same way
   def message
-    custom_params = { 'oauth_consumer_key' => tool.uuid }.merge(tool.rooms_app_configs_for_launch)
+    custom_params = { 'oauth_consumer_key' => tool.uuid }.merge(tool.app_configs_for_launch(app))
     custom_params['custom_enable_groups_scoping'] = 'true' if groups_scoping
     custom_params[MARKER] = operator
     {
@@ -72,14 +79,14 @@ class DashLtiLaunch
     }.compact
   end
 
-  # Creates the launch Rooms will read through the sessions API and the user Doorkeeper will
+  # Creates the launch the app will read through the sessions API and the user Doorkeeper will
   # authorize; Rooms refuses the launch unless both carry the same user id.
   def launch!(ip:)
     ActiveRecord::Base.transaction do
       user = User.find_or_initialize_by(context: USER_CONTEXT, uid: user_id)
       user.update!(full_name: message['lis_person_name_full'], first_name: display_name, last_name: "(#{operator})", last_accessed_at: Time.current)
       launch = tool.lti_launches.create!(nonce: SecureRandom.hex(16), message: message.to_json, user_id: user.id)
-      DashLaunchLog.create!(operator: operator, kind: 'launch', tool: tool, app: app, handler: handler, role: lti_role, ip: ip)
+      DashLaunchLog.create!(operator: operator, tool: tool, app: app, rooms_handler: rooms_handler, role: lti_role, ip: ip)
       launch
     end
   end
@@ -88,5 +95,9 @@ class DashLtiLaunch
 
   def tool_exists
     errors.add(:tool_id, 'must be a registered tool') unless tool
+  end
+
+  def app_registered
+    errors.add(:app, 'must be an app registered in the broker') unless self.class.apps.include?(app)
   end
 end

@@ -7,21 +7,24 @@ RSpec.describe(DashLtiLaunch) do
   let(:tool) { RailsLti2Provider::Tool.create!(uuid: 'dash-spec', shared_secret: 'secret', lti_version: 'LTI-1p0', tenant: tenant, app_settings: {}) }
   let(:context) do
     LtiContext.create!(
-      tool: tool, app: 'rooms', handler: Digest::SHA1.hexdigest('roomsdash-speccourse-1'), oauth_consumer_key: 'dash-spec',
+      tool: tool, app: 'rooms', rooms_handler: Digest::SHA1.hexdigest('roomsdash-speccourse-1'), oauth_consumer_key: 'dash-spec',
       context_id: 'course-1', context_title: 'Calculus I', resource_link_id: 'link-1', last_launch_at: Time.current
     )
   end
   let(:dash_launch) { described_class.from_context(context).tap { |launch| launch.operator = 'jane.doe' } }
 
-  before { BbbConfig.create!(tool: tool, url: 'https://bbb.example.com/bigbluebutton/', secret: 'bbb-secret') }
+  before do
+    BbbConfig.create!(tool: tool, url: 'https://bbb.example.com/bigbluebutton/', secret: 'bbb-secret')
+    %w[rooms worka].each { |app| Doorkeeper::Application.create!(name: app, redirect_uri: "https://#{app}.example.com/#{app}/auth/bbbltibroker/callback") }
+  end
 
   it 'opens the room of the context it came from' do
-    expect(dash_launch.handler).to(eq(context.handler))
+    expect(dash_launch.rooms_handler).to(eq(context.rooms_handler))
   end
 
   it 'opens another room when the course changes' do
     dash_launch.context_id = 'dash-test-1'
-    expect(dash_launch.handler).not_to(eq(context.handler))
+    expect(dash_launch.rooms_handler).not_to(eq(context.rooms_handler))
   end
 
   it 'builds the launch the app expects, with the tool configs and the dash marker' do
@@ -36,10 +39,20 @@ RSpec.describe(DashLtiLaunch) do
     expect(dash_launch.message).not_to(have_key('lis_person_contact_email_primary'))
   end
 
-  it 'refuses an operator that is not a plain slug, a role the app does not know and a missing tool' do
-    dash_launch.assign_attributes(operator: 'Jane Doe', lti_role: 'Administrator', tool_id: 0)
+  it 'refuses an operator that is not a plain slug, a role the app does not know, a missing tool and an unknown app' do
+    dash_launch.assign_attributes(operator: 'Jane Doe', lti_role: 'Administrator', tool_id: 0, app: 'unknown')
     expect(dash_launch).not_to(be_valid)
-    expect(dash_launch.errors.attribute_names).to(contain_exactly(:operator, :lti_role, :tool_id))
+    expect(dash_launch.errors.attribute_names).to(contain_exactly(:operator, :lti_role, :tool_id, :app))
+  end
+
+  it 'launches into another app with that app configs and no room to predict' do
+    WorkaAppConfig.create!(tool: tool, saas_world_url: 'https://worka.example.com/world')
+    dash_launch.app = 'worka'
+    expect(dash_launch.message['custom_params']).to(include('saas_world_url' => 'https://worka.example.com/world'))
+    expect(dash_launch.rooms_handler).to(be_nil)
+
+    dash_launch.launch!(ip: '10.0.0.1')
+    expect(DashLaunchLog.sole).to(have_attributes(app: 'worka', rooms_handler: nil))
   end
 
   describe '#launch!' do
@@ -49,7 +62,7 @@ RSpec.describe(DashLtiLaunch) do
       expect(launch.tool).to(eq(tool))
       expect(JSON.parse(launch[:message])).to(eq(dash_launch.message))
       expect(User.find(launch.user_id)).to(have_attributes(context: 'dash', uid: 'dash-jane.doe'))
-      expect(DashLaunchLog.sole).to(have_attributes(operator: 'jane.doe', kind: 'launch', tool: tool, handler: context.handler, role: 'Instructor', ip: '10.0.0.1'))
+      expect(DashLaunchLog.sole).to(have_attributes(operator: 'jane.doe', tool: tool, app: 'rooms', rooms_handler: context.rooms_handler, role: 'Instructor', ip: '10.0.0.1'))
     end
 
     it 'reuses the user of the same operator' do

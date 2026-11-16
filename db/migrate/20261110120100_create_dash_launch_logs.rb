@@ -2,10 +2,9 @@ class CreateDashLaunchLogs < ActiveRecord::Migration[8.1]
   def change
     create_table :dash_launch_logs, if_not_exists: true do |t|
       t.string :operator, null: false
-      t.string :kind, null: false
       t.bigint :tool_id
       t.string :app
-      t.string :handler
+      t.string :rooms_handler
       t.string :role
       t.string :ip
       t.timestamps

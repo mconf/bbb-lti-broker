@@ -1,38 +1,37 @@
 # frozen_string_literal: true
 
-# One row per room (app + handler), refreshed by every real launch into Rooms. The launches
-# themselves are deleted after a day, so this is how support finds a client's room by course
-# name or handler later on.
+# History of LTI launches: one row per app, tool, course and resource link, refreshed by every
+# real launch. The launches themselves are deleted after a day; this keeps where each one landed.
 class LtiContext < ApplicationRecord
   ROOMS_APP = 'rooms'
+  # The broker answers launches into this app itself, so nothing lands anywhere
+  SKIPPED_APP = 'default'
 
   belongs_to :tool, class_name: 'RailsLti2Provider::Tool'
 
-  validates :app, :handler, presence: true
+  validates :app, presence: true
 
   # message: the launch as the sessions API hands it to the app (see #standarized_message)
   def self.record_launch(tool, app, message)
-    return unless app == ROOMS_APP
-
-    handler = rooms_handler(message)
-    return if handler.nil?
+    return if app.blank? || app == SKIPPED_APP
 
     upsert(
       {
         tool_id: tool.id,
         app: app,
-        handler: handler,
+        # part of the unique key: '' instead of NULL, which the index would not compare
+        context_id: message['context_id'].to_s,
+        resource_link_id: message['resource_link_id'].to_s,
+        rooms_handler: (rooms_handler(message) if app == ROOMS_APP),
         oauth_consumer_key: message.dig('custom_params', 'oauth_consumer_key'),
         tool_consumer_instance_guid: message['tool_consumer_instance_guid'],
-        context_id: message['context_id'],
         context_title: message['context_title'],
-        resource_link_id: message['resource_link_id'],
         resource_link_title: message['resource_link_title'],
         lti_version: message['lti_version'],
         groups_scoping: groups_scoping?(message),
         last_launch_at: Time.current,
       },
-      unique_by: [:app, :handler]
+      unique_by: [:app, :tool_id, :context_id, :resource_link_id]
     )
   end
 

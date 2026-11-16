@@ -88,10 +88,10 @@ RSpec.describe('LTI 1.3 launch', type: :request) do
     end
   end
 
-  it 'records the room in the support index with the handler Rooms computes' do
+  it 'records the launch in the history with the room Rooms computes' do
     launch
     expect(LtiContext.sole).to(have_attributes(
-                                 app: 'rooms', handler: Digest::SHA1.hexdigest('roomslaunch-speccourse-1'),
+                                 app: 'rooms', rooms_handler: Digest::SHA1.hexdigest('roomslaunch-speccourse-1'),
                                  context_id: 'course-1', context_title: 'Calculus I', resource_link_id: 'link-1', lti_version: '1.3.0'
                                ))
   end

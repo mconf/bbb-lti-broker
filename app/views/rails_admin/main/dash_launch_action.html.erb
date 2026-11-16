@@ -3,7 +3,7 @@
 <% tools = RailsLti2Provider::Tool.order(:uuid).pluck(:id, :uuid) %>
 
 <% if @expected_handler %>
-  <p>Room in the index: <code id="dash-expected-handler"><%= @expected_handler %></code></p>
+  <p>Room in the launch history: <code id="dash-expected-handler"><%= @expected_handler %></code></p>
 <% end %>
 
 <% if launch.errors.any? %>
@@ -19,6 +19,11 @@
     <%= f.label :operator, 'Who is accessing (required)', class: 'form-label' %>
     <%= f.text_field :operator, value: launch.operator, required: true, pattern: '[a-z0-9._-]+', class: 'form-control', placeholder: 'first.last' %>
     <div class="form-text">Recorded in the access log and sent to the app as the user id. The dash login is shared: this is the only record of who you are.</div>
+  </div>
+
+  <div class="mb-3">
+    <%= f.label :app, 'App', class: 'form-label' %>
+    <%= f.select :app, options_for_select(DashLtiLaunch.apps, launch.app), {}, class: 'form-select' %>
   </div>
 
   <div class="mb-3">
@@ -48,24 +53,29 @@
     <%= f.text_field :resource_link_title, value: launch.resource_link_title, class: 'form-control mb-2' %>
     <div class="form-check">
       <%= f.check_box :groups_scoping, { checked: launch.groups_scoping, class: 'form-check-input' } %>
-      <%= f.label :groups_scoping, 'Room per resource link (groups scoping)', class: 'form-check-label' %>
+      <%= f.label :groups_scoping, 'Room per resource link (Rooms groups scoping)', class: 'form-check-label' %>
     </div>
   </fieldset>
 
-  <p>Room this launch opens: <code id="dash-handler">…</code></p>
-  <div id="dash-handler-warning" class="alert alert-warning d-none">This launch opens another room, not the one in the index.</div>
+  <div id="dash-rooms-preview">
+    <p>Room this launch opens: <code id="dash-handler">…</code></p>
+    <div id="dash-handler-warning" class="alert alert-warning d-none">This launch opens another room, not the one in the launch history.</div>
+  </div>
 
   <%= f.submit 'Launch', class: 'btn btn-primary' %>
 <% end %>
 
 <script>
-  // Same formula as the server (LtiContext.rooms_handler): the room the app will open
+  // Same formula as the server (LtiContext.rooms_handler): the room Rooms will open. Other apps have no such preview.
   (function () {
     var form = document.getElementById('dash-launch-form');
     var field = function (name) { return form.elements['dash_launch[' + name + ']']; };
     var expected = document.getElementById('dash-expected-handler');
 
     function refresh() {
+      var isRooms = field('app').value === 'rooms';
+      document.getElementById('dash-rooms-preview').classList.toggle('d-none', !isRooms);
+      if (!isRooms) { return; }
       var tool = field('tool_id');
       var key = tool.options[tool.selectedIndex].dataset.uuid || '';
       var groups = form.querySelector('input[type=checkbox][name="dash_launch[groups_scoping]"]').checked;

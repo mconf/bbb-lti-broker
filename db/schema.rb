@@ -26,10 +26,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_10_120100) do
 
   create_table "dash_launch_logs", force: :cascade do |t|
     t.string "operator", null: false
-    t.string "kind", null: false
     t.bigint "tool_id"
     t.string "app"
-    t.string "handler"
+    t.string "rooms_handler"
     t.string "role"
     t.string "ip"
     t.datetime "created_at", null: false
@@ -58,19 +57,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_10_120100) do
   create_table "lti_contexts", force: :cascade do |t|
     t.bigint "tool_id", null: false
     t.string "app", null: false
-    t.string "handler", null: false
+    t.string "context_id", default: "", null: false
+    t.string "resource_link_id", default: "", null: false
+    t.string "rooms_handler"
     t.string "oauth_consumer_key"
     t.string "tool_consumer_instance_guid"
-    t.string "context_id"
     t.string "context_title"
-    t.string "resource_link_id"
     t.string "resource_link_title"
     t.string "lti_version"
     t.boolean "groups_scoping", default: false, null: false
     t.datetime "last_launch_at", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["app", "handler"], name: "index_lti_contexts_on_app_and_handler", unique: true
+    t.index ["app", "tool_id", "context_id", "resource_link_id"], name: "index_lti_contexts_on_launch_target", unique: true
+    t.index ["rooms_handler"], name: "index_lti_contexts_on_rooms_handler"
     t.index ["tool_id"], name: "index_lti_contexts_on_tool_id"
   end
 
