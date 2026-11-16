@@ -1,20 +1,20 @@
 # frozen_string_literal: true
 
-# A real launch into Rooms made by support from the dash, as if the LMS had sent it: it lands in
+# A real launch into Rooms made from the dash, as if the LMS had sent it: it lands in
 # the room the handler points to and carries the tool's current configs, like any launch.
-class SupportLaunch
+class DashLtiLaunch
   include ActiveModel::Model
   include ActiveModel::Attributes
 
   ROLES = %w[Instructor Learner].freeze
-  # Data and the reports filter support launches out by this custom param
-  MARKER = 'custom_elos_support'
-  USER_CONTEXT = 'elos-support'
+  # Data and the reports filter dash launches out by this custom param
+  MARKER = 'custom_dash_launch'
+  USER_CONTEXT = 'dash'
 
   attribute :tool_id, :integer
   attribute :app, :string, default: LtiContext::ROOMS_APP
   attribute :operator, :string
-  attribute :display_name, :string, default: -> { Mconf::Env.fetch('SUPPORT_LAUNCH_DEFAULT_NAME', 'Suporte') }
+  attribute :display_name, :string, default: -> { Mconf::Env.fetch('DASH_LAUNCH_DEFAULT_NAME', 'Suporte') }
   attribute :lti_role, :string, default: 'Instructor'
   attribute :context_id, :string
   attribute :context_title, :string
@@ -79,7 +79,7 @@ class SupportLaunch
       user = User.find_or_initialize_by(context: USER_CONTEXT, uid: user_id)
       user.update!(full_name: message['lis_person_name_full'], first_name: display_name, last_name: "(#{operator})", last_accessed_at: Time.current)
       launch = tool.lti_launches.create!(nonce: SecureRandom.hex(16), message: message.to_json, user_id: user.id)
-      SupportAccess.create!(operator: operator, kind: 'launch', tool: tool, app: app, handler: handler, role: lti_role, ip: ip)
+      DashLaunchLog.create!(operator: operator, kind: 'launch', tool: tool, app: app, handler: handler, role: lti_role, ip: ip)
       launch
     end
   end

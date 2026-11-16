@@ -1,0 +1,9 @@
+en:
+  admin:
+    actions:
+      dash_launch_action:
+        title: "Launch"
+        menu: "Launch"
+        breadcrumb: "Launch"
+        link: "Open a launch from the dash"
+        done: "launched"

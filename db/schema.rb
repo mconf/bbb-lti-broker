@@ -24,6 +24,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_10_120100) do
     t.index ["tool_id"], name: "index_bbb_configs_on_tool_id"
   end
 
+  create_table "dash_launch_logs", force: :cascade do |t|
+    t.string "operator", null: false
+    t.string "kind", null: false
+    t.bigint "tool_id"
+    t.string "app"
+    t.string "handler"
+    t.string "role"
+    t.string "ip"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["tool_id"], name: "index_dash_launch_logs_on_tool_id"
+  end
+
   create_table "eduplay_app_configs", force: :cascade do |t|
     t.bigint "tool_id"
     t.string "client_id"
@@ -208,19 +221,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_10_120100) do
     t.index ["updated_at"], name: "index_sessions_on_updated_at"
   end
 
-  create_table "support_accesses", force: :cascade do |t|
-    t.string "operator", null: false
-    t.string "kind", null: false
-    t.bigint "tool_id"
-    t.string "app"
-    t.string "handler"
-    t.string "role"
-    t.string "ip"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["tool_id"], name: "index_support_accesses_on_tool_id"
-  end
-
   create_table "users", force: :cascade do |t|
     t.string "context"
     t.string "uid"
@@ -247,8 +247,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_10_120100) do
     t.index ["tool_id"], name: "index_worka_app_configs_on_tool_id"
   end
 
+  add_foreign_key "dash_launch_logs", "rails_lti2_provider_tools", column: "tool_id", on_delete: :nullify
   add_foreign_key "lti_contexts", "rails_lti2_provider_tools", column: "tool_id", on_delete: :cascade
   add_foreign_key "oauth_access_grants", "oauth_applications", column: "application_id"
   add_foreign_key "oauth_access_tokens", "oauth_applications", column: "application_id"
-  add_foreign_key "support_accesses", "rails_lti2_provider_tools", column: "tool_id", on_delete: :nullify
 end

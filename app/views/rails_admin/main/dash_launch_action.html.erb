@@ -1,9 +1,9 @@
-<%# Support launch form. It opens the launch in a new tab, so the dash stays on this page. %>
-<% launch = @support_launch %>
+<%# Dash launch form. It opens the launch in a new tab, so the dash stays on this page. %>
+<% launch = @dash_launch %>
 <% tools = RailsLti2Provider::Tool.order(:uuid).pluck(:id, :uuid) %>
 
 <% if @expected_handler %>
-  <p>Room in the index: <code id="support-expected-handler"><%= @expected_handler %></code></p>
+  <p>Room in the index: <code id="dash-expected-handler"><%= @expected_handler %></code></p>
 <% end %>
 
 <% if launch.errors.any? %>
@@ -14,7 +14,7 @@
   </div>
 <% end %>
 
-<%= form_with scope: :support_launch, url: request.path, method: :post, local: true, html: { target: '_blank', id: 'support-launch-form', class: 'form-horizontal' } do |f| %>
+<%= form_with scope: :dash_launch, url: request.path, method: :post, local: true, html: { target: '_blank', id: 'dash-launch-form', class: 'form-horizontal' } do |f| %>
   <div class="mb-3">
     <%= f.label :operator, 'Who is accessing (required)', class: 'form-label' %>
     <%= f.text_field :operator, value: launch.operator, required: true, pattern: '[a-z0-9._-]+', class: 'form-control', placeholder: 'first.last' %>
@@ -37,7 +37,7 @@
   </div>
 
   <fieldset class="mb-3">
-    <legend class="fs-6">Course <button type="button" id="support-randomize" class="btn btn-sm btn-outline-secondary">Randomize (new test room)</button></legend>
+    <legend class="fs-6">Course <button type="button" id="dash-randomize" class="btn btn-sm btn-outline-secondary">Randomize (new test room)</button></legend>
     <%= f.label :context_id, 'Context ID', class: 'form-label' %>
     <%= f.text_field :context_id, value: launch.context_id, required: true, class: 'form-control mb-2' %>
     <%= f.label :context_title, 'Course title', class: 'form-label' %>
@@ -52,8 +52,8 @@
     </div>
   </fieldset>
 
-  <p>Room this launch opens: <code id="support-handler">…</code></p>
-  <div id="support-handler-warning" class="alert alert-warning d-none">This launch opens another room, not the one in the index.</div>
+  <p>Room this launch opens: <code id="dash-handler">…</code></p>
+  <div id="dash-handler-warning" class="alert alert-warning d-none">This launch opens another room, not the one in the index.</div>
 
   <%= f.submit 'Launch', class: 'btn btn-primary' %>
 <% end %>
@@ -61,32 +61,32 @@
 <script>
   // Same formula as the server (LtiContext.rooms_handler): the room the app will open
   (function () {
-    var form = document.getElementById('support-launch-form');
-    var field = function (name) { return form.elements['support_launch[' + name + ']']; };
-    var expected = document.getElementById('support-expected-handler');
+    var form = document.getElementById('dash-launch-form');
+    var field = function (name) { return form.elements['dash_launch[' + name + ']']; };
+    var expected = document.getElementById('dash-expected-handler');
 
     function refresh() {
       var tool = field('tool_id');
       var key = tool.options[tool.selectedIndex].dataset.uuid || '';
-      var groups = form.querySelector('input[type=checkbox][name="support_launch[groups_scoping]"]').checked;
+      var groups = form.querySelector('input[type=checkbox][name="dash_launch[groups_scoping]"]').checked;
       var link = field('resource_link_id').value;
       var seed = 'rooms' + key + field('context_id').value + (groups && link ? link : '');
       if (!window.crypto || !window.crypto.subtle) { return; }
       crypto.subtle.digest('SHA-1', new TextEncoder().encode(seed)).then(function (buffer) {
         var hex = Array.from(new Uint8Array(buffer)).map(function (b) { return b.toString(16).padStart(2, '0'); }).join('');
-        document.getElementById('support-handler').textContent = hex;
+        document.getElementById('dash-handler').textContent = hex;
         var differs = expected && expected.textContent.trim() !== hex;
-        document.getElementById('support-handler-warning').classList.toggle('d-none', !differs);
+        document.getElementById('dash-handler-warning').classList.toggle('d-none', !differs);
       });
     }
 
-    document.getElementById('support-randomize').addEventListener('click', function () {
+    document.getElementById('dash-randomize').addEventListener('click', function () {
       var suffix = Math.random().toString(16).slice(2, 10);
       var today = new Date().toISOString().slice(0, 10);
-      field('context_id').value = 'support-test-' + suffix;
-      field('resource_link_id').value = 'support-test-' + suffix;
-      field('context_title').value = 'Teste suporte ' + today;
-      field('resource_link_title').value = 'Teste suporte ' + today;
+      field('context_id').value = 'dash-test-' + suffix;
+      field('resource_link_id').value = 'dash-test-' + suffix;
+      field('context_title').value = 'Teste dash ' + today;
+      field('resource_link_title').value = 'Teste dash ' + today;
       refresh();
     });
 

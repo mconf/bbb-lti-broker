@@ -44,15 +44,15 @@ class SafeSerializedField < RailsAdmin::Config::Fields::Types::Serialized
 end
 RailsAdmin::Config::Fields::Types.register(:serialized, SafeSerializedField)
 
-# Opens a real launch into Rooms as support, from a room in the index or from a tool (a new room).
-# Off unless SUPPORT_LAUNCH_ENABLED: only some brokers offer it.
-class SupportLaunchAction < RailsAdmin::Config::Actions::Base
-  RailsAdmin::Config::Actions.register(:support_launch, self)
+# Opens a real launch into Rooms from the dash, from a room in the index or from a tool (a new room).
+# Off unless DASH_LAUNCH_ENABLED: only some brokers offer it.
+class DashLaunchAction < RailsAdmin::Config::Actions::Base
+  RailsAdmin::Config::Actions.register(:dash_launch, self)
 
   register_instance_option(:member) { true }
   # enabled? and not visible?: RailsAdmin only checks enabled? when the action URL is opened directly
   register_instance_option :enabled? do
-    Mconf::Env.fetch_boolean('SUPPORT_LAUNCH_ENABLED', false) &&
+    Mconf::Env.fetch_boolean('DASH_LAUNCH_ENABLED', false) &&
       (bindings[:abstract_model].nil? || %w[LtiContext RailsLti2Provider::Tool].include?(bindings[:abstract_model].to_s))
   end
   register_instance_option(:http_methods) { %i[get post] }
@@ -61,24 +61,24 @@ class SupportLaunchAction < RailsAdmin::Config::Actions::Base
 
   register_instance_option :controller do
     proc do
-      @support_launch = @object.is_a?(LtiContext) ? SupportLaunch.from_context(@object) : SupportLaunch.new(tool_id: @object.id)
+      @dash_launch = @object.is_a?(LtiContext) ? DashLtiLaunch.from_context(@object) : DashLtiLaunch.new(tool_id: @object.id)
       @expected_handler = @object.handler if @object.is_a?(LtiContext)
 
       if request.post?
-        form = params.require(:support_launch)
-        @support_launch.assign_attributes(form.permit(
+        form = params.require(:dash_launch)
+        @dash_launch.assign_attributes(form.permit(
           :operator, :display_name, :lti_role, :context_id, :context_title, :resource_link_id, :resource_link_title, :groups_scoping
         ))
         # any registered tool can be picked: the dash is for admins only
-        @support_launch.tool_id = form[:tool_id] if form[:tool_id].present?
-        if @support_launch.valid?
-          launch = @support_launch.launch!(ip: request.remote_ip)
-          redirect_to(main_app.app_launch_path(app: @support_launch.app, oauth_nonce: launch.nonce))
+        @dash_launch.tool_id = form[:tool_id] if form[:tool_id].present?
+        if @dash_launch.valid?
+          launch = @dash_launch.launch!(ip: request.remote_ip)
+          redirect_to(main_app.app_launch_path(app: @dash_launch.app, oauth_nonce: launch.nonce))
           next
         end
       end
 
-      render(@action.template_name, status: @support_launch.errors.any? ? :unprocessable_entity : :ok)
+      render(@action.template_name, status: @dash_launch.errors.any? ? :unprocessable_entity : :ok)
     end
   end
 end
@@ -107,20 +107,20 @@ RailsAdmin.config do |config|
     new do
       # The private key is left out of the dash, so a pair created here couldn't sign; 1.3 pairs come from /registration/new
       # The support index is written by launches, and the access log is an audit trail
-      except ['RsaKeyPair', 'LtiContext', 'SupportAccess']
+      except ['RsaKeyPair', 'LtiContext', 'DashLaunchLog']
     end
     export
     bulk_delete do
-      except ['SupportAccess']
+      except ['DashLaunchLog']
     end
     show
     edit do
-      except ['LtiContext', 'SupportAccess']
+      except ['LtiContext', 'DashLaunchLog']
     end
     delete do
-      except ['SupportAccess']
+      except ['DashLaunchLog']
     end
-    support_launch
+    dash_launch
   end
 
   config.excluded_models = ['RailsLti2Provider::Registration']
@@ -370,15 +370,15 @@ RailsAdmin.config do |config|
   ### LtiContext ###
 
 
-  ### SupportAccess ###
-  config.model SupportAccess do
-    label 'Support access'
+  ### DashLaunchLog ###
+  config.model DashLaunchLog do
+    label 'Dash launch log'
     list do
       sort_by :created_at
       fields :created_at, :operator, :kind, :tool, :handler, :role, :ip
     end
   end
-  ### SupportAccess ###
+  ### DashLaunchLog ###
 
 
   ### RsaKeyPair ###
