@@ -45,6 +45,11 @@ RSpec.describe(DashLtiLaunch) do
     expect(dash_launch.errors.attribute_names).to(contain_exactly(:operator, :lti_role, :tool_id, :app))
   end
 
+  it 'carries the LTI version of the tool' do
+    tool.update!(lti_version: '1.3.0')
+    expect(dash_launch.message['lti_version']).to(eq('1.3.0'))
+  end
+
   it 'launches into another app with that app configs and no room to predict' do
     WorkaAppConfig.create!(tool: tool, saas_world_url: 'https://worka.example.com/world')
     dash_launch.app = 'worka'

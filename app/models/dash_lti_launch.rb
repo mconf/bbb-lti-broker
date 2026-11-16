@@ -64,7 +64,8 @@ class DashLtiLaunch
     custom_params[MARKER] = operator
     {
       'lti_message_type' => 'basic-lti-launch-request',
-      'lti_version' => 'LTI-1p0',
+      # the tool's version, so the app records where the context really comes from (e.g. meeting metadata)
+      'lti_version' => tool.lti_version.presence || 'LTI-1p0',
       'user_id' => user_id,
       'roles' => lti_role,
       'lis_person_name_full' => "#{display_name} (#{operator})",
