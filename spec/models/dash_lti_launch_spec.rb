@@ -43,6 +43,8 @@ RSpec.describe(DashLtiLaunch) do
     dash_launch.assign_attributes(name: '!!!', lti_role: 'Administrator', tool_id: 0, app: 'unknown')
     expect(dash_launch).not_to(be_valid)
     expect(dash_launch.errors.attribute_names).to(contain_exactly(:operator, :lti_role, :tool_id, :app))
+    expect(dash_launch.errors.full_messages).to(include('Operator needs letters or digits in the name', 'App must be an app registered in the broker'))
+    expect(dash_launch.errors.full_messages.join).not_to(include('translation missing'))
   end
 
   it 'opens a Rooms room by its handler, with the course and resource link from the history' do

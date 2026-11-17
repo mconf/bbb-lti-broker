@@ -27,7 +27,7 @@ class DashLtiLaunch
   attribute :tool_consumer_instance_guid, :string
 
   validates :name, presence: true
-  validates :operator, presence: { message: 'needs letters or digits in the name' }, if: -> { name.present? }
+  validates :operator, presence: { message: :no_letters }, if: -> { name.present? }
   validates :lti_role, inclusion: { in: ROLES }
   validate :tool_exists
   validate :app_registered
@@ -121,11 +121,11 @@ class DashLtiLaunch
   private
 
   def tool_exists
-    errors.add(:tool_id, 'must be a registered tool') unless tool
+    errors.add(:tool_id, :not_registered) unless tool
   end
 
   def app_registered
-    errors.add(:app, 'must be an app registered in the broker') unless self.class.apps.include?(app)
+    errors.add(:app, :not_registered) unless self.class.apps.include?(app)
   end
 
   # Resolves a typed handler into its history row; a handler is a hash, so the course can only come from there
@@ -136,6 +136,10 @@ class DashLtiLaunch
     return self.target = room if room
 
     elsewhere = self.class.find_room(nil, handler)
-    errors.add(:handler, elsewhere ? "belongs to tool #{elsewhere.tool.uuid}, not this one" : 'has no Rooms launch recorded for this tool')
+    if elsewhere
+      errors.add(:handler, :other_tool, tool: elsewhere.tool.uuid)
+    else
+      errors.add(:handler, :not_in_history)
+    end
   end
 end
