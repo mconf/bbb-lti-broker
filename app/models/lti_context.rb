@@ -2,6 +2,7 @@
 
 # History of LTI launches: one row per app, tool, course and resource link, refreshed by every
 # real launch. The launches themselves are deleted after a day; this keeps where each one landed.
+# Launches from the dash are left out on purpose: they are tests and visits, logged in DashLaunchLog.
 class LtiContext < ApplicationRecord
   ROOMS_APP = 'rooms'
   # The broker answers launches into this app itself, so nothing lands anywhere

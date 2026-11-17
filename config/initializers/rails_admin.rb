@@ -56,21 +56,26 @@ class DashLaunchAction < RailsAdmin::Config::Actions::Base
       (bindings[:abstract_model].nil? || %w[LtiContext RailsLti2Provider::Tool].include?(bindings[:abstract_model].to_s))
   end
   register_instance_option(:http_methods) { %i[get post] }
-  register_instance_option(:link_icon) { 'fas fa-sign-in-alt' }
+  register_instance_option(:link_icon) { 'fas fa-up-right-from-square' }
   register_instance_option(:turbo?) { false }
 
   register_instance_option :controller do
     proc do
-      @dash_launch = @object.is_a?(LtiContext) ? DashLtiLaunch.from_context(@object) : DashLtiLaunch.new(tool_id: @object.id)
-      @expected_handler = @object.rooms_handler if @object.is_a?(LtiContext)
+      # A history row fixes the app and the room; a tool only fixes the tool
+      from_history = @object.is_a?(LtiContext)
+      @dash_launch = from_history ? DashLtiLaunch.from_context(@object) : DashLtiLaunch.new(tool_id: @object.id)
+
+      # The form looks a typed handler up while it is typed, to show which room it is
+      if request.get? && params[:lookup]
+        room = DashLtiLaunch.find_room(@dash_launch.tool_id, params[:lookup])
+        elsewhere = DashLtiLaunch.find_room(nil, params[:lookup]) unless room
+        render(json: room&.slice(:context_id, :context_title, :resource_link_title, :last_launch_at) || { other_tool: elsewhere&.tool&.uuid }.compact)
+        next
+      end
 
       if request.post?
-        form = params.require(:dash_launch)
-        @dash_launch.assign_attributes(form.permit(
-          :app, :operator, :display_name, :lti_role, :context_id, :context_title, :resource_link_id, :resource_link_title, :groups_scoping
-        ))
-        # any registered tool can be picked: the dash is for admins only
-        @dash_launch.tool_id = form[:tool_id] if form[:tool_id].present?
+        fields = from_history ? %i[name lti_role] : %i[name lti_role app handler context_id context_title resource_link_id resource_link_title groups_scoping]
+        @dash_launch.assign_attributes(params.require(:dash_launch).permit(*fields))
         if @dash_launch.valid?
           launch = @dash_launch.launch!(ip: request.remote_ip)
           redirect_to(main_app.app_launch_path(app: @dash_launch.app, oauth_nonce: launch.nonce))

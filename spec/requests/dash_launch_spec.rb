@@ -11,7 +11,8 @@ RSpec.describe('Dash launch', type: :request) do
                        context_title: 'Calculus I', last_launch_at: Time.current)
   end
   let(:context_path) { "/dash/lti_context/#{context.id}/dash_launch_action" }
-  let(:form) { { tool_id: tool.id, operator: 'jane.doe', display_name: 'Suporte', lti_role: 'Learner', context_id: 'course-1', context_title: 'Calculus I' } }
+  let(:tool_path) { "/dash/rails_lti2_provider~tool/#{tool.id}/dash_launch_action" }
+  let(:form) { { name: 'Jane Doe', lti_role: 'Learner' } }
 
   let(:enabled) { 'true' }
 
@@ -24,29 +25,41 @@ RSpec.describe('Dash launch', type: :request) do
 
   before { Doorkeeper::Application.create!(name: 'rooms', redirect_uri: 'https://rooms.example.com/rooms/auth/bbbltibroker/callback') }
 
-  it 'shows the form for a room in the index' do
+  it 'shows the form for a room in the history' do
     get context_path, headers: auth_headers
     expect(response).to(have_http_status(:success))
-    expect(response.body).to(include(handler, 'Who is accessing'))
+    expect(response.body).to(include(handler, 'Your name'))
   end
 
   it 'shows the form for a new room from a tool' do
-    get "/dash/rails_lti2_provider~tool/#{tool.id}/dash_launch_action", headers: auth_headers
+    get tool_path, headers: auth_headers
     expect(response).to(have_http_status(:success))
   end
 
-  it 'refuses a launch without the operator' do
-    post context_path, params: { dash_launch: form.merge(operator: '') }, headers: auth_headers
+  it 'tells the form which room a handler is' do
+    context
+    get tool_path, params: { lookup: handler }, headers: auth_headers
+    expect(response.parsed_body).to(include('context_id' => 'course-1', 'context_title' => 'Calculus I'))
+    get tool_path, params: { lookup: 'unknown' }, headers: auth_headers
+    expect(response.parsed_body).to(eq({}))
+
+    other_tool = RailsLti2Provider::Tool.create!(uuid: 'dash-other', shared_secret: 'secret', lti_version: 'LTI-1p0', tenant: tenant, app_settings: {})
+    get "/dash/rails_lti2_provider~tool/#{other_tool.id}/dash_launch_action", params: { lookup: handler }, headers: auth_headers
+    expect(response.parsed_body).to(eq('other_tool' => 'dash-request'))
+  end
+
+  it 'refuses a launch without a name' do
+    post context_path, params: { dash_launch: form.merge(name: '') }, headers: auth_headers
     expect(response).to(have_http_status(:unprocessable_entity))
     expect(RailsLti2Provider::LtiLaunch.count).to(eq(0))
     expect(DashLaunchLog.count).to(eq(0))
   end
 
-  it 'launches into the room of the index, as the app will read it, without touching the index' do
+  it 'launches into the room of the history, as the app will read it, ignoring a course sent with it' do
     stub_doorkeeper_token
     context
 
-    post context_path, params: { dash_launch: form }, headers: auth_headers
+    post context_path, params: { dash_launch: form.merge(context_id: 'other-course') }, headers: auth_headers
     expect(response).to(redirect_to(%r{/rooms/launch\?oauth_nonce=}))
 
     get response.location
@@ -56,18 +69,25 @@ RSpec.describe('Dash launch', type: :request) do
 
     get "/api/v1/sessions/#{launch_nonce}"
     message = JSON.parse(response.body)['message']
-    expect(message).to(include('user_id' => 'dash-jane.doe', 'roles' => 'Learner', 'context_id' => 'course-1'))
-    expect(message['custom_params']).to(include('custom_dash_launch' => 'jane.doe', 'oauth_consumer_key' => 'dash-request'))
+    expect(message).to(include('user_id' => 'dash-jane-doe', 'roles' => 'Learner', 'context_id' => 'course-1'))
+    expect(message['custom_params']).to(include('custom_dash_launch' => 'jane-doe', 'oauth_consumer_key' => 'dash-request'))
     expect(LtiContext.rooms_handler(message)).to(eq(handler))
 
     launch = RailsLti2Provider::LtiLaunch.find_by(nonce: launch_nonce)
     expect(User.find(launch.user_id).uid).to(eq(message['user_id']))
-    expect(DashLaunchLog.sole).to(have_attributes(operator: 'jane.doe', app: 'rooms', rooms_handler: handler, role: 'Learner'))
+    expect(DashLaunchLog.sole).to(have_attributes(operator: 'jane-doe', app: 'rooms', rooms_handler: handler, role: 'Learner'))
     expect(LtiContext.sole).to(eq(context))
   end
 
+  it 'launches from a tool into the room of a typed handler' do
+    context
+    post tool_path, params: { dash_launch: form.merge(app: 'rooms', handler: handler) }, headers: auth_headers
+    expect(response).to(redirect_to(%r{/rooms/launch\?oauth_nonce=}))
+    expect(DashLaunchLog.sole).to(have_attributes(rooms_handler: handler))
+  end
+
   it 'keeps the access log read-only in the dash' do
-    access = DashLaunchLog.create!(operator: 'jane.doe')
+    access = DashLaunchLog.create!(operator: 'jane-doe')
     get "/dash/dash_launch_log/#{access.id}/edit", headers: auth_headers
     expect(response).not_to(have_http_status(:success))
     get "/dash/dash_launch_log/#{access.id}/delete", headers: auth_headers
