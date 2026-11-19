@@ -1,151 +1,96 @@
-<img width="1012" alt="bbb-lti-banner" src="https://user-images.githubusercontent.com/1273169/141151966-5e8c87ac-a062-4deb-9e53-ff5a4151037b.png">
+# bbb-lti-broker
 
+The entry point of the LTI integrations of Elos and ConferênciaWeb. It receives the
+launches sent by an LMS (e.g. Moodle, Brightspace), validates the client's credential
+and hands the user over to the LTI app registered for that launch, such as
+[bbb-app-rooms](https://github.com/mconf/bbb-app-rooms).
 
-## BigBlueButton LTI Broker
-The BBB LTI Broker is a Web Application that acts as a LTI Broker for connecting Tool Consumers with BigBlueButton Tools. The most basic deployment required the collaboration of two applications, the bbb-lti-broker itself and bbb-app-rooms. Being the flow:
+The same image also runs as the LTI admin dashboard (`/dash`), where client
+credentials and per-client app configs are managed. It is a fork of the BigBlueButton
+LTI broker and still close to it.
 
-## Getting Started
-#### Use Docker
-First, make sure you have both Docker and Docker-Compose installed as they are requirements.
+For architecture, conventions and pitfalls, see [AGENTS.md](AGENTS.md).
 
-Then, to get this running with Docker, follow these steps:
-Pull the ```docker-compose.yml``` and ```dotenv``` files from the repository. Then run the following commands.
-```
-  docker-compose run app rake db:create
-  docker-compose run app rake db:migrate
-  docker-compose run app rake db:seed
-  docker-compose up
-```
-To customize its behaviour copy the file dotenv as app.env (for development only) and uncomment the environment variables as required.
+## Requirements
 
-The database by default is sqlite3, even for production. Change the adapter for using postgresql and set up the rest of the parameters.
+- Docker and Docker Compose
+- To test a full launch: an LMS and an LTI app (e.g. bbb-app-rooms) reachable by the
+  broker
 
-```
-  # DB_ADAPTER=[sqlite3|postgresql]
-  # DB_HOST=<localhost>
-  # DB_NAME=
-  # DB_USERNAME=<root>
-  # DB_PASSWORD=
+## Running locally
+
+```bash
+make install   # creates .env from dotenv if missing, builds the dev image
+make run       # app + Postgres + Redis on http://localhost:3000/<RELATIVE_URL_ROOT>
 ```
 
-For changing the root (this is mandatory if you run the Tool Provider in the same box where BigBlueButton is running) and also
-for making use of the brokerage capability the external Application(s) must be declared in environment variables.
+Review `.env` after `make install` (`dotenv` documents the variables), and add
+`ADMIN_KEY` and `ADMIN_PASSWORD`, the dashboard credentials. `scripts/start.sh`
+creates or migrates the database on boot. Run `make install` again whenever the
+`Gemfile` changes. Background jobs need the Resque worker and scheduler:
+`docker compose up broker_worker broker_scheduler`.
 
-```
-  # App configuration
-  # Define the root where the application is being mounted
-  # (e.g. lti for http://example.com/lti or lti/tools for http://example.com/lti/tools)
-  # RELATIVE_URL_ROOT=lti
+Clients and apps are managed in the dashboard (`/dash`, HTTP basic auth with
+`ADMIN_KEY` / `ADMIN_PASSWORD`) or with rake tasks (`rake -T db`), run inside the
+container with `docker compose run --rm app bin/rake ...`. For example, to register
+bbb-app-rooms with the key and secret it uses to call the broker (the second argument
+is the app's OAuth2 callback URL, from which the broker also derives where it sends
+the launches):
 
-  # LTI tools configuration
-  # Define the external application to be used by default as for serving LTI launch requests.
-  # DEFAULT_LTI_TOOL=<default|rooms>
-```
-
-Whitelist the URL that the broker is on
-
-```
-  # DEVELOPER_MODE_ENABLED=broker.example.com
+```bash
+bin/rake "db:apps:add[rooms,https://<host>/rooms/auth/bbbltibroker/callback,<key>,<secret>]"
 ```
 
-There are some functions that can be enabled when setting the server into developer mode.
-This includes:
-  - A LTI App can be used by default for testing purposes.
-  - A UI for managing OAuth2 applications is enabled [http://example.com/lti/oauth/applications].
+## Linking an LMS
 
-```
-  # DEVELOPER_MODE_ENABLED=true
-```
+URLs below assume `RELATIVE_URL_ROOT=lti` and an app named `rooms`.
 
-The seed will set up data by default that should be changed for production. This is:
-  - LTI key pair
-```
-  {
-    :key => 'key',
-    :secret => 'secret'
-  }
-```
+### LTI 1.0/1.1
 
-## Ports
-The LTI Broker uses port 3000 by default, but this can be changed by editing the docker-compose file.
-Under the 'app' service the 'ports' configuration can be modified from 3000:3000 to DESIRED_PORT:3000
+The LMS needs the tool URL `https://<broker host>/lti/rooms/messages/blti` and a
+consumer key and secret, created as a Tool in the dashboard or with
+`bin/rake "db:keys:add[key,secret,tenant]"`.
 
-## Add a Tool to the LTI Broker
-In order to add an LTI Tool Provider or edit an existing tool, rake commands are used.
-A name for the tool, the hostname, as well as the provided UID and secret from the tool are required.
-The command is ```docker-compose run app rake "db:apps:add[tool_name,hostname,tool_uid,tool_secret]"```
+### LTI 1.3
 
-#### Useful Rake Commands
-Rake commands should be run using the following syntax:
-```
-docker-compose run app rake "RAKE_COMMAND"
-```
-The following are some useful and relevant rake commands for the LTI Broker:
-* rake db:apps:add[name,hostname,uid,secret,root]  # Add a new blti app
-* rake db:apps:delete[name]                        # Delete an existent blti app if exists
-* rake db:apps:deleteall                           # Delete all existent blti apps
-* rake db:apps:show[name]                          # Show an existent blti app if exists
-* rake db:apps:showall                             # Show all existent blti apps
-* rake db:apps:update[name,hostname,uid,secret]    # Update an existent blti app if exists
-* rake db:create                                   # Creates the database from DATABASE_URL or config/database.yml for the curre...
-* rake db:drop                                     # Drops the database from DATABASE_URL or config/database.yml for the current...
-* rake db:environment:set                          # Set the environment value for the database
-* rake db:exists                                   # Checks to see if the database exists
-* rake db:fixtures:load                            # Loads fixtures into the current environment's database
-* rake db:keys:add[keys]                           # Add a new blti keypair (e.g
-* rake db:keys:delete[keys]                        # Delete an existent blti keypair if exists (e.g
-* rake db:keys:deleteall                           # Delete all existent blti keypairs
-* rake db:keys:show                                # Show all existent blti keypairs
-* rake db:keys:update[keys]                        # Update an existent blti keypair if exists (e.g
-* rake db:migrate                                  # Migrate the database (options: VERSION=x, VERBOSE=false, SCOPE=blog)
-* rake db:migrate:status                           # Display status of migrations
-* rake db:prepare                                  # Runs setup if database does not exist, or runs migrations if it does
-* rake db:registration:delete                      # Delete existing Tool configuration
-* rake db:registration:keygen[type]                # Generate new key pair for existing Tool configuration [key, jwk]
-* rake db:registration:new[type]                   # Add new Tool configuration [key, jwk]
+Register the platform at `https://<broker host>/lti/registration/list` (HTTP basic
+auth with `ADMIN_KEY` / `ADMIN_PASSWORD`) or with `bin/rake "db:registration:new"`.
+1.3 Tools created directly in the dashboard have no registration and are skipped. The
+LMS needs:
 
+| Field | Value |
+|---|---|
+| Tool URL | `https://<broker host>/lti/rooms/messages/oblti` |
+| Initiate login URL | `https://<broker host>/lti/rooms/auth/login` |
+| Redirection URIs | `https://<broker host>/lti/rooms/messages/oblti` and `.../messages/deep-link` |
+| Client ID, public key | Shown by the registration |
 
-## Link the LTI Broker to LMS
+The key set, auth token and auth login URLs come from the LMS after it registers the
+tool.
 
-### Using LTI 1.0/1.1
-There is no need to register an LTI 1.0/1.1 tool with the broker. All that the the LTI Tool Consumer needs is the Broker Key and Secret. These can be set as environment variables.
-There are certain fields the tool consumer will require. These fields (and example values) are:
-Tool URL => ```http://broker.example.com/lti/TOOL_NAME/messages/blti```
-Consumer Key => ```BROKER_KEY```
-Shared Secret => ```BROKER_SECRET```
+## Tests and lint
 
-### Using LTI 1.3
-#### Add an LTI 1.3 Registration
-To register an LTI 1.3 tool with the Broker, there are some rake commands (for production) and a web UI for development mode.
-The Web UI is found at ```http://broker.example.com/lti/registration/list```
-The rake tasks to register are:
-```
-rake db:registration:new[key]
-rake db:registration:keygen[key]
-```
-In order to see all the available options use ```rake --tasks```
+The same checks the CI runs (`.github/workflows/ci.yml`):
 
-#### Using the Web UI
-Navigate to ```http://broker.example.com/lti/registration/list```
-
-
-Once the LTI 1.3 tool is registered with the Broker, it can be hooked into a tool consumer.
-There are certain fields the tool consumer will require. These fields (and example values) are:
-Tool URL => ```http://broker.example.com/lti/TOOL_NAME/messages/oblti```
-Client ID => ```Gh4Bj81cK290d```
-Public Key => ```A_JWT_KEY```
-Initiate Login URL => ```http://broker.example.com/lti/TOOL_NAME/auth/login```
-Redirection URI(s) =>
-```
-http://broker.example.com/lti/TOOL_NAME/messages/oblti
-http://broker.example.com/lti/TOOL_NAME/messages/deep-link
+```bash
+make lint      # RuboCop + Brakeman
+make format    # RuboCop safe auto-corrections
+make test      # prepares the test database and runs RSpec and Minitest
 ```
 
-All of these fields and values are visible and provided in the web UI.
-The other empty fields in the web UI are the following: Key Set URL, Auth Token URL, and Auth Login URL
+All targets run inside Docker Compose (`make help` lists them). To run on the host,
+empty the wrapper: `make lint RUN=`, `make test RUN_TEST=`. On the host, set
+`DATABASE_URL` to a test database and leave `RELATIVE_URL_ROOT` empty first, as the
+CI `test` job does.
 
-These values will be provided by your LMS after you have registered the tool provider.
+## Build
 
+```bash
+make build     # tagged bbb-lti-broker:local
+```
 
-## Developer Notes
-Must set DOCKER_USERNAME and DOCKER_PASSWORD in CircleCI config in order to have new images automatically pushed to dockerhub.
+Releases and deployment: see [AGENTS.md](AGENTS.md#deployment).
+
+## License
+
+See [LICENSE](LICENSE).
