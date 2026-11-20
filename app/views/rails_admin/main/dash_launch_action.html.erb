@@ -1,0 +1,168 @@
+<%# Dash launch form. It opens the launch in a new tab, so the dash stays on this page. %>
+<% launch = @dash_launch %>
+<% from_history = @object.is_a?(LtiContext) %>
+<% rooms = LtiContext::ROOMS_APP %>
+
+<p class="text-muted">Tool <code id="dash-tool" data-uuid="<%= launch.tool&.uuid %>"><%= launch.tool&.uuid %></code></p>
+
+<% if from_history %>
+  <div class="card card-body mb-3">
+    <div>
+      <strong><%= launch.context_title.presence || launch.context_id %></strong>
+      <% if launch.resource_link_title.present? %> · <%= launch.resource_link_title %><% end %>
+      <span class="text-muted">· <%= launch.app %></span>
+    </div>
+    <% if @object.rooms_handler %><div>Room <code><%= @object.rooms_handler %></code></div><% end %>
+    <div class="text-muted small">Last launch <%= l(@object.last_launch_at, format: :short) %></div>
+  </div>
+<% end %>
+
+<% if launch.errors.any? %>
+  <div class="alert alert-danger">
+    <% launch.errors.full_messages.each do |message| %>
+      <div><%= message %></div>
+    <% end %>
+  </div>
+<% end %>
+
+<%= form_with scope: :dash_launch, url: request.path, method: :post, local: true, html: { target: '_blank', id: 'dash-launch-form' } do |f| %>
+  <div class="mb-3">
+    <%= f.label :name, 'Your name', for: 'dash-name', class: 'form-label' %>
+    <%= f.text_field :name, value: launch.name, id: 'dash-name', required: true, autocomplete: 'off', class: 'form-control', placeholder: 'Jane Doe' %>
+    <div class="form-text">Shown in the room as typed. The dash login is shared, so this is also how the launch log knows who you are.</div>
+  </div>
+
+  <div class="mb-3">
+    <% [%w[Teacher Instructor], %w[Student Learner]].each do |label, role| %>
+      <div class="form-check form-check-inline">
+        <%= f.radio_button :lti_role, role, checked: launch.lti_role == role, id: "dash-role-#{role.downcase}", class: 'form-check-input' %>
+        <label class="form-check-label" for="dash-role-<%= role.downcase %>"><%= label %></label>
+      </div>
+    <% end %>
+  </div>
+
+  <% unless from_history %>
+    <div class="mb-3">
+      <%= f.label :app, 'App', for: 'dash-app', class: 'form-label' %>
+      <%= f.select :app, options_for_select(DashLtiLaunch.apps, launch.app), {}, id: 'dash-app', class: 'form-select' %>
+    </div>
+
+    <fieldset class="mb-3">
+      <legend class="fs-6">Room</legend>
+      <div class="form-check">
+        <input class="form-check-input" type="radio" name="room_mode" id="dash-mode-existing" value="existing" <%= 'checked' unless launch.handler.blank? && launch.context_id.present? %>>
+        <label class="form-check-label" for="dash-mode-existing">Existing Rooms room</label>
+      </div>
+      <div id="dash-existing" class="ms-4 mb-2">
+        <%= f.text_field :handler, value: launch.handler, 'aria-label': 'Room handler', autocomplete: 'off', class: 'form-control font-monospace', placeholder: 'room handler' %>
+        <div id="dash-room-found" class="form-text"></div>
+      </div>
+
+      <div class="form-check">
+        <input class="form-check-input" type="radio" name="room_mode" id="dash-mode-new" value="new" <%= 'checked' if launch.handler.blank? && launch.context_id.present? %>>
+        <label class="form-check-label" for="dash-mode-new">New test room</label>
+      </div>
+      <div id="dash-new" class="ms-4">
+        <p id="dash-rooms-preview" class="form-text"><code id="dash-handler">…</code></p>
+        <div class="mb-3">
+          <button type="button" id="dash-randomize" class="btn btn-sm btn-outline-secondary">Randomize values</button>
+        </div>
+        <%= f.label :context_id, 'Context ID', for: 'dash-context-id', class: 'form-label' %>
+        <%= f.text_field :context_id, value: launch.context_id, id: 'dash-context-id', class: 'form-control mb-2' %>
+        <%= f.label :context_title, 'Course title', for: 'dash-context-title', class: 'form-label' %>
+        <%= f.text_field :context_title, value: launch.context_title, id: 'dash-context-title', class: 'form-control mb-2' %>
+        <%= f.label :resource_link_id, 'Resource link ID', for: 'dash-resource-link-id', class: 'form-label' %>
+        <%= f.text_field :resource_link_id, value: launch.resource_link_id, id: 'dash-resource-link-id', class: 'form-control mb-2' %>
+        <%= f.label :resource_link_title, 'Resource link title', for: 'dash-resource-link-title', class: 'form-label' %>
+        <%= f.text_field :resource_link_title, value: launch.resource_link_title, id: 'dash-resource-link-title', class: 'form-control mb-2' %>
+        <div class="form-check">
+          <%= f.check_box :groups_scoping, { checked: launch.groups_scoping, id: 'dash-groups-scoping', class: 'form-check-input' } %>
+          <label class="form-check-label" for="dash-groups-scoping">One room per activity (instead of one per course)</label>
+        </div>
+      </div>
+    </fieldset>
+  <% end %>
+
+  <%= f.submit 'Launch', class: 'btn btn-primary' %>
+<% end %>
+
+<script>
+  (function () {
+    var form = document.getElementById('dash-launch-form');
+    var field = function (name) { return form.elements['dash_launch[' + name + ']']; };
+    var nameKey = 'dash-launch-name';
+
+    // The dash login is shared: the browser is the only place that knows who is using it
+    try {
+      if (!field('name').value) { field('name').value = window.localStorage.getItem(nameKey) || ''; }
+    } catch (e) { /* storage blocked: the field just starts empty */ }
+    form.addEventListener('submit', function () {
+      try { window.localStorage.setItem(nameKey, field('name').value); } catch (e) { /* ignore */ }
+    });
+
+    if (!field('app')) { return; } // a history row: the room is already set
+
+    var existing = document.getElementById('dash-mode-existing');
+    var found = document.getElementById('dash-room-found');
+    var toolUuid = document.getElementById('dash-tool').dataset.uuid || '';
+    var lookupTimer;
+
+    function draw() {
+      var suffix = Math.random().toString(16).slice(2, 10);
+      var today = new Date().toISOString().slice(0, 10);
+      field('context_id').value = 'dash-test-' + suffix;
+      field('resource_link_id').value = 'dash-test-' + suffix;
+      field('context_title').value = 'Teste dash ' + today;
+      field('resource_link_title').value = 'Teste dash ' + today;
+    }
+
+    // Same formula as the server (LtiContext.rooms_handler): the room Rooms will open
+    function preview() {
+      var link = field('resource_link_id').value;
+      var parts = ['rooms', toolUuid, field('context_id').value];
+      if (document.getElementById('dash-groups-scoping').checked && link) { parts.push(link); }
+      if (!window.crypto || !window.crypto.subtle) { return; }
+      crypto.subtle.digest('SHA-1', new TextEncoder().encode(parts.join(''))).then(function (buffer) {
+        var hex = Array.from(new Uint8Array(buffer)).map(function (b) { return b.toString(16).padStart(2, '0'); }).join('');
+        document.getElementById('dash-handler').textContent =
+          'sha1(' + parts.map(function (part) { return JSON.stringify(part); }).join(' + ') + ') = ' + hex;
+      });
+    }
+
+    function lookup() {
+      var handler = field('handler').value.trim();
+      if (!handler) { found.textContent = ''; return; }
+      fetch(form.action + '?lookup=' + encodeURIComponent(handler), { headers: { Accept: 'application/json' } })
+        .then(function (response) { return response.json(); })
+        .then(function (room) {
+          if (room.other_tool) { found.textContent = 'This room belongs to tool ' + room.other_tool + ', not this one.'; return; }
+          found.textContent = room.context_id === undefined
+            ? 'No Rooms launch recorded for this handler in this tool.'
+            : [room.context_title || room.context_id, room.resource_link_title, 'last launch ' + new Date(room.last_launch_at).toLocaleString()]
+              .filter(Boolean).join(' · ');
+        })
+        .catch(function () { found.textContent = ''; });
+    }
+
+    function refresh() {
+      var isRooms = field('app').value === 'rooms';
+      if (!isRooms) { document.getElementById('dash-mode-new').checked = true; }
+      existing.disabled = !isRooms;
+      var useExisting = existing.checked;
+      document.getElementById('dash-existing').classList.toggle('d-none', !useExisting);
+      document.getElementById('dash-new').classList.toggle('d-none', useExisting);
+      field('handler').disabled = !useExisting;
+      field('handler').required = useExisting;
+      document.getElementById('dash-rooms-preview').classList.toggle('d-none', !isRooms);
+      if (!useExisting && !field('context_id').value) { draw(); }
+      if (!useExisting && isRooms) { preview(); }
+    }
+
+    document.getElementById('dash-randomize').addEventListener('click', function () { draw(); refresh(); });
+    field('handler').addEventListener('input', function () { clearTimeout(lookupTimer); lookupTimer = setTimeout(lookup, 300); });
+    form.addEventListener('change', refresh);
+    form.addEventListener('input', function (event) { if (event.target !== field('handler')) { refresh(); } });
+    refresh();
+    lookup();
+  })();
+</script>
