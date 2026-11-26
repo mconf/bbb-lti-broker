@@ -1,0 +1,23 @@
+en:
+  admin:
+    actions:
+      dash_launch_action:
+        title: "Launch"
+        menu: "Launch"
+        breadcrumb: "Launch"
+        link: "Open a launch from the dash"
+        done: "launched"
+  activemodel:
+    errors:
+      models:
+        dash_lti_launch:
+          attributes:
+            operator:
+              no_letters: "needs letters or digits in the name"
+            tool_id:
+              not_registered: "must be a registered tool"
+            app:
+              not_registered: "must be an app registered in the broker"
+            handler:
+              other_tool: "belongs to tool %{tool}, not this one"
+              not_in_history: "has no Rooms launch recorded for this tool"

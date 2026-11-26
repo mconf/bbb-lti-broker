@@ -1,0 +1,91 @@
+{
+  "_about": "Room handler vectors: launch message (as the broker hands it to Rooms) -> handler. Hashes computed outside Ruby. Keep in sync with bbb-app-rooms AppLaunch#resource_handler.",
+  "vectors": [
+    {
+      "name": "consumer key and context",
+      "message": {
+        "context_id": "course-1",
+        "custom_params": {
+          "oauth_consumer_key": "key-1"
+        },
+        "tool_consumer_instance_guid": "lms.example.com"
+      },
+      "handler": "360d8bd72e8f6239758dcf2b85675c12ef59c0ec"
+    },
+    {
+      "name": "groups scoping adds the resource link",
+      "message": {
+        "context_id": "course-1",
+        "resource_link_id": "link-1",
+        "custom_params": {
+          "oauth_consumer_key": "key-1",
+          "custom_enable_groups_scoping": "true"
+        }
+      },
+      "handler": "2c2668c3e4e0736fff7b93b0d2610be80ec24d16"
+    },
+    {
+      "name": "groups scoping without a resource link",
+      "message": {
+        "context_id": "course-1",
+        "resource_link_id": "",
+        "custom_params": {
+          "oauth_consumer_key": "key-1",
+          "custom_enable_groups_scoping": "true"
+        }
+      },
+      "handler": "360d8bd72e8f6239758dcf2b85675c12ef59c0ec"
+    },
+    {
+      "name": "groups scoping other than true",
+      "message": {
+        "context_id": "course-1",
+        "resource_link_id": "link-1",
+        "custom_params": {
+          "oauth_consumer_key": "key-1",
+          "custom_enable_groups_scoping": "false"
+        }
+      },
+      "handler": "360d8bd72e8f6239758dcf2b85675c12ef59c0ec"
+    },
+    {
+      "name": "no consumer key falls back to the instance guid",
+      "message": {
+        "context_id": "course-1",
+        "custom_params": {},
+        "tool_consumer_instance_guid": "lms.example.com"
+      },
+      "handler": "caeac3276b2422df5ab159c96ff039ae6ed16c62"
+    },
+    {
+      "name": "no key nor guid falls back to the outcome service host",
+      "message": {
+        "context_id": "course-1",
+        "custom_params": {
+          "oauth_consumer_key": ""
+        },
+        "lis_outcome_service_url": "https://ava.example.edu/mod/lti/service.php"
+      },
+      "handler": "09d66c7f65dd98d2510b7bd44889c8eb8c4e8040"
+    },
+    {
+      "name": "non-ascii context id",
+      "message": {
+        "context_id": "Cálculo-2026",
+        "custom_params": {
+          "oauth_consumer_key": "key-1"
+        }
+      },
+      "handler": "7e8a0a5f4bc0a45cbd1136460c9471ae233ee3ca"
+    },
+    {
+      "name": "no context id",
+      "message": {
+        "custom_params": {
+          "oauth_consumer_key": "key-1"
+        }
+      },
+      "handler": null
+    }
+  ]
+}

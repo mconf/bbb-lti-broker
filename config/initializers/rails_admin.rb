@@ -44,6 +44,50 @@ class SafeSerializedField < RailsAdmin::Config::Fields::Types::Serialized
 end
 RailsAdmin::Config::Fields::Types.register(:serialized, SafeSerializedField)
 
+# Opens a real launch into an app from the dash, from a row of the launch history or from a tool (a new context).
+# Off unless DASH_LAUNCH_ENABLED: only some brokers offer it.
+class DashLaunchAction < RailsAdmin::Config::Actions::Base
+  RailsAdmin::Config::Actions.register(:dash_launch, self)
+
+  register_instance_option(:member) { true }
+  # enabled? and not visible?: RailsAdmin only checks enabled? when the action URL is opened directly
+  register_instance_option :enabled? do
+    Mconf::Env.fetch_boolean('DASH_LAUNCH_ENABLED', false) &&
+      (bindings[:abstract_model].nil? || %w[LtiContext RailsLti2Provider::Tool].include?(bindings[:abstract_model].to_s))
+  end
+  register_instance_option(:http_methods) { %i[get post] }
+  register_instance_option(:link_icon) { 'fas fa-up-right-from-square' }
+  register_instance_option(:turbo?) { false }
+
+  register_instance_option :controller do
+    proc do
+      # A history row fixes the app and the room; a tool only fixes the tool
+      from_history = @object.is_a?(LtiContext)
+      @dash_launch = from_history ? DashLtiLaunch.from_context(@object) : DashLtiLaunch.new(tool_id: @object.id)
+
+      # The form looks a typed handler up while it is typed, to show which room it is
+      if request.get? && params[:lookup]
+        room = DashLtiLaunch.find_room(@dash_launch.tool_id, params[:lookup])
+        elsewhere = DashLtiLaunch.find_room(nil, params[:lookup]) unless room
+        render(json: room&.slice(:context_id, :context_title, :resource_link_title, :last_launch_at) || { other_tool: elsewhere&.tool&.uuid }.compact)
+        next
+      end
+
+      if request.post?
+        fields = from_history ? %i[name lti_role] : %i[name lti_role app handler context_id context_title resource_link_id resource_link_title groups_scoping]
+        @dash_launch.assign_attributes(params.require(:dash_launch).permit(*fields))
+        if @dash_launch.valid?
+          launch = @dash_launch.launch!(ip: request.remote_ip)
+          redirect_to(main_app.app_launch_path(app: @dash_launch.app, oauth_nonce: launch.nonce))
+          next
+        end
+      end
+
+      render(@action.template_name, status: @dash_launch.errors.any? ? :unprocessable_entity : :ok)
+    end
+  end
+end
+
 RailsAdmin.config do |config|
   config.main_app_name = 'Broker'
 
@@ -67,13 +111,21 @@ RailsAdmin.config do |config|
     index                         # mandatory
     new do
       # The private key is left out of the dash, so a pair created here couldn't sign; 1.3 pairs come from /registration/new
-      except ['RsaKeyPair']
+      # The launch history is written by launches, and the dash launch log is an audit trail
+      except ['RsaKeyPair', 'LtiContext', 'DashLaunchLog']
     end
     export
-    bulk_delete
+    bulk_delete do
+      except ['DashLaunchLog']
+    end
     show
-    edit
-    delete
+    edit do
+      except ['LtiContext', 'DashLaunchLog']
+    end
+    delete do
+      except ['DashLaunchLog']
+    end
+    dash_launch
   end
 
   config.excluded_models = ['RailsLti2Provider::Registration']
@@ -318,6 +370,39 @@ RailsAdmin.config do |config|
     end
   end
   ### EduplayAppConfig ###
+
+
+  ### LtiContext ###
+  config.model LtiContext do
+    label 'Launch history'
+    label_plural 'Launch history'
+    list do
+      sort_by :last_launch_at
+      field :app
+      field :context_title do
+        searchable true
+      end
+      field :rooms_handler do
+        searchable true
+      end
+      field :tool
+      field :context_id
+      field :resource_link_title
+      field :last_launch_at
+    end
+  end
+  ### LtiContext ###
+
+
+  ### DashLaunchLog ###
+  config.model DashLaunchLog do
+    label 'Dash launch log'
+    list do
+      sort_by :created_at
+      fields :created_at, :operator, :app, :tool, :rooms_handler, :role, :ip
+    end
+  end
+  ### DashLaunchLog ###
 
 
   ### RsaKeyPair ###

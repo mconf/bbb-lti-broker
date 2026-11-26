@@ -25,6 +25,16 @@ Rails.application.config.to_prepare do
       false
     end
 
+    # Configs sent as custom_params on a launch into the given app; apps without configs of
+    # their own get the Rooms ones
+    def app_configs_for_launch(app)
+      case app
+      when 'worka' then worka_app_configs_for_launch
+      when 'eduplay' then eduplay_app_configs_for_launch
+      else rooms_app_configs_for_launch
+      end
+    end
+
     # Prepare configs to be sent as custom_params on Rooms app launch
     def rooms_app_configs_for_launch
       configs = { 'institution_guid' => self.tenant.institution_guid }
